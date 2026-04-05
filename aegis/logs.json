@@ -1,0 +1,2427 @@
+[
+  {
+    "insertId": "69d17b380005d69987065e25",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/",
+      "requestSize": "624",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.157.53.115",
+      "serverIp": "142.250.77.19",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:28.366440Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/a97dec4e114c04ca75c871da1a5c5a4f",
+    "receiveTimestamp": "2026-04-04T20:57:28.391026622Z",
+    "spanId": "c7f8bfda93db552a",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d17b3c000b0862d835a07d",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "664",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.157.53.115",
+      "referer": "http://promptforge.aiyoda.app",
+      "serverIp": "142.250.77.19",
+      "latency": "2.599412918s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:30.017790Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/748a2ac8e26dc18643e4f4d2a931a9bf",
+    "receiveTimestamp": "2026-04-04T20:57:33.049800027Z",
+    "spanId": "5124a70c771cd63b"
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d17b3a00004cc17fbe0529",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:30.019649Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-04T20:57:30.024639653Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d17b3b000303896d2b8339",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.197513Z",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T20:57:31.202551327Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d17b3b0003056c04a04d7a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.197996Z",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T20:57:31.537667643Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d17b3b000305a11e183f08",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.198049Z",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T20:57:31.537667643Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d17b3b0003069a4f870283",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.198298Z",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T20:57:31.537667643Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d17b3b00033983e52c5938",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.211331Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-04T20:57:31.357531980Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 373ms",
+    "insertId": "69d17b3b0008801c79d69d74",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T20:57:31.557084Z",
+    "labels": {
+      "instanceId": "008c15ff0849d3788fd5002922c9ca2b9251062d3fe7ce54453653c6706a6ec533d8a20740f4a1334a4e8228358ac1663f4be1fdf506a7fbf4d5c9d7e16fcc3d0d33debc59437975981deb35d119b78b45d782"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T20:57:31.870955872Z"
+  },
+  {
+    "insertId": "69d19bdb000356823bdc95ac",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "316",
+      "status": 200,
+      "responseSize": "19286",
+      "userAgent": "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)",
+      "remoteIp": "2a03:2880:f806:2c::",
+      "serverIp": "2607:f8b0:4002:c03::79",
+      "latency": "2.558957258s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:40.516487Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/2c6c8f0ed873c38d95af172a8b04b902",
+    "receiveTimestamp": "2026-04-04T23:16:43.224127341Z",
+    "spanId": "e78c9185a728887c",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d19bd80008669397008dbc",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:40.550547Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-04T23:16:40.558973487Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d19bd90009f937450f5ffc",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:41.653623Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-04T23:16:41.891166911Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d19bd9000a163a6640502a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:41.661050Z",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T23:16:41.666690381Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d19bd9000a18c775b11aa5",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:41.661703Z",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T23:16:42.000434024Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d19bd9000a18fd44b5c15e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:41.661757Z",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T23:16:42.000434024Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d19bd9000a1a386c144c74",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:41.662072Z",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T23:16:42.000434024Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 380ms",
+    "insertId": "69d19bda0000609ea307035a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-04T23:16:42.024734Z",
+    "labels": {
+      "instanceId": "008c15ff08887549d6d5c0264fcb6b55617fb846dfb9e13e73c5f738f1f87efd2f151662f1cc22f8663a892d1c739252c071f9890bb31f303d97f15ec425cd041590a8dc430009e559d51d6018fd9f9f11381d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-04T23:16:42.332149529Z"
+  },
+  {
+    "insertId": "69d1d045000b71a220a298a7",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/",
+      "requestSize": "624",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.130.47.33",
+      "serverIp": "142.251.218.83",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:21.732902Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/a4ae429720767c205e8f75b1921b1c4a",
+    "receiveTimestamp": "2026-04-05T03:00:21.756075466Z",
+    "spanId": "8aad0b2ce248de94",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d1d0490003ef4f3599ef96",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "664",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.130.47.33",
+      "referer": "http://promptforge.aiyoda.app",
+      "serverIp": "142.251.218.179",
+      "latency": "2.498670757s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:22.635267Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/22eda7c924781e75201ada445a11e047",
+    "receiveTimestamp": "2026-04-05T03:00:25.418680194Z",
+    "spanId": "ad937117111a2d25"
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d1d0460009bb86915b1d22",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:22.637830Z",
+    "severity": "INFO",
+    "labels": {
+      "scaling_reason": "AUTOSCALING",
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T03:00:22.644751316Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d1d047000bdfab5301beba",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:23.778155Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T03:00:23.976650971Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d1d047000bf39211fa2cad",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:23.783250Z",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T03:00:23.791309929Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d1d047000bf40a8dc61966",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:23.783370Z",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T03:00:24.123782579Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d1d047000bf4119a484e8e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:23.783377Z",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T03:00:24.123782579Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d1d047000bf5325bc616f1",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:23.783666Z",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T03:00:24.123782579Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 328ms",
+    "insertId": "69d1d04800017b468317e57a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T03:00:24.097094Z",
+    "labels": {
+      "instanceId": "008c15ff08e7720f268590a895bd20bfd50f75bc598e5ed87c95cb9ab6a3b8037706de3fdd440856a474cd58ed391c9a5d5f14975b2c3914ec0e24bdf5379d871dbffab60042f606fcbb29407d5521b1bf87b8"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T03:00:24.123782579Z"
+  },
+  {
+    "insertId": "69d1f022000cd3d2f2989c39",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge-ui-1098334131721.us-central1.run.app/robots.txt",
+      "requestSize": "385",
+      "status": 404,
+      "responseSize": "19690",
+      "userAgent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+      "remoteIp": "2a03:2880:24ff:3::",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "2.521470125s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:16.077628Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/5462ae0e564d26ffdfe1040bebfeac72",
+    "receiveTimestamp": "2026-04-05T05:16:18.849172286Z",
+    "spanId": "6eef2436ff835897",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d1f0200001809eb19637ce",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:16.098462Z",
+    "severity": "INFO",
+    "labels": {
+      "scaling_reason": "AUTOSCALING",
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T05:16:16.103508114Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d1f02100050a37471d6648",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.330295Z",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:16:17.337432064Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d1f02100050c1de82ce00f",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.330781Z",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:16:17.670426371Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d1f02100050c5b57c04f8f",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.330843Z",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:16:17.670426371Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d1f02100050d600e21f67f",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.331104Z",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:16:17.670426371Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d1f02100053c671e4788f5",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.343143Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T05:16:17.435478803Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 375ms",
+    "insertId": "69d1f021000a873ca3083158",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:16:17.689980Z",
+    "labels": {
+      "instanceId": "008c15ff086e67e907dc01a747f4ff159776d48e6d2867ac96619724df9ae77720275d8dfdb768e188cf84f44f12fe9a7bc12e1cbd6794b33d327f2d1a00ffbbe8e519668a4fe5366d4105f0276a70d899bafb"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:16:18.002835437Z"
+  },
+  {
+    "insertId": "69d1f821000cabfe43411917",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "346",
+      "status": 404,
+      "responseSize": "5062",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/600.2.5 (KHTML, like Gecko) Version/8.0.2 Safari/600.2.5 (Gort)",
+      "remoteIp": "52.22.138.222",
+      "serverIp": "142.251.111.121",
+      "latency": "1.985205937s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:23.649051Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/24ba067d57dda744881190b79ba8f25a",
+    "receiveTimestamp": "2026-04-05T05:50:25.836920248Z",
+    "spanId": "2089f66bdd991552",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d1f81f000a0a741ea3afa1",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:23.658036Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T05:50:23.665775349Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d1f8200009384283cb334a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.604226Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T05:50:24.663557316Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d1f820000948157f8148dd",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.608277Z",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:50:24.614410086Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d1f82000094a30ab58b748",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.608816Z",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:50:24.947757399Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d1f82000094a6d57196525",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.608877Z",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:50:24.947757399Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d1f82000094b6c1dfdde9c",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.609132Z",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:50:24.947757399Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 288ms",
+    "insertId": "69d1f820000d75df37469bc1",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T05:50:24.882143Z",
+    "labels": {
+      "instanceId": "008c15ff08d6708809f7d2d34d7edff1b2add0ab03854ddfa73d673db6d1efb236217cd65f661d837e9f7f7ad6cc656a1faca5564502a652adf4ac5ec7f6f4198e91772a4f10976723cce22fb24ee029a79a06"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T05:50:24.947757399Z"
+  },
+  {
+    "insertId": "69d201b800086f67702727e8",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "499",
+      "status": 404,
+      "responseSize": "5062",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot",
+      "remoteIp": "104.210.140.130",
+      "serverIp": "172.253.135.121",
+      "latency": "1.874860019s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:18.555761Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/249560eed611ce41862c67042a52acd2",
+    "receiveTimestamp": "2026-04-05T06:31:20.559769195Z",
+    "spanId": "1ec7e01e1a61befe",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d201b60008d6841f0bdf06",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:18.579204Z",
+    "severity": "INFO",
+    "labels": {
+      "scaling_reason": "AUTOSCALING",
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T06:31:18.585014870Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d201b70006d3e4524ed348",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.447460Z",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T06:31:19.456332656Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d201b70006d5ee279ef110",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.447982Z",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T06:31:19.786512072Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d201b70006d62d497660d5",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.448045Z",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T06:31:19.786512072Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d201b70006d7ee168b59c4",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.448494Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T06:31:19.584104440Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d201b70006d85a0f3fc28a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.448602Z",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T06:31:19.786512072Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 291ms",
+    "insertId": "69d201b7000b123bc5af6205",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:19.725563Z",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T06:31:19.786512072Z"
+  },
+  {
+    "insertId": "69d201b80009c541e9aab581",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "518",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot",
+      "remoteIp": "104.210.140.135",
+      "serverIp": "172.253.135.121",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:20.638684Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/d2e54fba593861e34789bf6ec6c5a5d1",
+    "receiveTimestamp": "2026-04-05T06:31:20.893280910Z",
+    "spanId": "e3dba13b279631eb"
+  },
+  {
+    "insertId": "69d201b8000a92d1185934aa",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "499",
+      "status": 404,
+      "responseSize": "5062",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot",
+      "remoteIp": "104.210.140.130",
+      "serverIp": "172.253.135.121",
+      "latency": "0.012787138s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T06:31:20.678418Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff08b13b4cdbf4e534b5d8de9402b10180ca0a29ee0f46cef49c5fdd4c881c932e9e78bb931d4c12e616d2109076044aebee04e43fdb2c3bebdcf6845cf30f2d6ab1f330d07c938f6b9fb209a8d0267d"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/611acc30295363963209343b6b421d86",
+    "receiveTimestamp": "2026-04-05T06:31:20.893280910Z",
+    "spanId": "9ca7dfb568258c5a"
+  },
+  {
+    "insertId": "69d21943000c66c301d6b118",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/",
+      "requestSize": "624",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.153.10.83",
+      "serverIp": "142.250.204.51",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:47.783487Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/a11775692bad70fcb94234acfe975641",
+    "receiveTimestamp": "2026-04-05T08:11:47.821915226Z",
+    "spanId": "fdd2efb50d49ae52",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d21947000c9e435e38f5c3",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "664",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.153.10.83",
+      "referer": "http://promptforge.aiyoda.app",
+      "serverIp": "142.250.204.51",
+      "latency": "2.562334644s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:49.157356Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/95d4d6e0ea48bff3e35ec6127e8e6db2",
+    "receiveTimestamp": "2026-04-05T08:11:52.147720195Z",
+    "spanId": "c281d1a5aef2347f"
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d219450002708ffc48e7df",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:49.159887Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T08:11:49.166691893Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d2194600041e1994a614f0",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.269849Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T08:11:50.498920171Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d2194600042939c71d2aae",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.272697Z",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T08:11:50.277581224Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d2194600042b3650a96632",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.273206Z",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T08:11:50.613033776Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d2194600042b6959c3f03d",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.273257Z",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T08:11:50.613033776Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d2194600042c6c72051603",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.273516Z",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T08:11:50.613033776Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 359ms",
+    "insertId": "69d2194600096c8ba0c15710",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T08:11:50.617611Z",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T08:11:50.943702616Z"
+  },
+  {
+    "insertId": "69d21cbc00036ec8f5640a11",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "456",
+      "status": 404,
+      "responseSize": "5062",
+      "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36",
+      "remoteIp": "207.46.13.229",
+      "serverIp": "142.250.69.179",
+      "latency": "0.038903545s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T08:26:36.179689Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff0887d1d44a6ef4376c1fe33a330c1e7be41fc25c8f9b58d621c41c95fe61af6f1aed7460068ded96bce5e253e594edf681691ab2b54b3983ba1ce581aa21929d64a6bded1828d4775491cb4d078ffe"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/edfb2d7a1fcc1d5de4b021705296bf46",
+    "receiveTimestamp": "2026-04-05T08:26:36.232791505Z",
+    "spanId": "54b4e912aceef70b",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d24cac000742a5d25264d2",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/robots.txt",
+      "requestSize": "333",
+      "status": 404,
+      "responseSize": "19690",
+      "userAgent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+      "remoteIp": "2a03:2880:24ff:48::",
+      "serverIp": "2607:f8b0:4002:c08::79",
+      "latency": "2.511583820s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:05.828869Z",
+    "severity": "WARNING",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/cdb16348f5ca499965c70e1951a4ad6f",
+    "receiveTimestamp": "2026-04-05T11:51:08.482690107Z",
+    "spanId": "c6ad003a262cb1f5",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d24ca9000cfb10c4c8cff3",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:05.850704Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T11:51:05.857290347Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d24cab00009cf3677c4609",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.040179Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T11:51:07.192705377Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d24cab0000a1e58cfcc555",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.041445Z",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T11:51:07.047795868Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d24cab0000a3f954b482ad",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.041977Z",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T11:51:07.380073223Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d24cab0000a43b89f94a61",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.042043Z",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T11:51:07.380073223Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d24cab0000a538d7c8a345",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.042296Z",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T11:51:07.380073223Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 345ms",
+    "insertId": "69d24cab0005ab8ed8955945",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T11:51:07.371598Z",
+    "labels": {
+      "instanceId": "008c15ff08feb5414b3961b83ed2d5561c894b269db97cdd5a41b48536a73537f66bf82127cf10b4226a37c039f88582a171bce1fc5009406df54c39a0fbda28f12f1044e192646afed5c73bed27a9b0691503d9"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T11:51:07.380073223Z"
+  },
+  {
+    "insertId": "69d259b0000d01be704dc7a2",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/",
+      "requestSize": "623",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.166.239.145",
+      "serverIp": "172.253.122.121",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:40.827313Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/7947a43c1e91c7d6f5de01962441abd4",
+    "receiveTimestamp": "2026-04-05T12:46:40.860347814Z",
+    "spanId": "6e007149c66e627a",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d259b3000d58dd19919061",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "664",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "43.166.239.145",
+      "referer": "http://promptforge.aiyoda.app",
+      "serverIp": "172.253.122.121",
+      "latency": "1.839018584s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:41.931759Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/0c211bb17bfa207728bceb1e0cf82942",
+    "receiveTimestamp": "2026-04-05T12:46:44.189471070Z",
+    "spanId": "3be65d3aa66abcfb"
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d259b1000e3f626192d6f3",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:41.933730Z",
+    "severity": "INFO",
+    "labels": {
+      "scaling_reason": "AUTOSCALING",
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T12:46:41.941135756Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d259b2000c3f20574909fe",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:42.802592Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T12:46:42.937906737Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d259b2000c44830aa7fd4e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:42.803971Z",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T12:46:42.812133783Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d259b2000c46e0cc5256ec",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:42.804576Z",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T12:46:43.144806325Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d259b2000c472dbafdab94",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:42.804653Z",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T12:46:43.144806325Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d259b2000c48b53c9bbf51",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:42.805045Z",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T12:46:43.144806325Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 275ms",
+    "insertId": "69d259b30000fac3f8fbf52c",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T12:46:43.064195Z",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T12:46:43.144806325Z"
+  },
+  {
+    "insertId": "69d25c9f00021ab6960821b3",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "315",
+      "status": 200,
+      "responseSize": "19286",
+      "userAgent": "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)",
+      "remoteIp": "2a03:2880:f806:d::",
+      "serverIp": "2607:f8b0:4002:c11::79",
+      "latency": "0.015413033s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T12:59:11.114748Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff080a8777b0a3186c8440612fb89676926b8f5b5ef30f976a292352b309ae54e6fc34a7599ce9af03187021c14f510eb2497f7caa5fc211558c11a2e7a0e07142a84c45a911b4d06c30c7744908b6ebe5"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/88462d6c52c75e552d2b9b72be1d95df",
+    "receiveTimestamp": "2026-04-05T12:59:11.144220619Z",
+    "spanId": "495f04e9a61eb28c",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d282660003e2b67bc4ebe0",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "326",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "visionheight.com/scan Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0.0.0 Safari/537.36",
+      "remoteIp": "3.151.194.164",
+      "serverIp": "142.251.211.19",
+      "latency": "2.563964060s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:19.542776Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/ef700611c929ea8e27ade1889865ea36",
+    "receiveTimestamp": "2026-04-05T15:40:22.261486068Z",
+    "spanId": "a56707b5731029c3",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d282630008bc07c30ca7a3",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:19.572423Z",
+    "severity": "INFO",
+    "labels": {
+      "scaling_reason": "AUTOSCALING",
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T15:40:19.579470729Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d28264000aa25aff0636ce",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:20.696922Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T15:40:20.914191541Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d28264000abd6507728d4d",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:20.703845Z",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T15:40:20.709735601Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d28264000abf48a4833387",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:20.704328Z",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T15:40:21.044165549Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d28264000abf99e71f0c43",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:20.704409Z",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T15:40:21.044165549Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d28264000ac08513edb62e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:20.704645Z",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T15:40:21.044165549Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 326ms",
+    "insertId": "69d282650000400a5fce3c68",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T15:40:21.016394Z",
+    "labels": {
+      "instanceId": "008c15ff085afe694fb683be1798146f3412b93d6427e7fc5019fea03a8e2d175d373aaf148dc0fc5e03a601f0168a6bfae70d3b6451373116bf408fa7844108f29a27bad839266aa48ecd8c745b30e394730fde"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T15:40:21.044165549Z"
+  },
+  {
+    "insertId": "69d28eb0000e01f2fe97231d",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/_next/static/chunks/main-app-2ecc3bf42ae2d122.js",
+      "requestSize": "384",
+      "status": 200,
+      "responseSize": "855",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.3",
+      "remoteIp": "2a14:7c1:400::1",
+      "serverIp": "2a00:1450:400e:806::2013",
+      "latency": "1.812524860s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:46.972709Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/057bcb11b81097d39174686f665e18a5",
+    "receiveTimestamp": "2026-04-05T16:32:48.923911006Z",
+    "spanId": "4cb394bbbbf9b6a2",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d28eae000f27004ccb2da4",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:46.993024Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T16:32:46.999160326Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d28eaf000d2a5764edd6b7",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:47.862807Z",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T16:32:47.869924711Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d28eaf000d2c2a4efbb4ff",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:47.863274Z",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T16:32:48.201718560Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d28eaf000d2c796c0194fd",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:47.863353Z",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T16:32:48.201718560Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d28eaf000d2d907f669323",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:47.863632Z",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T16:32:48.201718560Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d28eaf000d60d393184dd8",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:47.876755Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T16:32:47.998957191Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 278ms",
+    "insertId": "69d28eb00001f377a1e0cde3",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4"
+      }
+    },
+    "timestamp": "2026-04-05T16:32:48.127863Z",
+    "labels": {
+      "instanceId": "008c15ff0813ceb976be45f3d0f464db25ad020f55e14aa4a3bcb75e1110fd54aae7656cbd4a3229bebe040f0a9d03a0c88794f2e1be03f805cc6f729b24843eb7d6e885f9d1e2b8a98106a0142fc544e13ae9dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T16:32:48.201718560Z"
+  },
+  {
+    "insertId": "69d2977d0008fa101b5ae768",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "http://promptforge.aiyoda.app/",
+      "requestSize": "649",
+      "status": 302,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "49.51.141.76",
+      "serverIp": "192.178.183.121",
+      "latency": "0s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:21.562167Z",
+    "severity": "INFO",
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/70238f8200c217d63dbf7e866af5b637",
+    "receiveTimestamp": "2026-04-05T17:10:21.596384444Z",
+    "spanId": "4b96c9ce0f8204e1",
+    "traceSampled": true
+  },
+  {
+    "insertId": "69d2978000030217bdd53df8",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://promptforge.aiyoda.app/",
+      "requestSize": "665",
+      "status": 200,
+      "responseSize": "5051",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+      "remoteIp": "49.51.141.76",
+      "referer": "http://promptforge.aiyoda.app",
+      "serverIp": "192.178.183.121",
+      "latency": "1.972065659s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:22.098448Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/promptforge-c27e8/traces/9433a9532d5b373bcb184747d7a223bf",
+    "receiveTimestamp": "2026-04-05T17:10:24.257808721Z",
+    "spanId": "899ed5336ac43b2c"
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69d2977e00018e1e597a95df",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:22.101918Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T17:10:22.106325280Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"promptforge-ui-1\" on port 3000.",
+    "insertId": "69d2977f00010f6f1dd0788d",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.069487Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-04-05T17:10:23.107655896Z"
+  },
+  {
+    "textPayload": "   ▲ Next.js 15.5.7",
+    "insertId": "69d2977f00012de3b9c5705f",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.077283Z",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T17:10:23.084059516Z"
+  },
+  {
+    "textPayload": "   - Local:        http://localhost:3000",
+    "insertId": "69d2977f00012fd31ec3d71b",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.077779Z",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T17:10:23.417323906Z"
+  },
+  {
+    "textPayload": "   - Network:      http://0.0.0.0:3000",
+    "insertId": "69d2977f0001300862f858a1",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8",
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.077832Z",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T17:10:23.417323906Z"
+  },
+  {
+    "textPayload": " ✓ Starting...",
+    "insertId": "69d2977f00013111fd5b9a05",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "service_name": "promptforge-ui",
+        "location": "us-central1",
+        "project_id": "promptforge-c27e8"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.078097Z",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T17:10:23.417323906Z"
+  },
+  {
+    "textPayload": " ✓ Ready in 294ms",
+    "insertId": "69d2977f00056afe9f7dc2dd",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "promptforge-c27e8",
+        "location": "us-central1",
+        "service_name": "promptforge-ui",
+        "revision_name": "promptforge-ui-00013-tb4",
+        "configuration_name": "promptforge-ui"
+      }
+    },
+    "timestamp": "2026-04-05T17:10:23.355070Z",
+    "labels": {
+      "instanceId": "008c15ff085d799b51770cc0771d76bde1232aa4e5efd4e2cc1f55ebfbaebf4658335c87d9d035a680d5d548d8d5fe1819ce3782bba8ab83bddb8816449a4fc29d74b638968be42bf5a4fa96263aab9305cb44dd"
+    },
+    "logName": "projects/promptforge-c27e8/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-04-05T17:10:23.417323906Z"
+  }
+]

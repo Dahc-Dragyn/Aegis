@@ -1,0 +1,22 @@
+# Rust
+target/
+target2/
+**/*.rs.bk
+
+# Aegis Local Data & Forensic Checkpoints
+aegis.exe
+aegis.pos
+aegis.audit.jsonl
+aegis.debug.log
+testlog.json
+*.tmp
+
+# Environment & Secrets
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

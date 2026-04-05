@@ -1,0 +1,12 @@
+/target
+.env
+.agent
+.gemini/
+*.log
+*.exe
+*.pdb
+aegis.pos
+aegis.audit.jsonl
+NIST_MANIFEST.md
+error.txt
+/target2

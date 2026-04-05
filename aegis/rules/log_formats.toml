@@ -1,0 +1,26 @@
+# Aegis: Log Format Configuration Library (NIST Compliant)
+
+[formats.gcp]
+# Support for GCP Cloud Run JSON exports
+timestamp_field = "timestamp"
+message_field = "textPayload"
+severity_field = "severity"
+source_field = "resource.type"
+metadata_map = { status = "httpRequest.status", ip = "httpRequest.remoteIp", trace = "trace" }
+
+[formats.aws]
+# Support for AWS CloudWatch JSON exports
+timestamp_field = "timestamp"
+message_field = "message"
+severity_field = "logGroup"
+metadata_map = { stream = "logStream", id = "id" }
+
+[redaction]
+# AU-9 Privacy Protections (Masking)
+enabled = true
+mask_ips = true
+patterns = [
+    '(?i)bearer\s+[a-zA-Z0-9\-_./]{8,}',
+    '(?i)apikey[:=]\s*[a-zA-Z0-9\-_./]{8,}',
+    '(?i)password[:=]\s*[^\s]+'
+]
