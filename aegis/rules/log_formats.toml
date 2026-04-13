@@ -15,6 +15,12 @@ message_field = "message"
 severity_field = "logGroup"
 metadata_map = { stream = "logStream", id = "id" }
 
+[formats.elastic]
+# Support for Elastic/macOS Endpoint logs
+timestamp_field = "@timestamp"
+message_field = "message"
+metadata_map = { process_name = "_source.process.name", file_path = "_source.file.path", process_exe = "_source.process.executable" }
+
 [redaction]
 # AU-9 Privacy Protections (Masking)
 enabled = true

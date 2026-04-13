@@ -2,15 +2,20 @@ use crate::models::{LogRecord, ParsingQuality};
 use crate::parsers::{LogParser, parse_timestamp_robust};
 use crate::config::LogFormatConfig;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
+use chrono::Local;
 
 pub struct JsonParser {
     config: LogFormatConfig,
+    name: String,
 }
 
 impl JsonParser {
-    pub fn new(config: LogFormatConfig) -> Self {
-        Self { config }
+    pub fn new(config: LogFormatConfig, name: &str) -> Self {
+        Self { 
+            config,
+            name: name.to_string(),
+        }
     }
 
     fn get_nested_value<'a>(&self, val: &'a Value, path: &str) -> Option<&'a Value> {
@@ -21,23 +26,37 @@ impl JsonParser {
         Some(current)
     }
 
-    pub fn parse_value(&self, v: Value, raw: &str) -> Option<LogRecord> {
+    pub fn parse_value(&self, v: Value, raw: &str) -> LogRecord {
+        let mut quality = ParsingQuality::Success;
+        let mut unparsed_raw = None;
+
         // 1. Extract Timestamp (Chrono-Chain Robustness)
         let ts_field = self.config.timestamp_field.as_deref().unwrap_or("timestamp");
-        let (timestamp, quality) = if let Some(ts_str) = self.get_nested_value(&v, ts_field).and_then(|v| v.as_str()) {
+        let (timestamp, ts_quality) = if let Some(ts_str) = self.get_nested_value(&v, ts_field).and_then(|v| v.as_str()) {
             parse_timestamp_robust(ts_str)
         } else {
-            (chrono::Utc::now(), ParsingQuality::PartialTimestamp)
+            (Local::now(), ParsingQuality::PartialTimestamp)
         };
 
+        if matches!(ts_quality, ParsingQuality::PartialTimestamp) {
+            quality = ParsingQuality::PartialTimestamp;
+        }
+
         // 2. Extract Message (No-Pamper Zero-Loss Mapping)
-        // Check configured field first, then probe for common message fields, then fall back to raw JSON
+        // NIST Hardening: Priority for forensic context (Process Command Line)
         let msg_fields = ["message", "textPayload", "log", "msg"];
         let mut message = None;
         
-        if let Some(field) = &self.config.message_field {
-            if let Some(m) = self.get_nested_value(&v, field).and_then(|v| v.as_str()) {
-                message = Some(m.to_string());
+        // Elastic/Endpoint Forensic Priority: Use command_line if message is generic
+        if let Some(cmd) = self.get_nested_value(&v, "_source.process.command_line").and_then(|v| v.as_str()) {
+             message = Some(cmd.to_string());
+        }
+
+        if message.is_none() {
+            if let Some(field) = &self.config.message_field {
+                if let Some(m) = self.get_nested_value(&v, field).and_then(|v| v.as_str()) {
+                    message = Some(m.to_string());
+                }
             }
         }
 
@@ -50,8 +69,12 @@ impl JsonParser {
             }
         }
 
-        // Fallback to the whole object as a string if no text field is found (FORENSIC MODE)
-        let message = message.unwrap_or_else(|| v.to_string());
+        // NIST Hardening: If we can't find a message, we mark as Degraded but capture the JSON object
+        let message = message.unwrap_or_else(|| {
+            quality = ParsingQuality::Degraded;
+            unparsed_raw = Some(raw.to_string());
+            "DEGRADED: No message field found".to_string()
+        });
 
         // 3. Extract Severity
         let sev_fields = ["severity", "level", "logLevel"];
@@ -68,70 +91,97 @@ impl JsonParser {
             }
         }
 
-        // 4. Extract Source
-        let source = self.config.source_field.as_deref()
-            .and_then(|path| self.get_nested_value(&v, path))
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
-
-        // 5. Populate Metadata
-        let mut metadata = HashMap::new();
+        // 4. Populate Metadata (NIST AU-3)
+        let mut metadata = BTreeMap::new();
         for (key, path) in &self.config.metadata_map {
             if let Some(val) = self.get_nested_value(&v, path) {
-                let val_str = match val {
+                let clean_val = match val {
                     Value::String(s) => s.clone(),
-                    Value::Number(n) => n.to_string(),
-                    Value::Bool(b) => b.to_string(),
                     _ => val.to_string(),
                 };
-                metadata.insert(key.clone(), val_str);
+                metadata.insert(key.clone(), clean_val);
             }
         }
 
-        // 6. Extract Subject / Identity (AU-3.f)
-        let id_fields = ["user", "uid", "principal", "userId", "email"];
-        let mut subject_id = None;
-        for f in id_fields {
-            if let Some(id) = self.get_nested_value(&v, f).and_then(|v| v.as_str()) {
-                subject_id = Some(id.to_string());
-                break;
-            }
-        }
+        // Forensic Mirroring: Ensure extracted message is available as metadata for attribution
+        metadata.insert("captured_message".to_string(), message.clone());
 
-        // 7. Extract Outcome (AU-3.e)
-        let outcome_fields = ["status", "result", "outcome", "exit_code"];
-        let mut outcome = None;
-        for f in outcome_fields {
-            if let Some(o) = self.get_nested_value(&v, f).and_then(|v| v.as_str()) {
-                outcome = Some(o.to_string());
-                break;
-            }
-        }
-
-        Some(LogRecord {
+        LogRecord {
             timestamp,
             message,
             severity,
-            source,
-            subject_id,
-            outcome,
+            source: Some(self.format_name().to_string()),
+            subject_id: None,
+            outcome: if quality == ParsingQuality::Degraded { Some("Degraded".to_string()) } else { Some("Success".to_string()) },
             metadata,
+            additional_context: Some(v.clone()),
             raw: raw.to_string(),
+            unparsed_raw,
             original_format: self.format_name().to_string(),
             quality,
+            incident_id: None,
             redactions: Vec::new(),
-        })
+            bridge_hash: None,
+            chain_hash: None,
+        }
     }
 }
 
 impl LogParser for JsonParser {
     fn format_name(&self) -> &str {
-        "json_configurable"
+        &self.name
     }
 
-    fn parse(&self, raw: &str) -> Option<LogRecord> {
-        let v: Value = serde_json::from_str(raw).ok()?;
-        self.parse_value(v, raw)
+    fn parse(&self, raw: &str) -> LogRecord {
+        let trimmed = raw.trim();
+        
+        // Zero-Drop Fidelity: Every newline is an event (NIST AU-2)
+        if trimmed.is_empty() {
+             return LogRecord {
+                timestamp: Local::now(),
+                message: String::new(),
+                severity: Some("INFO".to_string()),
+                source: Some(self.format_name().to_string()),
+                subject_id: None,
+                outcome: Some("Success".to_string()),
+                metadata: BTreeMap::new(),
+                additional_context: None,
+                raw: raw.to_string(),
+                unparsed_raw: Some(raw.to_string()),
+                original_format: self.format_name().to_string(),
+                quality: ParsingQuality::Success,
+                incident_id: None,
+                redactions: Vec::new(),
+                bridge_hash: None,
+                chain_hash: None,
+            };
+        }
+
+        let mut stream = serde_json::Deserializer::from_str(trimmed).into_iter::<Value>();
+        match stream.next() {
+            Some(Ok(v)) => self.parse_value(v, raw),
+            _ => {
+                // Return Degraded for malformed JSON
+                LogRecord {
+                    timestamp: Local::now(),
+                    message: "DEGRADED: Malformed JSON".to_string(),
+                    severity: Some("WARN".to_string()),
+                    source: Some(self.format_name().to_string()),
+                    subject_id: None,
+                    outcome: Some("Degraded".to_string()),
+                    metadata: BTreeMap::new(),
+                    additional_context: None,
+                    raw: raw.to_string(),
+                    unparsed_raw: Some(raw.to_string()),
+                    original_format: self.format_name().to_string(),
+                    quality: ParsingQuality::Degraded,
+                    incident_id: None,
+                    redactions: Vec::new(),
+                    bridge_hash: None,
+                    chain_hash: None,
+                }
+            }
+        }
     }
 
     fn as_any(&self) -> &dyn std::any::Any {

@@ -1,7 +1,9 @@
 use crate::models::{LogRecord, ParsingQuality};
 use crate::parsers::{LogParser, parse_timestamp_robust};
+use chrono::Local;
 use regex::Regex;
 use once_cell::sync::Lazy;
+use std::collections::BTreeMap;
 
 pub struct PlainTextParser;
 
@@ -15,15 +17,36 @@ impl LogParser for PlainTextParser {
         "plaintext_fallback"
     }
 
-    fn parse(&self, raw: &str) -> Option<LogRecord> {
+    fn parse(&self, raw: &str) -> LogRecord {
         let trimmed = raw.trim();
-        if trimmed.is_empty() { return None; }
+        
+        // Zero-Drop Fidelity: Every newline is an event (NIST AU-2)
+        if trimmed.is_empty() {
+             return LogRecord {
+                timestamp: Local::now(),
+                message: String::new(),
+                severity: Some("INFO".to_string()),
+                source: Some("local_file".to_string()),
+                subject_id: None,
+                outcome: Some("Success".to_string()),
+                metadata: BTreeMap::new(),
+                additional_context: None,
+                raw: raw.to_string(),
+                unparsed_raw: Some(raw.to_string()),
+                original_format: self.format_name().to_string(),
+                quality: ParsingQuality::Success,
+                incident_id: None,
+                redactions: Vec::new(),
+                bridge_hash: None,
+                chain_hash: None,
+            };
+        }
 
         // 1. Best-effort Timestamp Extraction
         let (timestamp, quality) = if let Some(mat) = TIMESTAMP_REGEX.find(trimmed) {
              parse_timestamp_robust(mat.as_str())
         } else {
-            (chrono::Utc::now(), ParsingQuality::PartialTimestamp)
+            (Local::now(), ParsingQuality::PartialTimestamp)
         };
 
         // 2. Simple severity detection (INFO, ERROR, WARN)
@@ -35,20 +58,26 @@ impl LogParser for PlainTextParser {
             Some("INFO".to_string())
         };
 
-        Some(LogRecord {
+        LogRecord {
             timestamp,
             message: trimmed.to_string(),
             severity,
             source: Some("local_file".to_string()),
             subject_id: None,
-            outcome: None,
-            metadata: std::collections::HashMap::new(),
+            outcome: if quality == ParsingQuality::Degraded { Some("Degraded".to_string()) } else { Some("Success".to_string()) },
+            metadata: BTreeMap::new(),
+            additional_context: None,
             raw: raw.to_string(),
+            unparsed_raw: Some(raw.to_string()), // Preserving for byte-perfect AU-9 audit
             original_format: self.format_name().to_string(),
             quality,
+            incident_id: None,
             redactions: Vec::new(),
-        })
+            bridge_hash: None,
+            chain_hash: None,
+        }
     }
+
 
     fn as_any(&self) -> &dyn std::any::Any {
         self

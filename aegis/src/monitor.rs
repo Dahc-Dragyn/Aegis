@@ -13,6 +13,7 @@ pub struct PostureMonitor {
     // Quality Pulse Metrics (Audit Requirements)
     pub lines_skipped: AtomicU64,
     pub timestamp_fallbacks: AtomicU64,
+    pub degraded_signals: AtomicU64,
     
     status_message: Mutex<String>,
     pulse_history: Mutex<VecDeque<u64>>,
@@ -31,6 +32,7 @@ pub struct PostureSnapshot {
     // Quality Metrics for Dashboard
     pub lines_skipped: u64,
     pub timestamp_fallbacks: u64,
+    pub degraded_signals: u64,
     pub success_rate: f64,
 }
 
@@ -49,6 +51,7 @@ impl PostureMonitor {
             start_time: Instant::now(),
             lines_skipped: AtomicU64::new(0),
             timestamp_fallbacks: AtomicU64::new(0),
+            degraded_signals: AtomicU64::new(0), 
             status_message: Mutex::new("Sentinel Live".to_string()),
             pulse_history: Mutex::new(VecDeque::from(vec![0; 60])),
             last_count: AtomicU64::new(0),
@@ -64,6 +67,10 @@ impl PostureMonitor {
             },
             ParsingQuality::Malformed => {
                 self.lines_skipped.fetch_add(1, Ordering::Relaxed);
+            },
+            ParsingQuality::Degraded => {
+                self.total_processed.fetch_add(1, Ordering::Relaxed);
+                self.degraded_signals.fetch_add(1, Ordering::Relaxed);
             }
         }
     }
@@ -122,6 +129,7 @@ impl PostureMonitor {
             status: self.status_message.lock().unwrap().clone(),
             lines_skipped: skipped,
             timestamp_fallbacks: self.timestamp_fallbacks.load(Ordering::Relaxed),
+            degraded_signals: self.degraded_signals.load(Ordering::Relaxed),
             success_rate,
         }
     }

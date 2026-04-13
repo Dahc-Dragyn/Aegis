@@ -3,6 +3,10 @@ name = "aegis"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "debug_parse"
+path = "src/debug_parse.rs"
+
 [dependencies]
 # Core Logic
 serde = { version = "1.0", features = ["derive"] }
@@ -13,11 +17,20 @@ anyhow = "1.0"
 thiserror = "1.0"
 once_cell = "1.18"
 sha2 = "0.10.8"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+redb = "1.0"
+bincode = "1.3"
+evtx = "0.8"
+pcap-parser = "0.14"
+etherparse = "0.13"
 
 # Phase 2 & 3: Ingestion & Ledger
 tokio = { version = "1.32", features = ["full"] }
 notify = "6.1"
 rayon = "1.8"
+dashmap = "5.5"
+moka = { version = "0.12", features = ["future"] }
+sysinfo = "0.30"
 
 # Phase 4 & 6: Heartbeat & UX Evolution
 ratatui = "0.26.0"
@@ -30,6 +43,9 @@ rand = "0.8"
 flate2 = "1.0"
 toml = "0.8"
 clap = { version = "4.4", features = ["derive"] }
+linemux = "0.3"
+futures = "0.3.32"
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 
 [dev-dependencies]
 tempfile = "3.8"

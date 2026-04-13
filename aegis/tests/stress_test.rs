@@ -27,24 +27,34 @@ async fn test_100k_compliance_burst() {
     let monitor = Arc::new(PostureMonitor::new());
     let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512).unwrap());
     
+    // Initialize high-capacity EdgeBuffer for stress check
+    let edge_db_path = dir.path().join("aegis.edge.db");
+    let edge_buffer = Arc::new(aegis::edge_buffer::EdgeBuffer::new(
+        edge_db_path, 
+        Arc::clone(&ledger), 
+        200000, 
+        true
+    ).unwrap());
+
     // Hardened Dispatcher (using batch size 512 for stress)
     let dispatcher = Dispatcher::new(
         Arc::clone(&engine), 
-        Arc::clone(&ledger), 
+        Arc::clone(&edge_buffer), 
         Arc::clone(&monitor),
         &config,
         512
     );
+
     
     // Hardened Sentry (using PlainTextParser for log-injection tests)
     let parser = Arc::new(aegis::parsers::plain::PlainTextParser);
-    let monitor = Arc::new(PostureMonitor::new());
     let sentry = Arc::new(Sentry::with_parser(
         log_path.clone(), 
         offset_path.clone(), 
         parser, 
-        monitor
+        Arc::clone(&monitor)
     ).expect("Failed to create sentry"));
+
     
     // Achievement: Use a massive channel (2x volume) to eliminate backpressure
     let (tx, rx) = mpsc::channel(200000); 

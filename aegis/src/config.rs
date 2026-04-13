@@ -3,11 +3,37 @@ use std::collections::HashMap;
 use std::path::Path;
 use anyhow::{Result, Context};
 
+#[derive(Debug, Clone, Deserialize, PartialEq, Default)]
+pub enum ActiveFramework {
+    #[default]
+    Federal53,
+    Commercial171,
+    AiRmf100,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     pub formats: HashMap<String, LogFormatConfig>,
     #[serde(default)]
     pub redaction: RedactionConfig,
+    #[serde(default = "default_sensor_id")]
+    pub sensor_id: String,
+    #[serde(default = "default_profile_name")]
+    pub profile_name: String,
+    #[serde(default)]
+    pub active_framework: ActiveFramework,
+    #[serde(default)]
+    pub ai_rmf: AiRmfConfig,
+    #[serde(default)]
+    pub authorized_baseline_services: Vec<String>,
+}
+
+fn default_profile_name() -> String {
+    "NIST_SP-800-53_rev5_HIGH-baseline".to_string()
+}
+
+fn default_sensor_id() -> String {
+    "aegis.edge-node.01".to_string()
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -19,6 +45,26 @@ pub struct LogFormatConfig {
     #[serde(default)]
     pub metadata_map: HashMap<String, String>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AiRmfConfig {
+    #[serde(default = "default_toxicity_threshold")]
+    pub toxicity_threshold: f64,
+    #[serde(default = "default_latency_threshold")]
+    pub latency_threshold_ms: u64,
+}
+
+impl Default for AiRmfConfig {
+    fn default() -> Self {
+        Self {
+            toxicity_threshold: default_toxicity_threshold(),
+            latency_threshold_ms: default_latency_threshold(),
+        }
+    }
+}
+
+fn default_toxicity_threshold() -> f64 { 0.85 }
+fn default_latency_threshold() -> u64 { 5000 }
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct RedactionConfig {
@@ -54,10 +100,38 @@ impl AppConfig {
                 m
             },
         });
-        
+
+        // 2. High-Fidelity Elastic/Endpoint/Beats Mapping
+        formats.insert("elastic".to_string(), LogFormatConfig {
+            timestamp_field: Some("_source.@timestamp".to_string()),
+            message_field: Some("_source.message".to_string()),
+            severity_field: Some("_source.log.level".to_string()),
+            source_field: Some("_source.event.dataset".to_string()),
+            metadata_map: {
+                let mut m = HashMap::new();
+                m.insert("hostname".to_string(), "_source.host.hostname".to_string());
+                m.insert("cmd".to_string(), "_source.process.command_line".to_string());
+                m.insert("user".to_string(), "_source.user.name".to_string());
+                m.insert("action".to_string(), "_source.event.action".to_string());
+                m
+            },
+        });
+
         Self {
             formats,
             redaction: RedactionConfig::default(),
+            sensor_id: default_sensor_id(),
+            profile_name: default_profile_name(),
+            active_framework: ActiveFramework::Federal53,
+            ai_rmf: AiRmfConfig::default(),
+            authorized_baseline_services: vec![
+                "RtkAudioUniversalService".to_string(),
+                "GameSDK Service".to_string(),
+                "RulesEngine".to_string(),
+                "AsusUpdateHelper.msi".to_string(),
+                "UAPSDKAddOn-x86.msi".to_string(),
+                "Windows Subsystem for Linux".to_string(),
+            ],
         }
     }
 }

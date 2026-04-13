@@ -10,6 +10,18 @@ aegis.audit.jsonl
 aegis.debug.log
 testlog.json
 *.tmp
+*.db
+*.pos.*
+*.hash
+audit_temp.txt
+batch_audit_results.json
+gauntlet_results/
+forensic_results/
+receipts/
+scratch/
+draft_tickets/
+audit_vault/
+LocaleMetaData/
 
 # Environment & Secrets
 .env
@@ -20,3 +32,8 @@ testlog.json
 .idea/
 *.swp
 *.swo
+
+# Python
+aegis_mcp/.venv/
+__pycache__/
+*.pyc

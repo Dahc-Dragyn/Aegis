@@ -1,4 +1,3 @@
-use crate::ledger::AuditLedger;
 use crate::monitor::PostureMonitor;
 use crate::NistEngine;
 use crate::models::LogRecord;
@@ -10,16 +9,17 @@ use anyhow::Result;
 
 pub struct Dispatcher {
     engine: Arc<NistEngine>,
-    ledger: Arc<AuditLedger>,
+    fusion_tx: mpsc::Sender<Arc<LogRecord>>,
     monitor: Arc<PostureMonitor>,
     redactor: Arc<Redactor>,
+    config: AppConfig,
     batch_threshold: usize,
 }
 
 impl Dispatcher {
     pub fn new(
         engine: Arc<NistEngine>,
-        ledger: Arc<AuditLedger>,
+        fusion_tx: mpsc::Sender<Arc<LogRecord>>,
         monitor: Arc<PostureMonitor>,
         config: &AppConfig,
         batch_threshold: usize,
@@ -27,9 +27,10 @@ impl Dispatcher {
         let redactor = Arc::new(Redactor::new(&config.redaction));
         Self {
             engine,
-            ledger,
+            fusion_tx,
             monitor,
             redactor,
+            config: config.clone(),
             batch_threshold,
         }
     }
@@ -82,20 +83,22 @@ impl Dispatcher {
 
     async fn process_batch(&self, batch: &mut Vec<Arc<LogRecord>>) -> Result<()> {
         let engine = Arc::clone(&self.engine);
-        let ledger = Arc::clone(&self.ledger);
-        let monitor = Arc::clone(&self.monitor);
+        let fusion_tx = self.fusion_tx.clone();
         
         let batch_to_process = std::mem::take(batch);
 
         // Heavy lifting NIST analysis in parallel (Hardened Await for Persistence)
+        let config = self.config.clone();
+
+
         tokio::task::spawn_blocking(move || {
-            let signals = engine.analyze_batch(&batch_to_process);
-            let signal_count = signals.len() as u64;
+            let records = engine.analyze_batch(&batch_to_process, &config);
             
-            if signal_count > 0 {
-                monitor.increment_signals(signal_count);
-                if let Err(e) = ledger.log_batch(signals) {
-                    eprintln!("❌ Failed to write to audit ledger: {:?}", e);
+            // Offload to background Fusion Worker for IR-4 correlation and Edge Persistence
+            let rt = tokio::runtime::Handle::current();
+            for record in records {
+                if let Err(e) = rt.block_on(fusion_tx.send(Arc::new(record))) {
+                    eprintln!("❌ Failed to hand off to fusion worker: {:?}", e);
                 }
             }
         }).await?;

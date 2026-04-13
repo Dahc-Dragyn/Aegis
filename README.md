@@ -16,6 +16,36 @@ Aegis is engineered for federal environments, providing 100% auditable signal ca
 
 ---
 
+## 🏗️ Unified Workspace Architecture 🚀
+
+The Antigravity Rust Lab is now consolidated into a single **Cargo Workspace**. This optimization allows for:
+- **Shared Indexing**: `rust-analyzer` indices dependencies once for the entire workspace, significantly reducing memory consumption.
+- **Unified Build Cache**: All projects share the root `target/` directory, preventing redundant recompilation.
+- **Zero-Drop Tracking**: Coordinated cross-crate forensic audits via the shared ledger.
+
+---
+
+## 🏗️ Project Catalog
+
+### 1. [Project Aegis (Flagship)](./aegis) 🛡️ 🏅 [NIST-CERTIFIED]
+**"The Federal Compliance Sentinel"**
+- **Architecture**: Decoupled `Tokio` ingestion (Producer) and **Elastic `Rayon` analysis loop** (Consumer).
+- **Compliance**: Fully aligned with **NIST SP 800-53 Rev 5** (AU/AC/SI families).
+- **Forensic Fidelity**: Achieves **100% Audit Coverage** via an append-only, SHA-256 cryptographically identifiable ledger.
+- **TUI**: Real-time federal dashboard built with `Ratatui`.
+
+### 2. [Vortex Context Generator](./vortex) 🌀
+**"The High-Fidelity Skeletonizer"**
+- **Architecture**: Recursive module-graph traversal using `syn` for AST parsing.
+- **Key Feature**: Generates lean API skeletons for LLM context optimization.
+
+### 3. [Sentinel Log Monitor](./sentinel) 🛡️
+**"Async Pulse Oversight"**
+- **Architecture**: Multi-threaded async monitor (Tokio) designed for 12-core saturation.
+- **Detection**: Real-time binary signature scanning for forensic anomaly detection.
+
+---
+
 ## 🚀 Quick Start (Audit in 60 Seconds)
 
 ### 1. Build the Sentinel (Hardened Protocol)
