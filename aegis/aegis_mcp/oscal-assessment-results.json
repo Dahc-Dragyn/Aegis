@@ -1,0 +1,35 @@
+{
+  "assessment-results": {
+    "uuid": "428a77f6-2c59-4f41-8e78-f358c7b6ba97",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-04-07T22:19:54.737891200Z",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "1a84fa50-59b9-46a6-88a7-6c1650cc9ad4",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 1 signals.",
+        "start": "2026-04-07T22:19:54.737889800Z",
+        "observations": [
+          {
+            "uuid": "52e2cdde-1e95-4779-83c8-e32e3b19d184",
+            "description": "NIST Control Capture: AU-6",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "relevant-evidence": [
+              {
+                "description": "{\"timestamp\": \"2026-04-07T14:00:30Z\", \"model\": \"gpt-4\", \"user_id\": \"usr_8811\", \"usage\": {\"prompt_tokens\": 50, \"completion_tokens\":"
+              }
+            ]
+          }
+        ],
+        "findings": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+🧪 Testing Aegis MCP Tools...
+
+--- Testing run_aegis_scan ---
+Unexpected Error executing Aegis: [WinError 2] The system cannot find the file specified
+
+--- Testing query_compliance_ledger (Severity: Info) ---
+Successfully retrieved 1 records.
+First record sample: AI Model Interaction: gpt-4-turbo
+
+--- Testing draft_poam_ticket ---
+Draft PO&M ticket created successfully: draft_tickets\poam_draft_3_14_3_20260407_165025.json
+Review this draft before committing to the master OSCAL PO&M.
+
+--- Testing update_aegis_baseline ---
+SUCCESS: svchost.exe has been added to the Aegis baseline. Future scans will classify this as NORMAL.

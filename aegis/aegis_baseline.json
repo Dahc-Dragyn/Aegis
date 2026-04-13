@@ -1,0 +1,13 @@
+{
+  "authorized_services": [],
+  "authorized_processes": [
+    {
+      "name": "svchost.exe",
+      "justification": "Authorized Windows service host"
+    },
+    {
+      "name": "svchost.exe",
+      "justification": "Authorized Windows service host"
+    }
+  ]
+}

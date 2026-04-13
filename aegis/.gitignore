@@ -10,6 +10,10 @@ aegis.audit.jsonl
 aegis.debug.log
 testlog.json
 *.tmp
+*.ps1
+logs/
+audit_vault/
+tests/Violation_logs/
 *.db
 *.pos.*
 *.hash
