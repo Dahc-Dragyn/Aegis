@@ -10,6 +10,7 @@ pub mod ai_proxy;
 pub mod pcap;
 pub mod syslog;
 pub mod web_log;
+pub mod splunk;
 
 pub trait LogParser: Send + Sync {
     fn parse(&self, raw: &str) -> LogRecord;
@@ -81,6 +82,7 @@ pub enum LogFormat {
     Syslog,
     WebLog,
     Elastic,
+    SplunkBots,
     Auto,
 }
 
@@ -133,11 +135,17 @@ impl AutoDetector {
         // 1. Specialized JSON Heuristics (Highest Priority)
         if trimmed.starts_with('{') {
             let lower = s.to_lowercase();
-            if lower.contains("_index") || lower.contains("_source") || lower.contains("agent.type") || lower.contains("textpayload") {
+            if lower.contains("_index") || lower.contains("_source") || lower.contains("agent.type") {
                 return LogFormat::Elastic;
+            }
+            if lower.contains("textpayload") {
+                return LogFormat::NdJson;
             }
             if lower.contains("\"usage\"") || lower.contains("\"security_flags\"") {
                 return LogFormat::AiProxy;
+            }
+            if lower.contains("\"sourcetype\"") || lower.contains("\"result\":") {
+                return LogFormat::SplunkBots;
             }
         }
 

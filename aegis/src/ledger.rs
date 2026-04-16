@@ -60,6 +60,25 @@ impl AuditLedger {
         self.source_artifact = source.to_string();
     }
 
+    pub fn live_notify(&self, record: &LogRecord) {
+        let severity = record.severity.as_deref().unwrap_or("INFO");
+        let timestamp = record.timestamp.format("%H:%M:%S%.3f");
+        let message = &record.message;
+        
+        match severity.to_uppercase().as_str() {
+            "CRITICAL" => {
+                println!("\n🔴 [{}] ☢️ CRITICAL ALERT!", timestamp);
+                println!("   MESSAGE: {}", message);
+                if let Some(vault) = &record.evidence_vault {
+                    println!("   📂 Evidence Secured: {}", vault);
+                }
+                println!();
+            },
+            "HIGH" => println!("⚠️ [{}] HIGH: {}", timestamp, message),
+            _ => println!("ℹ️ [{}] INFO: {}", timestamp, message),
+        }
+    }
+
     pub fn record(&self, record: &LogRecord) -> Result<()> {
         self.rotate_if_needed()?;
         
@@ -499,7 +518,7 @@ impl AuditLedger {
         let criticals = events.iter().filter(|e| e.severity == crate::models::SeverityLevel::Critical).count();
         let highs = events.iter().filter(|e| e.severity == crate::models::SeverityLevel::High).count();
         
-        let (_score, status_label, status_color) = if criticals > 0 {
+        let (_score, status_label, _status_color) = if criticals > 0 {
             ("F (CRITICAL)", "NON-COMPLIANT", "🔴")
         } else if highs > 5 {
             ("D (FAILING)", "NON-COMPLIANT", "🟠")
@@ -509,190 +528,316 @@ impl AuditLedger {
             ("A (SECURE)", "COMPLIANT", "🟢")
         };
 
+        // --- 🔴/🟡/🟢 DEFENSE STATUS ---
+        let defense_status = match status_label.as_ref() {
+            "NON-COMPLIANT" => "🔴 COMPROMISED",
+            "DEGRADED" => "🟡 AT RISK",
+            _ => "🟢 SAFE",
+        };
+
         let mut brief = format!(
-            "# 🛡️ COMMANDER'S BRIEF: AEGIS FORENSIC STATUS\n\n**Audit Pulse**: {}\n**Forensic Source**: `{}` (NIST AU-11)\n**Signals Captured**: {}\n**Certification Status**: {} {}\n\n---\n\n",
-            ts, self.source_artifact, total_signals, status_color, status_label
+            "# 🛡️ AEGIS DEFENSE STATUS: {}\n\n",
+            defense_status
         );
 
-        // --- 🕵️ TAC-SYNTH: ATTACK CHAIN DETECTION ---
+        // --- 📝 THE SITUATION (Plain English Summary) ---
         if total_signals > 0 {
+            // Calculate time span
+            let time_span_msg = if let (Some(f_event), Some(l_event)) = (events.first(), events.last()) {
+                let duration = l_event.timestamp.signed_duration_since(f_event.timestamp);
+                let secs = duration.num_seconds().abs();
+                if secs < 60 {
+                    format!("{} times in {} seconds", total_signals, secs)
+                } else {
+                    format!("{} times over {} minutes", total_signals, duration.num_minutes().abs())
+                }
+            } else {
+                format!("{} times", total_signals)
+            };
+
+            brief.push_str("## 📝 The Situation\n");
+            
             let payloads: Vec<String> = events.iter().map(|e| e.raw_log.to_lowercase()).collect();
+            let is_persistence = events.iter().any(|e| e.control_id.contains("SC-7") || e.control_id.contains("CM-3") || e.control_id.contains("SI-4 [WMI]"));
+            
+            if is_persistence {
+                brief.push_str(&format!("Aegis has unmasked a **'Ghost' Persistence Backdoor** on your system. An intruder attempted to hide their presence by creating an automatic startup mechanism (Scheduled Task, Registry Run key, or WMI Consumer). This activity occurred **{}**. This is a critical attempt to maintain control of your computer even after a restart.\n\n", time_span_msg));
+            } else if events.iter().any(|e| e.metadata.get("forensic_tag").map(|s| s.as_str()) == Some("PivotAttempt")) {
+                brief.push_str(&format!("Aegis has detected an attempt to **Jump to another Computer** (Lateral Movement). An intruder is using this system as a 'bridgehead' to pivot across your network. This activity occurred **{}**. This is a high-priority indicator of an active lateral spread attempt.\n\n", time_span_msg));
+            } else if events.iter().any(|e| e.metadata.get("forensic_tag").map(|s| s.as_str()) == Some("CredentialDumping") || e.metadata.get("forensic_tag").map(|s| s.as_str()) == Some("RegistryExfiltration")) {
+                brief.push_str(&format!("Aegis has detected an attempt to reach into your computer's **'Identity Vault'**. An intruder is trying to steal your saved passwords, system keys (LSASS), or sensitive registry databases (SAM/SECURITY). This activity occurred **{}**. This is a critical attempt to escalate privileges and take full control of the domain.\n\n", time_span_msg));
+            } else {
+                brief.push_str(&format!("Aegis has detected suspicious activity on your network. An automated tool or attacker attempted to interact with your system **{}**. This activity is consistent with a modern cyberattack aimed at stealing your identity or taking control of your computer.\n\n", time_span_msg));
+            }
+
             let is_byov = payloads.iter().any(|p| p.contains("zam64") || p.contains("byov") || p.contains("cve-2021-21551"));
             let is_dump = payloads.iter().any(|p| p.contains("ppldump") || p.contains("lsass") || p.contains("mimikatz"));
 
             if is_byov && is_dump {
-                brief.push_str("## ☢️ CRITICAL TAC-SYNTH ALERT: BYOV ATTACK CHAIN\n");
                 brief.push_str("> [!CAUTION]\n");
-                brief.push_str("> **Active Exploitation Detected**: A 'Bring Your Own Vulnerable Driver' (BYOV) tactic has been detected alongside credential dumping attempts. This indicates a high-sophistication attacker attempting to bypass LSA protection.\n\n");
+                brief.push_str("> **Advanced Attack Detected**: We found evidence of a highly sophisticated attempt to bypass your computer's security 'locks'. This is an active emergency.\n\n");
             }
 
-            brief.push_str("## 🚩 Tactical Compliance Findings\n\n");
-            
-            // --- 🏗️ AGGREGATION & DE-DUPLICATION (Group by Control + Host) ---
-            let mut groups: std::collections::BTreeMap<(String, String), Vec<&PostureEvent>> = std::collections::BTreeMap::new();
+            // --- 🏗️ CONSOLIDATED FORENSIC AGGREGATION (Single Pass Optimization) ---
+            let mut groups: std::collections::BTreeMap<(String, String), Vec<(String, String, String, String, String, String, String)>> = std::collections::BTreeMap::new();
+            let mut origin_counts: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+            let mut global_deduplicated: std::collections::BTreeMap<String, (usize, String, String, String, String)> = std::collections::BTreeMap::new();
+
             for event in &events {
+                let (eid, time, pid, rid, payload, origin, lineage) = self.extract_telemetry(event);
+                
                 let hostname = event.metadata.get("Computer")
                     .or_else(|| event.metadata.get("computer"))
                     .or_else(|| event.metadata.get("computer_name"))
                     .or_else(|| event.metadata.get("host"))
                     .or_else(|| event.metadata.get("Hostname"))
                     .or_else(|| event.metadata.get("source"))
+                    .or_else(|| event.metadata.get("WorkstationName"))
+                    .or_else(|| event.metadata.get("SourceWorkstation"))
+                    .or_else(|| event.metadata.get("machine_name"))
                     .cloned()
                     .unwrap_or_else(|| "Unknown Host".to_string());
-                
-                groups.entry((event.control_id.clone(), hostname)).or_default().push(event);
+
+                // 1. Grouping for tactical findings
+                groups.entry((event.control_id.clone(), hostname)).or_default()
+                    .push((eid.clone(), time.clone(), pid.clone(), rid.clone(), payload.clone(), origin.clone(), lineage.clone()));
+
+                // 2. Global Origin Mapping (for Battlefield Map)
+                if origin != "Unknown" {
+                    *origin_counts.entry(origin.clone()).or_insert(0) += 1;
+                }
+
+                // 2b. Global Target Mapping (Iron Sights)
+                if let Some(dip) = event.metadata.get("destination_ip") {
+                    let dip_id = format!("Target_{}", dip.replace('.', "_").replace(':', "_"));
+                    *origin_counts.entry(dip_id).or_insert(0) += 1;
+                }
+
+                // 3. Global De-duplication (for high-fidelity signal table)
+                let entry = global_deduplicated.entry(payload.clone()).or_insert((0, time.clone(), time.clone(), eid.clone(), origin.clone()));
+                entry.0 += 1;
+                entry.2 = time; // Update last seen
             }
 
-            for ((control_id, hostname), group_events) in groups {
-                let first = group_events[0];
+            // --- 🗺️ AUTOMATED BATTLEFIELD MAP (MERMAID) ---
+            if !groups.is_empty() {
+                brief.push_str("## 🗺️ Automated Battlefield Map (Attack Chain)\n");
+                brief.push_str("```mermaid\n");
+                brief.push_str("graph TD\n");
                 
-                // --- 🤖 AI SYNTHESIS (First 10 Events Per Group) ---
-                let telemetry_slice: Vec<String> = group_events.iter().take(10)
-                    .map(|e| e.raw_log.clone())
+                // --- 🚩 THE MOST USEFUL BATTLEFIELD MAP EVER ---
+                let mut added_targets = std::collections::HashSet::new();
+                let mut added_origins = std::collections::HashSet::new();
+                let mut added_tactics = std::collections::HashSet::new();
+                let mut graph_connections = Vec::new();
+                let mut top_actions = Vec::new();
+
+                for ((control_id, hostname), group_events) in &groups {
+                    let weight = group_events.len();
+                    
+                    // Fetch remediation for Flash Report
+                    if let Some(control) = self.engine.lookup_control(control_id) {
+                        if control.severity == crate::models::SeverityLevel::Critical || control.severity == crate::models::SeverityLevel::High {
+                            top_actions.push((control.severity, control.human_title.clone(), control.human_action.clone(), weight));
+                        }
+                    }
+
+                    // Human-First Identity Mapping
+                    let display_host = if hostname == "Unknown Host" || hostname == "localhost" {
+                        "Your Computer".to_string()
+                    } else {
+                        format!("Your Computer ({})", hostname)
+                    };
+                    
+                    let display_origin = "Unknown Attacker".to_string();
+
+                    let host_id = format!("Host_{}", display_host.replace('.', "_").replace('-', "_").replace(' ', "_"));
+                    let origin_id = format!("Origin_{}", display_origin.replace('.', "_").replace('-', "_").replace(':', "_").replace(' ', "_"));
+                    let tactic_id = format!("Tactic_{}_{}", control_id.replace('-', "_"), display_host.replace('-', "_").replace(' ', "_"));
+
+                    // Add nodes to subgraphs
+                    if !added_targets.contains(&host_id) {
+                        brief.push_str(&format!("        {}[\"💻 {}\"]\n", host_id, display_host));
+                        added_targets.insert(host_id.clone());
+                    }
+                    if !added_origins.contains(&origin_id) {
+                        brief.push_str(&format!("    subgraph \"🚨 Threat Entities\"\n"));
+                        brief.push_str(&format!("        {}((\"🌐 {}\"))\n", origin_id, display_origin));
+                        brief.push_str("    end\n");
+                        added_origins.insert(origin_id.clone());
+                    }
+
+                    if !added_tactics.contains(&tactic_id) {
+                        let human_title = if let Some(c) = self.engine.lookup_control(control_id) {
+                            c.human_title.clone()
+                        } else {
+                            "Suspicious Activity".to_string()
+                        };
+                        
+                        let status_emoji = if defense_status.contains("COMPROMISED") { "☢️" } else { "⚠️" };
+                        brief.push_str(&format!("    subgraph \"🎯 Active Threats\"\n"));
+                        brief.push_str(&format!("        {}{{\"{} {}\"}}\n", tactic_id, status_emoji, human_title));
+                        brief.push_str("    end\n");
+                        added_tactics.insert(tactic_id.clone());
+                    }
+
+                    // Build weighted connection
+                    graph_connections.push((origin_id, tactic_id.clone(), weight));
+                    graph_connections.push((tactic_id.clone(), host_id.clone(), weight));
+
+                    // Iron Sights: Lateral Pivot Connection
+                    if let Some(dip) = group_events[0].4.split("traffic to ").last().and_then(|s| s.split(':').next()) {
+                        // Check if it's a real IP and not N/A
+                        if dip.contains('.') || dip.contains(':') {
+                            let target_id = format!("Target_{}", dip.replace('.', "_").replace(':', "_"));
+                            if !added_targets.contains(&target_id) {
+                                brief.push_str(&format!("        {}[\"🌐 Target: {}\"]\n", target_id, dip));
+                                added_targets.insert(target_id.clone());
+                            }
+                            graph_connections.push((host_id, target_id, weight));
+                        }
+                    }
+                }
+
+                brief.push_str("    subgraph \"🛡️ Impacted Assets\"\n");
+                for host_id in &added_targets { brief.push_str(&format!("        {}\n", host_id)); }
+                brief.push_str("    end\n\n");
+
+                // Render connections and apply weighted styling
+                for (idx, (src, dst, weight)) in graph_connections.iter().enumerate() {
+                    let weight_label = if *weight >= 1000 { format!("{:.1}k Signals", *weight as f32 / 1000.0) } else { format!("{} Signals", weight) };
+                    brief.push_str(&format!("    {} -- \"{}\" --> {}\n", src, weight_label, dst));
+                    
+                    let stroke_width = if *weight > 1000 { 8 } else if *weight > 100 { 4 } else if *weight > 10 { 2 } else { 1 };
+                    let color = if *weight > 1000 { "#ff4444" } else if *weight > 100 { "#ffbb33" } else { "#00C851" };
+                    brief.push_str(&format!("    linkStyle {} stroke:{},stroke-width:{}px;\n", idx, color, stroke_width));
+                }
+
+                brief.push_str("\n    classDef tactic fill:#f9ab00,stroke:#333,stroke-width:1px,color:#000;\n");
+                brief.push_str("    classDef target fill:#1a73e8,stroke:#333,stroke-width:1px,color:#fff;\n");
+                for tactic in added_tactics { brief.push_str(&format!("    class {} tactic;\n", tactic)); }
+                for host in added_targets { brief.push_str(&format!("    class {} target;\n", host)); }
+                brief.push_str("```\n\n");
+
+                // --- 6. Operation Black Box: Evidence Vault Reporting ---
+                let mut unique_vaults = std::collections::HashSet::new();
+                for event in &events {
+                    if let Some(vault) = event.metadata.get("evidence_vault") {
+                        unique_vaults.insert(vault.clone());
+                    }
+                }
+
+                if !unique_vaults.is_empty() {
+                    brief.push_str("## 📦 Automated Evidence Collected\n");
+                    brief.push_str("Aegis has automatically secured volatile evidence (Network State, Process Modules, and Registry Keys) to ensure the intruder cannot clear their tracks. These artifacts are sealed in the Forensic Vault(s):\n\n");
+                    for vault in unique_vaults {
+                        brief.push_str(&format!("- `{}`\n", vault));
+                    }
+                    brief.push_str("\n");
+                }
+
+                // --- 🛡️ WHAT YOU NEED TO DO ---
+                brief.push_str("## 🛡️ What You Need To Do\n");
+                top_actions.sort_by(|a, b| b.3.cmp(&a.3));
+                let mut seen_actions: std::collections::HashSet<String> = std::collections::HashSet::new();
+                let mut step_count = 1;
+                for (_sev, title, action, _weight) in top_actions.iter().take(5) {
+                    if !seen_actions.contains(title) {
+                        brief.push_str(&format!("{}. **{}**\n", step_count, action));
+                        seen_actions.insert(title.clone());
+                        step_count += 1;
+                    }
+                }
+                brief.push_str("\n");
+            }
+
+            // --- ⚙️ TECHNICAL APPENDIX (Collapsed) ---
+            brief.push_str("<details>\n<summary>🔬 Technical Forensic Appendix (For IT/Security Professionals)</summary>\n\n");
+            brief.push_str("## Technical Pulse Evidence\n");
+            brief.push_str(&format!("**Audit Pulse**: {}\n**Forensic Source**: `{}` (NIST AU-11)\n**Signals Captured**: {}\n\n", ts, self.source_artifact, total_signals));
+            
+            brief.push_str("#### 🔍 Raw Signal Telemetry\n");
+            brief.push_str("| Count | Technical Signal | First Seen | Last Seen | EventID |\n");
+            brief.push_str("|:---:|:---|:---|:---|:---:|\n");
+
+            let mut sorted_global: Vec<_> = global_deduplicated.into_iter().collect();
+            sorted_global.sort_by(|a, b| b.1.0.cmp(&a.1.0));
+            
+            for (payload, (count, first, last, eid, _origin)) in sorted_global.iter().take(15) {
+                let display_payload = if payload.chars().count() > 80 { 
+                    format!("{}...", payload.chars().take(77).collect::<String>()) 
+                } else { 
+                    payload.clone() 
+                };
+                brief.push_str(&format!("| **{}x** | `{}` | {} | {} | {} |\n", count, display_payload, first, last, eid));
+            }
+            brief.push_str("\n");
+
+            // --- 🕵️ DETAILED GROUP FINDINGS ---
+            for ((control_id, hostname), group_events) in groups {
+                let (_first_eid, _first_time, _pid, _rid, _first_payload, _origin, lineage) = &group_events[0];
+                
+                let telemetry_slice: Vec<String> = group_events.iter().take(5)
+                    .map(|e| e.4.clone())
                     .collect();
                 let ai_summary = self.get_ai_synthesis(&telemetry_slice.join("\n"));
 
-                // --- 📑 HYBRID HEADER (NIST + THREAT) ---
-                // NIST Hardening: Use the maximum severity in the group for heading synthesis
-                let group_max_event = group_events.iter().max_by_key(|e| e.severity as i32).unwrap_or(&first);
-                let group_max_severity = group_max_event.severity;
-
-                let emoji = if group_max_severity == crate::models::SeverityLevel::Critical { "☢️" } else { "🚩" };
-                let threat_cat = if control_id == "SI-4" { 
-                    if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("macOS Persistence")).unwrap_or(false)) {
-                        "Endpoint Persistence / Launch Agent Modification"
-                    } else if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("macOS LPE")).unwrap_or(false)) {
-                        "Local Privilege Escalation / Authorization Trampoline Abuse"
-                    } else {
-                        "ACTIVE THREAT: System Integrity / Kernel & Protocol Exploitation"
-                    }
-                } else if control_id == "AC-3" { 
-                    if group_max_severity == crate::models::SeverityLevel::Critical {
-                        if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("Local SMB Relay")).unwrap_or(false)) {
-                            "Privilege Escalation / Local SMB Token Relay"
-                        } else if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("WinRM Lateral Movement")).unwrap_or(false)) {
-                            "Lateral Movement / WinRM Remote Execution"
-                        } else {
-                            "ACTIVE THREAT: Credential Access / OS Credential Dumping"
-                        }
-                    } else if group_max_severity == crate::models::SeverityLevel::High {
-                        if group_events.iter().any(|e| e.description.contains("Security Software Discovery")) {
-                            "Security Software Discovery / Defense Evasion Reconnaissance"
-                        } else {
-                            "Targeted Active Directory Enumeration"
-                        }
-                    } else {
-                        "COMPLIANCE WARNING: Generic Reconnaissance / Lateral Movement Risk"
-                    }
-                } else if control_id == "AC-2" {
-                    if group_max_severity == crate::models::SeverityLevel::Critical {
-                        "Privilege Escalation / Local Admin Group Manipulation"
-                    } else {
-                        "NIST AC-2: Account Management Anomalies"
-                    }
-                } else { 
-                    "NIST COMPLIANCE GAP DETECTED" 
-                };
-
-                brief.push_str(&format!(
-                    "## {} [NIST {}] {}\n",
-                    emoji, control_id, threat_cat
-                ));
+                let control_data = self.engine.lookup_control(&control_id);
+                let emoji = if let Some(c) = control_data {
+                    if c.severity == crate::models::SeverityLevel::Critical { "☢️" } else { "🚩" }
+                } else { "🚩" };
                 
-                // --- 🧠 IMPACT TRANSLATION (Plain English) ---
-                brief.push_str("**What does this mean?**: ");
-                if control_id == "SI-4" {
-                    if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("macOS Persistence")).unwrap_or(false)) {
-                        brief.push_str("An attacker is establishing stealthy persistence by modifying macOS Launch Agent or Daemon configurations via native Living-off-the-Land (LotL) tools. This bypasses standard application behaviors and ensures malicious code executes automatically upon user login or system boot, providing long-term, invisible access for data exfiltration and further compromise.\n\n");
-                    } else if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("macOS LPE")).unwrap_or(false)) {
-                        brief.push_str("An attacker is abusing the native macOS `security_authtrampoline` binary to bypass the system's authorization framework. This allows the execution of root-level commands and the establishment of persistent backdoors via `launchctl` without explicit user consent.\n\n");
-                    } else {
-                        brief.push_str("An attacker is attempting to hide malicious code by cloaking it within legitimate system processes or by tampering with binary integrity. This bypasses traditional security and prevents NIST certification.\n\n");
-                    }
-                } else if control_id == "AC-3" {
-                    if group_max_severity == crate::models::SeverityLevel::Critical {
-                        if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("Local SMB Relay")).unwrap_or(false)) {
-                            brief.push_str("An attacker is performing a Local SMB Relay attack (e.g., RottenPotato/JuicyPotato) by forcing a high-privilege service account to authenticate through the local loopback adapter. This 'Token Kidnapping' allows the attacker to impersonate the SYSTEM account, resulting in absolute compromise of the host.\n\n");
-                        } else if group_events.iter().any(|e| e.metadata.get("threat_type").map(|t| t.contains("WinRM Lateral Movement")).unwrap_or(false)) {
-                            brief.push_str("An attacker is using Windows Remote Management (WinRM) to move laterally across the network and execute unauthorized commands. The detection of `wsmprovhost.exe` spawning an interactive shell or using encoded commands is a definitive signature of a remote session being hijacked to gain command-line access to the system.\n\n");
-                        } else if group_events.iter().any(|e| e.metadata.contains_key("rogue_san")) {
-                            brief.push_str("An attacker is abusing Active Directory Certificate Services (AD CS) to request certificates with unauthorized Subject Alternative Names (SANs). This ESC1/ESC8 exploit allows an attacker to impersonate highly privileged accounts (e.g., Domain Administrator) using rogue certificates, resulting in instantaneous, persistent Domain Dominance that spans across the entire identity infrastructure.\n\n");
-                        } else {
-                            brief.push_str("Highly sensitive credentials (LSASS memory, NTDS.dit, or LSA secrets) have been targeted for extraction. This indicates an active OS Credential Dumping attempt, granting the attacker the ability to impersonate any user or maintain persistent, invisible access across the domain.\n\n");
-                        }
-                    } else if group_max_severity == crate::models::SeverityLevel::High {
-                        if group_events.iter().any(|e| e.description.contains("Security Software Discovery")) {
-                            brief.push_str("Detection of active reconnaissance targeting native or third-party macOS security software. This bypasses the generic system baseline, indicating an attacker mapping the defensive posture to prepare for Defense Evasion.\n\n");
-                        } else {
-                            brief.push_str("Active enumeration of high-value Active Directory groups (e.g., Domain Admins) has been detected. This is a strong indicator of targeted reconnaissance preceding a privileged escalation attempt.\n\n");
-                        }
-                    } else {
-                        brief.push_str("Generic system or user discovery activity has been detected. While potentially authorized, this persistent reconnaissance often maps to the initial stages of lateral movement.\n\n");
-                    }
-                } else if control_id == "AC-2" {
-                    if group_max_severity == crate::models::SeverityLevel::Critical {
-                        brief.push_str("Detection of unauthorized account elevation to the local 'admin' or 'wheel' groups via native macOS utilities. This is a critical Local Privilege Escalation (LPE) event, granting the attacker root-level control over the endpoint and the ability to modify all system configurations.\n\n");
-                    } else {
-                        brief.push_str("Anomalous account management activity has been detected. Modifications to user profiles or group memberships require authorization review to ensure they match the system's access control policy.\n\n");
-                    }
-                } else {
-                    brief.push_str("Forensic anomalies have been detected that deviate from the authorized system baseline, requiring immediate review to maintain compliance.\n\n");
-                }
+                let threat_title = control_data.map(|c| c.human_title.clone())
+                    .unwrap_or_else(|| "SUSPICIOUS ACTIVITY DETECTED".to_string());
 
+                brief.push_str(&format!("--- \n\n## {} {}\n", emoji, threat_title));
+                brief.push_str(&format!("**Target Host**: `{}`\n", hostname));
+                
+                if !lineage.is_empty() {
+                    brief.push_str(&format!("**Lineage (Family History)**: `{}`\n\n", lineage));
+                }
+                
                 if let Some(ai) = ai_summary {
                     brief.push_str(&format!("> **Executive Summary (AI Sync)**: {}\n\n", ai));
+                }
+
+                // --- 🛡️ NIST CONTAINMENT PROTOCOL (IR-4) ---
+                let rem_steps = if let Some(control) = self.engine.lookup_control(&control_id) {
+                    control.remediation.split('.')
+                        .map(|s: &str| s.trim())
+                        .filter(|s: &&str| !s.is_empty())
+                        .map(|s| s.to_string())
+                        .collect::<Vec<String>>()
                 } else {
-                    brief.push_str(&format!("> **Forensic Context**: {}\n\n", first.description));
-                }
-
-                // --- 🏗️ NIST CONTAINMENT PROTOCOL (IR-4) ---
-                brief.push_str("#### 🛡️ NIST Containment Protocol (IR-4)\n");
-                let mut prot_lines = Vec::new();
-                for (i, step) in first.remediation.split('.').enumerate() {
-                    let trimmed = step.trim();
-                    if !trimmed.is_empty() {
-                        prot_lines.push(format!("{}. **{}**", i + 1, trimmed));
-                    }
-                }
-                brief.push_str(&prot_lines.join("\n"));
-                brief.push_str("\n\n");
-
-                // --- 📊 EVIDENCE TELEMETRY TABLE (Aggregated) ---
-                brief.push_str("#### 🔍 Evidence Telemetry\n");
-                brief.push_str("| EventID | Time (UTC) | Process ID | Payload / Command | EventRecordID |\n");
-                brief.push_str("|:---:|:---:|:---:|:---:|:---:|\n");
-
-                let mut copilot_payload = Vec::new();
-
-                for event in group_events {
-                    let (eid, time, pid, rid, payload) = self.extract_telemetry(event);
-                    let display_payload = if payload.chars().count() > 60 { 
-                        format!("{}...", payload.chars().take(57).collect::<String>()) 
-                    } else { 
-                        payload.clone() 
-                    };
-                    brief.push_str(&format!("| {} | {} | {} | `{}` | {} |\n", eid, time, pid, display_payload, rid));
-                    if payload != "N/A" { copilot_payload.push(format!("[ID: {}] {}", eid, payload)); }
-                }
+                    vec!["Containment and isolation required immediately.".to_string()]
+                };
                 
+                brief.push_str("#### 🛡️ Immediate Action Plan (Response)\n");
+                for (i, step) in rem_steps.iter().enumerate() {
+                    brief.push_str(&format!("{}. **{}**\n", i + 1, step));
+                }
+                brief.push_str("\n");
+
                 // --- 🤖 COPILOT TRIAGE PROMPT ---
-                brief.push_str("\n> [!TIP]\n");
+                brief.push_str("> [!TIP]\n");
                 brief.push_str("> **🤖 COPILOT TRIAGE PROMPT (Copy/Paste)**\n");
                 brief.push_str("> \"I am investigating a security anomaly on host **");
                 brief.push_str(&hostname);
-                brief.push_str("**. I have detected the following command sequence: ");
-                brief.push_str(&copilot_payload.join(" -> "));
-                brief.push_str(". Please analyze this tactic and provide a root cause hypothesis.\"\n\n");
-
-                brief.push_str("*For full cryptographic witness, extract the stateless forensic artifact (e.g., aegis_forensic_ledger.jsonl.gz) and query for the EventRecordID listed above.*\n\n");
-                brief.push_str("---\n\n");
+                brief.push_str("**. Signal tactics: ");
+                let group_tactics: Vec<String> = group_events.iter().take(3).map(|e| e.4.clone()).collect();
+                brief.push_str(&group_tactics.join(" -> "));
+                brief.push_str(". Please provide root cause analysis.\"\n\n");
             }
+
+            brief.push_str("*For full cryptographic witness, extract the stateless forensic artifact (e.g., aegis_forensic_ledger.jsonl.gz) and query for the Evidence Telemetry listed above.*\n\n");
+            brief.push_str("---\n\n");
+            brief.push_str("</details>\n");
         } else {
-            brief.push_str("✅ **No forensic anomalies or compliance deviations detected in this pulse.**\n");
-            brief.push_str("*Forensic Signal Fidelity: 100% | NIST SP 800-53 (AU-2) Auditing Active.*\n\n");
+            brief.push_str("## 🟢 Your System is Safe\n");
+            brief.push_str("Aegis has analyzed your activity and found no evidence of security threats or unauthorized access attempts. You do not need to take any action at this time.\n\n");
         }
 
-        brief.push_str("\n---\n*Notice: This brief is an executive synthesis for rapid triage. Review the NIST Master Manifest for the immutable audit trail.*");
+        brief.push_str("\n---\n*Notice: Aegis Forensic Sentinel - Automated Human Readability Mode Active.*");
 
         std::fs::write(output_path, brief)
             .with_context(|| format!("Failed to write boardroom brief to: {:?}", output_path))?;
@@ -701,9 +846,51 @@ impl AuditLedger {
     }
 
     /// Resiliently extracts critical telemetry and payloads from raw forensic logs. (NIST AU-8/AU-12)
-    /// Resiliently extracts critical telemetry and payloads from raw forensic logs. (NIST AU-8/AU-12)
-    fn extract_telemetry(&self, event: &PostureEvent) -> (String, String, String, String, String) {
+    fn extract_telemetry(&self, event: &PostureEvent) -> (String, String, String, String, String, String, String) {
         let raw = &event.raw_log;
+        
+        let mut origin = "Unknown".to_string();
+        // --- 🌐 ORIGIN DETECTION ENGINE (Hardened for Netlogon/Syslog/Cloud) ---
+        // Look for IP addresses in the raw log
+        let ip_regex = r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})";
+        if let Ok(re) = regex::Regex::new(ip_regex) {
+            if let Some(caps) = re.captures(raw) {
+                origin = caps[1].to_string();
+            }
+        }
+
+        let lineage = event.metadata.get("lineage_chain")
+            .cloned()
+            .or_else(|| {
+                // If not in metadata, try to extract from record if available
+                // But PostureEvent doesn't have it directly, so we rely on NistEngine having tagged it
+                None
+            })
+            .unwrap_or_default();
+
+        // Fallback or specific Netlogon override if IP not found via regex
+        if origin == "Unknown" || origin.contains("Negot:") {
+            if raw.contains(" (") && raw.contains(')') {
+                let parts: Vec<&str> = raw.split(" (").collect();
+                if parts.len() > 1 {
+                    if let Some(rest) = parts.get(1) {
+                        let potential = rest.split(')').next().unwrap_or("Unknown");
+                        // Only accept if it looks like a hostname or IP (no massive User Agents)
+                        if potential.len() < 32 && !potential.contains(';') && !potential.contains(':') {
+                            origin = potential.to_string();
+                        }
+                    }
+                }
+            }
+        }
+
+        if origin == "Unknown" {
+            if let Some(src) = event.metadata.get("source_ip") {
+                origin = src.clone();
+            } else if let Some(src) = event.metadata.get("source_workstation") {
+                origin = src.clone();
+            }
+        }
         
         // --- ☢️ PRIORITY 0: PCAP/Hardened Forensic Suffix ---
         if raw.contains("FORENSIC_INDICATORS:") {
@@ -712,7 +899,7 @@ impl AuditLedger {
                 .map(|s| s.trim().to_string())
                 .unwrap_or_else(|| "N/A".to_string());
             
-            return ("N/A".to_string(), event.timestamp.to_rfc3339(), "N/A".to_string(), "N/A".to_string(), payload);
+            return ("N/A".to_string(), event.timestamp.to_rfc3339(), "N/A".to_string(), "N/A".to_string(), payload, origin, lineage);
         }
 
         // --- ☢️ PRIORITY 1: Captured Forensic Message ---
@@ -721,7 +908,7 @@ impl AuditLedger {
                 let eid = event.metadata.get("event_id").cloned().unwrap_or_else(|| "N/A".to_string());
                 let rid = event.metadata.get("line_id").cloned().unwrap_or_else(|| "N/A".to_string());
                 let pid = event.metadata.get("process_id").cloned().unwrap_or_else(|| "N/A".to_string());
-                return (eid, event.timestamp.to_rfc3339(), pid, rid, msg.clone());
+                return (eid, event.timestamp.to_rfc3339(), pid, rid, msg.clone(), origin, lineage);
             }
         }
 
@@ -733,7 +920,7 @@ impl AuditLedger {
             let eid = event.metadata.get("event_id").cloned().unwrap_or_else(|| "N/A".to_string());
             let rid = event.metadata.get("line_id").cloned().unwrap_or_else(|| "N/A".to_string());
             let pid = event.metadata.get("process_id").cloned().unwrap_or_else(|| "N/A".to_string());
-            return (eid, event.timestamp.to_rfc3339(), pid, rid, curated_message.clone());
+            return (eid, event.timestamp.to_rfc3339(), pid, rid, curated_message.clone(), origin, lineage);
         }
 
         let v: serde_json::Value = serde_json::from_str(raw).unwrap_or(serde_json::Value::Null);
@@ -797,11 +984,11 @@ impl AuditLedger {
                     // 5c. Try Windows EVTX 'EventData' block
                     event_kv.get("EventData").and_then(|ed| {
                         // Start of extraction chain (Hardened order)
-                        let p = ed.get("ScriptBlockText")
-                            .or_else(|| ed.get("CommandLine"))
-                            .or_else(|| ed.get("TargetImage"))
-                            .or_else(|| ed.get("SourceImage"))
+                        let p = ed.get("TargetImage") // Shadow Vault Priority
                             .or_else(|| ed.get("GrantedAccess"))
+                            .or_else(|| ed.get("ScriptBlockText"))
+                            .or_else(|| ed.get("CommandLine"))
+                            .or_else(|| ed.get("SourceImage"))
                             .or_else(|| ed.get("CallTrace"))
                             .or_else(|| ed.get("PipeName"))
                             .or_else(|| ed.get("TargetObject"))
@@ -891,7 +1078,7 @@ impl AuditLedger {
                 .unwrap_or_else(|| "N/A".to_string())
             });
 
-            return (eid, time, pid, rid, payload);
+            return (eid, time, pid, rid, payload, origin, lineage);
         }
 
         // --- 2. PostureEvent Path (Fallback for CSV/Plain) ---
@@ -908,7 +1095,7 @@ impl AuditLedger {
             "N/A".to_string()
         };
 
-        (eid, time, pid, rid, payload)
+        (eid, time, pid, rid, payload, origin, lineage)
     }
 
     pub fn get_posture_events(&self) -> Result<Vec<PostureEvent>> {
@@ -1069,13 +1256,48 @@ impl AuditLedger {
         encoder.finish()?;
         println!("✅ Aegis: Forensic artifact SEALED in vault: {}", artifact_name);
 
-        // 4. Ruthless Ephemeral Cleanup of raw source files
+        // 4. Selective Cleanup: Purge rotated .cold files, but PRESERVE main ledger for live bridge
         for p in files_to_delete {
-            if p.exists() {
+            if p.exists() && p != self.path {
                 let _ = remove_file(&p);
             }
         }
         
         Ok(())
+    }
+
+    /// Helper to extract a probable identity alias from raw message content
+    #[allow(dead_code)]
+    fn extract_alias(&self, payload: &str) -> Option<String> {
+        // Look for Windows machine names: \\NAME or name$
+        if payload.contains("\\\\") {
+            let parts: Vec<&str> = payload.split("\\\\").collect();
+            if parts.len() > 1 {
+                let name = parts[1].split(|c: char| !c.is_alphanumeric() && c != '-').next()?;
+                if !name.is_empty() { return Some(format!("Observed: {}", name)); }
+            }
+        }
+        
+        // Netlogon specifically: "for NAME on account"
+        if payload.contains("for ") && payload.contains(" on account") {
+            let parts: Vec<&str> = payload.split("for ").collect();
+            if parts.len() > 1 {
+                let name = parts[1].split(' ').next()?;
+                if !name.is_empty() { return Some(format!("Observed: {}", name)); }
+            }
+        }
+        
+        // Simple word extraction for Domain01: Name patterns
+        if payload.contains(": ") {
+            let parts: Vec<&str> = payload.split(": ").collect();
+            if parts.len() > 1 {
+                let name = parts[1].split(' ').next()?;
+                if name.len() > 3 && name.chars().all(|c| c.is_alphanumeric() || c == '-') {
+                    return Some(format!("Observed: {}", name));
+                }
+            }
+        }
+
+        None
     }
 }

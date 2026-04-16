@@ -15,28 +15,30 @@ async fn test_edge_resilience_spillover() {
     let edge_db_path = dir.path().join("aegis.edge.db");
     let audit_path = dir.path().join("aegis.audit.jsonl");
 
-    let engine = Arc::new(NistEngine::new().unwrap());
+    let engine = Arc::new(NistEngine::new(AppConfig::default_config()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
     let config = AppConfig::default_config();
     let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1).unwrap());
 
     // 1. Initialize EdgeBuffer in OFFLINE mode
-    let buffer = Arc::new(EdgeBuffer::new(edge_db_path.clone(), Arc::clone(&ledger), 100, false).unwrap());
+    let (buffer, _handle) = EdgeBuffer::new(edge_db_path.clone(), Arc::clone(&ledger), 100, false).unwrap();
+    let buffer = Arc::new(buffer);
 
     // 2. Push records (should spill to disk)
     let record = LogRecord {
-        timestamp: Utc::now(),
+        timestamp: chrono::Local::now(),
         message: "Test Breach Signal".to_string(),
         severity: Some("CRITICAL".to_string()),
         source: None,
         subject_id: None,
         outcome: None,
-        metadata: std::collections::HashMap::new(),
+        metadata: std::collections::BTreeMap::new(),
         additional_context: None,
         raw: "raw".to_string(),
+        unparsed_raw: None,
         original_format: "test".to_string(),
         quality: ParsingQuality::Success,
-        redactions: Vec::new(),
+        ..Default::default()
     };
 
     buffer.push(Arc::new(record.clone())).await.unwrap();

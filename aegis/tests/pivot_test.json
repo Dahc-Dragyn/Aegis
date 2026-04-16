@@ -1,0 +1,106 @@
+[
+  {
+    "Event": {
+      "System": {
+        "Provider": { "Name": "Microsoft-Windows-Sysmon" },
+        "EventID": 1,
+        "TimeCreated": { "SystemTime": "2026-04-15T23:10:00.000000Z" },
+        "Execution": { "ProcessID": 4 },
+        "EventRecordID": 5001,
+        "Computer": "WORKSTATION-01"
+      },
+      "EventData": {
+        "ProcessId": "1000",
+        "Image": "C:\\Windows\\explorer.exe",
+        "CommandLine": "explorer.exe",
+        "ParentProcessId": "500",
+        "ParentImage": "C:\\Windows\\System32\\userinit.exe",
+        "ProcessGuid": "{A1B2C3D4-0001-0000-0000-000000000000}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "Provider": { "Name": "Microsoft-Windows-Sysmon" },
+        "EventID": 3,
+        "TimeCreated": { "SystemTime": "2026-04-15T23:10:05.000000Z" },
+        "Execution": { "ProcessID": 4 },
+        "EventRecordID": 5002,
+        "Computer": "WORKSTATION-01"
+      },
+      "EventData": {
+        "ProcessId": "1000",
+        "Image": "C:\\Windows\\explorer.exe",
+        "Protocol": "tcp",
+        "SourceIp": "192.168.1.10",
+        "SourcePort": "49152",
+        "DestinationIp": "1.1.1.1",
+        "DestinationPort": "443",
+        "ProcessGuid": "{A1B2C3D4-0001-0000-0000-000000000000}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "Provider": { "Name": "Microsoft-Windows-Sysmon" },
+        "EventID": 1,
+        "TimeCreated": { "SystemTime": "2026-04-15T23:11:00.000000Z" },
+        "Execution": { "ProcessID": 4 },
+        "EventRecordID": 5003,
+        "Computer": "WORKSTATION-01"
+      },
+      "EventData": {
+        "ProcessId": "3000",
+        "Image": "C:\\Users\\Public\\pivot_engine.exe",
+        "CommandLine": "pivot_engine.exe --spread",
+        "ParentProcessId": "9999",
+        "ParentImage": "C:\\Windows\\System32\\unknown_orchestrator.exe",
+        "ProcessGuid": "{A1B2C3D4-0003-0000-0000-000000000000}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "Provider": { "Name": "Microsoft-Windows-Sysmon" },
+        "EventID": 3,
+        "TimeCreated": { "SystemTime": "2026-04-15T23:11:05.000000Z" },
+        "Execution": { "ProcessID": 4 },
+        "EventRecordID": 5004,
+        "Computer": "WORKSTATION-01"
+      },
+      "EventData": {
+        "ProcessId": "3000",
+        "Image": "C:\\Users\\Public\\pivot_engine.exe",
+        "Protocol": "tcp",
+        "SourceIp": "192.168.1.10",
+        "SourcePort": "49500",
+        "DestinationIp": "10.0.0.50",
+        "DestinationPort": "445",
+        "ProcessGuid": "{A1B2C3D4-0003-0000-0000-000000000000}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "Provider": { "Name": "Microsoft-Windows-Sysmon" },
+        "EventID": 1,
+        "TimeCreated": { "SystemTime": "2026-04-15T23:12:00.000000Z" },
+        "Execution": { "ProcessID": 4 },
+        "EventRecordID": 5005,
+        "Computer": "WORKSTATION-01"
+      },
+      "EventData": {
+        "ProcessId": "5000",
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Write-Host 'Remote Execution Test'",
+        "ParentProcessId": "4000",
+        "ParentImage": "C:\\Windows\\System32\\wbem\\wmiprvse.exe",
+        "ProcessGuid": "{A1B2C3D4-0004-0000-0000-000000000000}"
+      }
+    }
+  }
+]

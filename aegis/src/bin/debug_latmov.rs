@@ -9,8 +9,8 @@ use std::sync::Arc;
 fn main() {
     let path = Path::new("logs/latmov_impersoate.evtx");
     let parser = EvtxParser::new();
-    let engine = NistEngine::new().unwrap();
     let config = AppConfig::default_config();
+    let engine = NistEngine::new(config.clone()).unwrap();
     let mut raw_parser = RawParser::from_path(path).unwrap();
 
     let mut count = 0;

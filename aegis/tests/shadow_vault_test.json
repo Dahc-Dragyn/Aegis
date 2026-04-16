@@ -1,0 +1,60 @@
+[
+  {
+    "Event": {
+      "System": {
+        "EventID": 10,
+        "TimeCreated": { "@SystemTime": "2026-04-15T16:00:00.000000Z" },
+        "Execution": { "@ProcessID": "4" }
+      },
+      "EventData": {
+        "SourceImage": "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.2102.4-0\\MsMpEng.exe",
+        "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+        "GrantedAccess": "0x1fffff",
+        "SourceProcessGuid": "{00000000-0000-0000-0000-000000000001}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "EventID": 10,
+        "TimeCreated": { "@SystemTime": "2026-04-15T16:00:10.000000Z" },
+        "Execution": { "@ProcessID": "9999" }
+      },
+      "EventData": {
+        "SourceImage": "C:\\Temp\\mimikatz.exe",
+        "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+        "GrantedAccess": "0x1fffff",
+        "SourceProcessGuid": "{00000000-0000-0000-0000-000000000002}"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "EventID": 1,
+        "TimeCreated": { "@SystemTime": "2026-04-15T16:00:15.000000Z" },
+        "Execution": { "@ProcessID": "9999" }
+      },
+      "EventData": {
+        "Image": "C:\\Windows\\System32\\reg.exe",
+        "CommandLine": "reg save HKLM\\SAM C:\\Users\\Public\\SAM.hiv",
+        "ParentImage": "C:\\Temp\\mimikatz.exe"
+      }
+    }
+  },
+  {
+    "Event": {
+      "System": {
+        "EventID": 4663,
+        "TimeCreated": { "@SystemTime": "2026-04-15T16:00:20.000000Z" },
+        "Execution": { "@ProcessId": "0x2710" }
+      },
+      "EventData": {
+        "ObjectName": "HKLM\\SECURITY",
+        "AccessMask": "0x1",
+        "ProcessName": "C:\\Temp\\lsadump.exe"
+      }
+    }
+  }
+]

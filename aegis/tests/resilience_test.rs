@@ -20,28 +20,34 @@ async fn test_log_rotation_resilience() {
 
     // 1. Initialize System with Default Config
     let config = AppConfig::default_config();
-    let engine = Arc::new(NistEngine::new().unwrap());
+    let engine = Arc::new(NistEngine::new(config.clone()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
     let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1).unwrap());
     let (tx, rx) = mpsc::channel(100);
     
     // Initialize EdgeBuffer for resilience check
     let edge_db_path = dir.path().join("aegis.edge.db");
-    let edge_buffer = Arc::new(aegis::edge_buffer::EdgeBuffer::new(
+    let (edge_buffer, _buffer_handle) = aegis::edge_buffer::EdgeBuffer::new(
         edge_db_path, 
         Arc::clone(&ledger), 
         50000, 
         true
-    ).unwrap());
+    ).unwrap();
+    let edge_buffer = Arc::new(edge_buffer);
+
+    let (fusion_tx, fusion_rx) = mpsc::channel(100);
 
     // Hardened Dispatcher (using batch size 1 for instant feedback in resilience tests)
     let dispatcher = Dispatcher::new(
         Arc::clone(&engine), 
-        Arc::clone(&edge_buffer), 
+        fusion_tx, 
         Arc::clone(&monitor),
         &config,
         1
     );
+
+    // Hardened Fusion Worker
+    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer), Arc::clone(&monitor));
 
     
     // Hardened Sentry (using PlainTextParser for log-injection tests)
@@ -53,6 +59,7 @@ async fn test_log_rotation_resilience() {
         Arc::clone(&monitor)
     ).expect("Failed to create sentry");
     let d_handle = tokio::spawn(async move { let _ = dispatcher.run(rx).await; });
+    let f_handle = tokio::spawn(async move { fusion_worker.run().await; });
     let s_handle = tokio::spawn(async move { let _ = sentry.tail(tx).await; });
 
     // 2. WAIT FOR SENTRY TO INITIALIZE

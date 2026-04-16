@@ -47,9 +47,14 @@ impl JsonParser {
         let msg_fields = ["message", "textPayload", "log", "msg"];
         let mut message = None;
         
-        // Elastic/Endpoint Forensic Priority: Use command_line if message is generic
+        // Elastic/Endpoint/Sysmon Forensic Priority: Use command_line if message is generic
         if let Some(cmd) = self.get_nested_value(&v, "_source.process.command_line").and_then(|v| v.as_str()) {
              message = Some(cmd.to_string());
+        }
+        if message.is_none() {
+            if let Some(cmd) = self.get_nested_value(&v, "Event.EventData.CommandLine").and_then(|v| v.as_str()) {
+                message = Some(cmd.to_string());
+            }
         }
 
         if message.is_none() {
@@ -69,11 +74,12 @@ impl JsonParser {
             }
         }
 
-        // NIST Hardening: If we can't find a message, we mark as Degraded but capture the JSON object
+        // NIST Hardening: If we can't find a message, use a truncated raw sample to preserve forensic intent
         let message = message.unwrap_or_else(|| {
             quality = ParsingQuality::Degraded;
             unparsed_raw = Some(raw.to_string());
-            "DEGRADED: No message field found".to_string()
+            let truncated = if raw.len() > 100 { format!("{}...", &raw[..97]) } else { raw.to_string() };
+            format!("[RAW Forensic Payload] {}", truncated)
         });
 
         // 3. Extract Severity
@@ -113,7 +119,7 @@ impl JsonParser {
             source: Some(self.format_name().to_string()),
             subject_id: None,
             outcome: if quality == ParsingQuality::Degraded { Some("Degraded".to_string()) } else { Some("Success".to_string()) },
-            metadata,
+            metadata: metadata.clone(),
             additional_context: Some(v.clone()),
             raw: raw.to_string(),
             unparsed_raw,
@@ -123,6 +129,17 @@ impl JsonParser {
             redactions: Vec::new(),
             bridge_hash: None,
             chain_hash: None,
+            parent_process_id: metadata.get("ParentProcessId")
+                .or_else(|| metadata.get("parent_process_id"))
+                .and_then(|id| {
+                    if id.starts_with("0x") { u32::from_str_radix(&id[2..], 16).ok() }
+                    else { id.parse::<u32>().ok() }
+                }),
+            parent_process_name: metadata.get("ParentImage")
+                .or_else(|| metadata.get("ParentProcessName"))
+                .or_else(|| metadata.get("parent_image"))
+                .cloned(),
+            ..Default::default()
         }
     }
 }
@@ -154,6 +171,7 @@ impl LogParser for JsonParser {
                 redactions: Vec::new(),
                 bridge_hash: None,
                 chain_hash: None,
+                ..Default::default()
             };
         }
 
@@ -179,6 +197,7 @@ impl LogParser for JsonParser {
                     redactions: Vec::new(),
                     bridge_hash: None,
                     chain_hash: None,
+                    ..Default::default()
                 }
             }
         }

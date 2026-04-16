@@ -125,6 +125,9 @@ impl BufferWorker {
                 
                 // Normal live forwarding
                 self.ledger.log_batch(vec![(*record).clone()])?;
+                
+                // Real-time forensic notification (NIST IR-4)
+                self.ledger.live_notify(&record);
             } else {
                 // Spillover Mode: Persistence & Chaining
                 self.spill_to_disk(record)?;

@@ -39,6 +39,7 @@ impl LogParser for PlainTextParser {
                 redactions: Vec::new(),
                 bridge_hash: None,
                 chain_hash: None,
+                ..Default::default()
             };
         }
 
@@ -75,6 +76,7 @@ impl LogParser for PlainTextParser {
             redactions: Vec::new(),
             bridge_hash: None,
             chain_hash: None,
+            ..Default::default()
         }
     }
 

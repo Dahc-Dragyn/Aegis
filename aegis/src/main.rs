@@ -23,6 +23,7 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 use tokio::sync::mpsc;
+use tokio::process::Command;
 use chrono::Local;
 use crossterm::event::{self, Event, KeyCode};
 use clap::Parser;
@@ -72,6 +73,10 @@ struct Cli {
     /// Simulate Offline Mode (Tactical Edge Resilience Test)
     #[arg(long, default_value_t = false)]
     offline: bool,
+
+    /// Run only forensic pre-flight checks and exit
+    #[arg(long, default_value_t = false)]
+    check_only: bool,
 }
 
 fn calculate_file_hash(path: &PathBuf) -> Result<String> {
@@ -123,15 +128,41 @@ async fn main() -> Result<()> {
         }
     }
 
+    if cfg!(windows) && !cli.offline {
+        println!("🛡️ Aegis: Initializing forensic pre-flight checks...");
+        match run_preflight_checks().await {
+            Ok(_) => {
+                if cli.check_only {
+                    println!("✅ Pre-flight SUCCESS. Forensic auditing is correctly configured.");
+                    return Ok(());
+                }
+            },
+            Err(e) => {
+                log_fn(&format!("❌ PRE-FLIGHT CRITICAL: {}", e));
+                println!("❌ ERROR: {}", e);
+                if cli.check_only {
+                    return Err(e);
+                }
+                println!("⚠️ WARNING: Proceeding with degraded forensic capabilities. Lineage tracking may be non-functional.");
+            }
+        }
+    }
+
     // 3. Selection of AI Proxy Parser (Priority Override for Phase 7)
     let is_ai_rmf = matches!(config.active_framework, ActiveFramework::AiRmf100);
 
     // 4. Select Target Log (with Auto-Discovery)
-    let log_path = match cli.log_file {
-        Some(path) => path,
-        None => {
-            let candidates = vec![PathBuf::from("auth.log"), PathBuf::from("cloudlogs.json")];
-            candidates.into_iter().find(|p| p.exists()).context("No log file found. Provide one via 'aegis.exe <PATH>'")?
+    let is_watchtower = cli.watch && cli.log_file.is_none();
+    
+    let log_path = if is_watchtower {
+        PathBuf::from("WATCHTOWER")
+    } else {
+        match cli.log_file.clone() {
+            Some(path) => path,
+            None => {
+                let candidates = vec![PathBuf::from("auth.log"), PathBuf::from("cloudlogs.json")];
+                candidates.into_iter().find(|p| p.exists()).context("No log file found. Provide one via 'aegis.exe <PATH>' or use --watch for live events.")?
+            }
         }
     };
 
@@ -177,7 +208,7 @@ async fn main() -> Result<()> {
     }
 
     // 5. Initialize Shared Engine, Ledger, and Monitor
-    let engine = Arc::new(NistEngine::new()?);
+    let engine = Arc::new(NistEngine::new(config.clone())?);
     let monitor = Arc::new(PostureMonitor::new());
     let mut ledger_obj = AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512)?;
     ledger_obj.set_source_artifact(&log_path.to_string_lossy());
@@ -187,6 +218,7 @@ async fn main() -> Result<()> {
     let compliance_cache = Arc::new(ComplianceCache::new(&compliance_cache_path)?);
     
     let output_dir = "forensic_results";
+    let _ = std::fs::create_dir_all(output_dir);
     let receipt_manager = ReceiptManager::new(output_dir)?;
     
     // Automatic cache pruning (NIST CA-5)
@@ -200,7 +232,11 @@ async fn main() -> Result<()> {
     }
 
     // 6. Initialize Format-Specific Parser (with Watch Mode Resilience)
-    if cli.watch && !log_path.exists() {
+    if is_watchtower {
+        println!("🔭 Aegis Watchtower: Entering active sentinel mode (Live Events).");
+    } else if cli.watch && log_path.exists() {
+        println!("🔭 Aegis Sentinel: Watching {:?} in the background.", log_path);
+    } else if cli.watch && !log_path.exists() {
         println!("🔭 Aegis Sentinel: Target {:?} not found. Entering active wait state...", log_path);
         while !log_path.exists() {
             std::thread::sleep(Duration::from_secs(2));
@@ -242,13 +278,17 @@ async fn main() -> Result<()> {
             let elastic_config = config.formats.get("elastic").cloned().unwrap_or(config.formats.values().next().unwrap().clone());
             Arc::new(JsonParser::new(elastic_config, "elastic"))
         },
-        LogFormat::JsonArray | LogFormat::NdJson => {
+        LogFormat::JsonArray => {
             let (name, gcp_config) = if let Some(c) = config.formats.get("gcp") {
                 ("gcp", c.clone())
             } else {
                 ("json_generic", config.formats.values().next().unwrap().clone())
             };
             Arc::new(JsonParser::new(gcp_config, name))
+        },
+        LogFormat::NdJson => {
+            let config = config.formats.get("gcp").cloned().unwrap_or(config.formats.values().next().unwrap().clone());
+            Arc::new(JsonParser::new(config, "ndjson"))
         },
         LogFormat::Csv => Arc::new(CsvParser::new()),
         LogFormat::Evtx => {
@@ -267,6 +307,10 @@ async fn main() -> Result<()> {
             log_fn("Initializing Web Server Forensic Parser (Combined/CLF)...");
             Arc::new(WebLogParser)
         },
+        LogFormat::SplunkBots => {
+            log_fn("Initializing Splunk BOTS Schema Crosswalk (Universal Translator)...");
+            Arc::new(aegis::parsers::splunk::SplunkParser::new())
+        },
         _ => Arc::new(PlainTextParser),
     };
 
@@ -284,7 +328,7 @@ async fn main() -> Result<()> {
     )?;
     let edge_buffer = Arc::new(edge_buffer);
 
-    let batch_threshold = if cli.dashboard || cli.watch { 512 } else { 1 };
+    let batch_threshold = if cli.dashboard { 512 } else if cli.watch { 1 } else { 1 };
     let (fusion_tx, fusion_rx) = mpsc::channel(10000);
     
     let dispatcher = Arc::new(Dispatcher::new(
@@ -315,10 +359,21 @@ async fn main() -> Result<()> {
         }
     });
 
-    // 7. Forensic Branch: .evtx vs Standard Stream
+    // 7. Forensic Branch: .evtx vs Standard Stream vs Watchtower
     let mut sentry_ptr = None;
+    let mut event_sentry_ptr = None;
 
-    if detected_format == LogFormat::Evtx {
+    if is_watchtower {
+        log_fn("Initializing Operation Watchtower (Real-Time Subscription)...");
+        let mut event_sentry = aegis::watcher::EventSentry::new(Arc::clone(&monitor));
+        let tx_clone = tx.clone();
+        
+        // Start the subscription daemon
+        event_sentry.start_watching(tx_clone).await?;
+        event_sentry_ptr = Some(event_sentry);
+        
+        monitor.increment_sources(3); // Security, Sysmon, System
+    } else if detected_format == LogFormat::Evtx {
         log_fn("Pivoting to Binary Forensic Ingestion (.evtx)...");
         // Windows Forensic Logic: Read from path again via crate specialized iterator
         let evtx_path_str = log_path.to_string_lossy().to_string();
@@ -390,13 +445,14 @@ async fn main() -> Result<()> {
         }
         dashboard.cleanup()?;
     } else if cli.watch {
-        println!("🛡️ Aegis Sentinel: Watching {:?} in the background.", log_path);
+        let mode_desc = if is_watchtower { "Watchtower (Live Events)" } else { "Sentinel (File Tailing)" };
+        println!("🛡️ Aegis: Active {} is running in the background.", mode_desc);
         
         let mut last_flush_count = monitor.get_snapshot().total_processed;
         let mut no_change_ticks = 0;
         
         loop {
-            tokio::time::sleep(Duration::from_millis(1000)).await;
+            tokio::time::sleep(Duration::from_secs(1)).await;
             let current_count = monitor.get_snapshot().total_processed;
             
             if current_count > last_flush_count {
@@ -405,8 +461,8 @@ async fn main() -> Result<()> {
                 last_flush_count = current_count;
             } else {
                 // No new events, check if we need to flush (debounce)
-                if no_change_ticks == 2 {
-                    println!("🔄 Event debounce triggered. Flushing artifacts ({} events processed).", current_count);
+                if no_change_ticks == 5 {
+                    println!("🔄 Pulse Stable. Syncing artifacts ({} total events).", current_count);
                     let _ = AuditLedger::prep_vault(output_dir);
                     let _ = ledger.generate_manifest(&PathBuf::from(output_dir).join("NIST_MANIFEST.md"));
                     let _ = std::fs::write(PathBuf::from(output_dir).join("COMMANDERS_BRIEF.md"), {
@@ -419,7 +475,7 @@ async fn main() -> Result<()> {
                         let _ = std::fs::write(PathBuf::from(output_dir).join("oscal-poam.json"), aegis::report::OscalExporter::generate_poam(&events, &compliance_cache, &config).unwrap_or_default());
                     }
                 }
-                if no_change_ticks <= 2 {
+                if no_change_ticks <= 5 {
                     no_change_ticks += 1;
                 }
             }
@@ -513,5 +569,59 @@ async fn main() -> Result<()> {
     }
     
     println!("🛡️ Project Aegis: Audit Finalized Successfully.");
+    Ok(())
+}
+
+async fn run_preflight_checks() -> Result<()> {
+    if !cfg!(windows) { return Ok(()); }
+
+    // Check 1: Registry Auditing (SC-7 / SI-4 / Operation Shadow Vault)
+    let output_reg = Command::new("powershell")
+        .args(&["-NoProfile", "-Command", "auditpol /get /subcategory:'Registry' /r"])
+        .output()
+        .await;
+    
+    if let Ok(output) = output_reg {
+        let stdout_reg = String::from_utf8_lossy(&output.stdout);
+        if !stdout_reg.contains("Success") {
+            println!("⚠️ WARNING: CRITICAL NIST SI-4 ALIGNMENT FAILURE: 'Registry' auditing (Event ID 4663/4656) is DISABLED.");
+            println!("   Operation Shadow Vault (Registry Trap) requires this for SAM/SECURITY exfiltration detection.");
+        } else {
+            println!("✅ Forensic Baseline: Registry Auditing is ACTIVE.");
+        }
+    }
+
+    // Check 2: Process Creation Auditing (AU-12 / SI-4) - Critical for Operation Ghost Hunter
+    let output_proc = Command::new("powershell")
+        .args(&["-NoProfile", "-Command", "auditpol /get /subcategory:'Process Creation' /r"])
+        .output()
+        .await;
+    
+    if let Ok(output) = output_proc {
+        let stdout_proc = String::from_utf8_lossy(&output.stdout);
+        if !stdout_proc.contains("Success") {
+            println!("⚠️ WARNING: CRITICAL NIST AU-12 ALIGNMENT FAILURE: 'Process Creation' auditing (Event ID 4688) is DISABLED.");
+            println!("   Operation Ghost Hunter (Lineage Reconstruction) requires this telemetry for low-noise analysis.");
+            println!("   Enable via GPO: Detailed Tracking > Audit Process Creation.");
+        } else {
+            println!("✅ Forensic Baseline: Process Creation Auditing is ACTIVE.");
+        }
+    }
+    
+    // Check 3: Process Command Line (Fidelity Check)
+    let output_cmd = Command::new("powershell")
+        .args(&["-NoProfile", "-Command", "Get-ItemProperty 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit' | Select-Object -ExpandProperty ProcessCreationIncludeCmdLine_Enabled -ErrorAction SilentlyContinue"])
+        .output()
+        .await;
+    
+    if let Ok(output) = output_cmd {
+        let stdout_cmd = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if stdout_cmd != "1" {
+            println!("⚠️ WARNING: 'Include Command Line in Process Creation Events' is DISABLED. Forensic depth will be reduced.");
+        } else {
+            println!("✅ Forensic Baseline: Process Command Line telemetry is ACTIVE.");
+        }
+    }
+
     Ok(())
 }

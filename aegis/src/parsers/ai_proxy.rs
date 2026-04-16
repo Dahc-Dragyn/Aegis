@@ -87,6 +87,7 @@ impl LogParser for AiProxyParser {
                     redactions: Vec::new(),
                     bridge_hash: None,
                     chain_hash: None,
+                    ..Default::default()
                 }
             },
             Err(_) => {
@@ -108,6 +109,7 @@ impl LogParser for AiProxyParser {
                     redactions: Vec::new(),
                     bridge_hash: None,
                     chain_hash: None,
+                    ..Default::default()
                 }
             }
         }

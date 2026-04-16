@@ -1,13 +1,24 @@
 {
-  "authorized_services": [],
+  "authorized_services": [
+    "lsass.exe",
+    "services.exe",
+    "svchost.exe",
+    "dwm.exe",
+    "MsMpEng.exe",
+    "spoolsv.exe"
+  ],
   "authorized_processes": [
     {
       "name": "svchost.exe",
       "justification": "Authorized Windows service host"
     },
     {
-      "name": "svchost.exe",
-      "justification": "Authorized Windows service host"
+      "name": "lsass.exe",
+      "justification": "Local Security Authority Subsystem Service"
+    },
+    {
+      "name": "services.exe",
+      "justification": "Service Control Manager"
     }
   ]
 }

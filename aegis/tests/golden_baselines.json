@@ -1,0 +1,32 @@
+{
+  "CA_PetiPotam_etw_rpc_efsr_5_6.evtx": {
+    "expected_title": "Security Credential Theft",
+    "required_verbs": ["Disconnect", "Update", "Reset"],
+    "severity": "Critical"
+  },
+  "CA_sysmon_hashdump_cmd_meterpreter.evtx": {
+    "expected_title": "Critical System Takeover Attempt",
+    "required_verbs": ["Disconnect", "Update", "Change"],
+    "severity": "Critical"
+  },
+  "DE_1102_security_log_cleared.evtx": {
+    "expected_title": "Security Credential Theft",
+    "required_verbs": ["Disconnect", "Reset"],
+    "severity": "Critical"
+  },
+  "Powershell_4104_MiniDumpWriteDump_Lsass.evtx": {
+    "expected_title": "Critical System Takeover Attempt",
+    "required_verbs": ["Disconnect", "Update", "Change"],
+    "severity": "Critical"
+  },
+  "privesc_sysmon_cve_20201030_spooler.evtx": {
+    "expected_title": "Critical System Takeover Attempt",
+    "required_verbs": ["Disconnect", "Update", "Change"],
+    "severity": "Critical"
+  },
+  "DE_ProcessHerpaderping_Sysmon_11_10_1_7.evtx": {
+    "expected_title": "Critical System Takeover Attempt",
+    "required_verbs": ["Disconnect", "Update", "Change"],
+    "severity": "Critical"
+  }
+}

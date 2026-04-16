@@ -80,8 +80,24 @@ impl AppConfig {
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let content = std::fs::read_to_string(path)
             .context("Failed to read log_formats.toml")?;
-        let config: AppConfig = toml::from_str(&content)
+        let mut config: AppConfig = toml::from_str(&content)
             .context("Failed to parse log_formats.toml")?;
+
+        // Day-2 SOC Baseline Tuning: Proactively load aegis_baseline.json if it exists
+        if let Ok(baseline_content) = std::fs::read_to_string("aegis_baseline.json") {
+            if let Ok(baseline) = serde_json::from_str::<serde_json::Value>(&baseline_content) {
+                if let Some(services) = baseline.get("authorized_services").and_then(|v| v.as_array()) {
+                    for service in services {
+                        if let Some(s) = service.as_str() {
+                            if !config.authorized_baseline_services.contains(&s.to_string()) {
+                                config.authorized_baseline_services.push(s.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Ok(config)
     }
 
@@ -97,6 +113,10 @@ impl AppConfig {
                 let mut m = HashMap::new();
                 m.insert("status".to_string(), "httpRequest.status".to_string());
                 m.insert("ip".to_string(), "httpRequest.remoteIp".to_string());
+                m.insert("ParentProcessId".to_string(), "parent_process_id".to_string());
+                m.insert("ParentImage".to_string(), "parent_image".to_string());
+                m.insert("ProcessId".to_string(), "process_id".to_string());
+                m.insert("NewProcessName".to_string(), "image_name".to_string());
                 m
             },
         });
@@ -113,6 +133,10 @@ impl AppConfig {
                 m.insert("cmd".to_string(), "_source.process.command_line".to_string());
                 m.insert("user".to_string(), "_source.user.name".to_string());
                 m.insert("action".to_string(), "_source.event.action".to_string());
+                m.insert("ParentProcessId".to_string(), "_source.process.ppid".to_string());
+                m.insert("ParentImage".to_string(), "_source.process.parent.executable".to_string());
+                m.insert("ProcessId".to_string(), "_source.process.pid".to_string());
+                m.insert("NewProcessName".to_string(), "_source.process.executable".to_string());
                 m
             },
         });

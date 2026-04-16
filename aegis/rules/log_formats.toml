@@ -1,12 +1,12 @@
 # Aegis: Log Format Configuration Library (NIST Compliant)
 
 [formats.gcp]
-# Support for GCP Cloud Run JSON exports
+# Support for GCP Cloud Run JSON/NDJSON exports
 timestamp_field = "timestamp"
 message_field = "textPayload"
 severity_field = "severity"
 source_field = "resource.type"
-metadata_map = { status = "httpRequest.status", ip = "httpRequest.remoteIp", trace = "trace" }
+metadata_map = { status = "httpRequest.status", ip = "httpRequest.remoteIp", ParentProcessId = "parent_process_id", ParentImage = "parent_image", ProcessId = "process_id", NewProcessName = "image_name" }
 
 [formats.aws]
 # Support for AWS CloudWatch JSON exports
@@ -19,7 +19,7 @@ metadata_map = { stream = "logStream", id = "id" }
 # Support for Elastic/macOS Endpoint logs
 timestamp_field = "@timestamp"
 message_field = "message"
-metadata_map = { process_name = "_source.process.name", file_path = "_source.file.path", process_exe = "_source.process.executable" }
+metadata_map = { process_name = "_source.process.name", file_path = "_source.file.path", NewProcessName = "_source.process.executable", ProcessId = "_source.process.pid", ParentProcessId = "_source.process.ppid", ParentImage = "_source.process.parent.executable" }
 
 [redaction]
 # AU-9 Privacy Protections (Masking)

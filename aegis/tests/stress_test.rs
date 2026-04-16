@@ -23,29 +23,34 @@ async fn test_100k_compliance_burst() {
     config.redaction.enabled = true;
     config.redaction.mask_ips = true;
     
-    let engine = Arc::new(NistEngine::new().unwrap());
+    let engine = Arc::new(NistEngine::new(config.clone()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
     let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512).unwrap());
     
     // Initialize high-capacity EdgeBuffer for stress check
     let edge_db_path = dir.path().join("aegis.edge.db");
-    let edge_buffer = Arc::new(aegis::edge_buffer::EdgeBuffer::new(
+    let (edge_buffer, _buffer_handle) = aegis::edge_buffer::EdgeBuffer::new(
         edge_db_path, 
         Arc::clone(&ledger), 
         200000, 
         true
-    ).unwrap());
+    ).unwrap();
+    let edge_buffer = Arc::new(edge_buffer);
+
+    let (fusion_tx, fusion_rx) = mpsc::channel(200000);
 
     // Hardened Dispatcher (using batch size 512 for stress)
     let dispatcher = Dispatcher::new(
         Arc::clone(&engine), 
-        Arc::clone(&edge_buffer), 
+        fusion_tx, 
         Arc::clone(&monitor),
         &config,
         512
     );
 
-    
+    // Hardened Fusion Worker
+    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer), Arc::clone(&monitor));
+
     // Hardened Sentry (using PlainTextParser for log-injection tests)
     let parser = Arc::new(aegis::parsers::plain::PlainTextParser);
     let sentry = Arc::new(Sentry::with_parser(
@@ -59,9 +64,13 @@ async fn test_100k_compliance_burst() {
     // Achievement: Use a massive channel (2x volume) to eliminate backpressure
     let (tx, rx) = mpsc::channel(200000); 
 
-    // 2. Spawn Dispatcher (Will end when tx is dropped)
+    // 2. Spawn Dispatcher & Fusion Worker
     let dispatcher_handle = tokio::spawn(async move {
         let _ = dispatcher.run(rx).await;
+    });
+
+    let fusion_handle = tokio::spawn(async move {
+        fusion_worker.run().await;
     });
 
     // 3. The 100,000 Line Burst Injector (LFA v3 Hardened)

@@ -46,6 +46,7 @@ impl LogParser for EvtxParser {
                 redactions: Vec::new(),
                 bridge_hash: None,
                 chain_hash: None,
+                ..Default::default()
             };
         }
 
@@ -71,6 +72,7 @@ impl LogParser for EvtxParser {
                     redactions: Vec::new(),
                     bridge_hash: None,
                     chain_hash: None,
+                    ..Default::default()
                 };
             }
         };
@@ -98,6 +100,7 @@ impl LogParser for EvtxParser {
                 redactions: Vec::new(),
                 bridge_hash: None,
                 chain_hash: None,
+                ..Default::default()
             };
         };
 
@@ -215,7 +218,7 @@ impl LogParser for EvtxParser {
             source: provider,
             subject_id: None, 
             outcome: if quality == ParsingQuality::Degraded { Some("Degraded".to_string()) } else { Some("Success".to_string()) },
-            metadata,
+            metadata: metadata.clone(),
             additional_context: Some(json_val),
             raw: raw.to_string(),
             unparsed_raw,
@@ -225,6 +228,20 @@ impl LogParser for EvtxParser {
             redactions: Vec::new(),
             bridge_hash: None,
             chain_hash: None,
+            parent_process_id: metadata.get("ParentProcessId")
+                .or_else(|| metadata.get("parent_process_id"))
+                .and_then(|id| {
+                    if id.starts_with("0x") {
+                        u32::from_str_radix(&id[2..], 16).ok()
+                    } else {
+                        id.parse::<u32>().ok()
+                    }
+                }),
+            parent_process_name: metadata.get("ParentImage")
+                .or_else(|| metadata.get("ParentProcessName"))
+                .or_else(|| metadata.get("parent_image"))
+                .cloned(),
+            ..Default::default()
         }
     }
 

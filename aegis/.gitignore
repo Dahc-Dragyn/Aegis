@@ -11,6 +11,9 @@ aegis.debug.log
 testlog.json
 *.tmp
 *.ps1
+*.hiv
+*.jsonl.gz
+simulated_telemetry.json
 logs/
 audit_vault/
 tests/Violation_logs/

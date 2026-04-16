@@ -55,6 +55,17 @@ pub struct LogRecord {
     pub redactions: Vec<RedactionEvent>,
     pub bridge_hash: Option<String>, // NIST AU-11 continuity marker
     pub chain_hash: Option<String>, // NIST AU-9 (Rolling Cryptographic Chain)
+    pub parent_process_id: Option<u32>,
+    pub parent_process_name: Option<String>,
+    pub lineage_chain: Option<String>,
+    pub line_id: Option<u32>,
+    pub destination_ip: Option<String>,
+    pub destination_port: Option<u16>,
+    pub protocol: Option<String>,
+    pub process_guid: Option<String>,
+    pub target_image: Option<String>,
+    pub granted_access: Option<String>,
+    pub evidence_vault: Option<String>,
 }
 
 impl Default for LogRecord {
@@ -76,6 +87,17 @@ impl Default for LogRecord {
             redactions: Vec::new(),
             bridge_hash: None,
             chain_hash: None,
+            parent_process_id: None,
+            parent_process_name: None,
+            lineage_chain: None,
+            line_id: None,
+            destination_ip: None,
+            destination_port: None,
+            protocol: None,
+            process_guid: None,
+            target_image: None,
+            granted_access: None,
+            evidence_vault: None,
         }
     }
 }
