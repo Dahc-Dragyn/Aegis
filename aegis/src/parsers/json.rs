@@ -109,6 +109,21 @@ impl JsonParser {
             }
         }
 
+        // Ensure EventID is captured for lineage tracking (NIST AU-12)
+        if !metadata.contains_key("EventID") {
+            if let Some(id) = self.get_nested_value(&v, "Event.System.EventID")
+                .or_else(|| v.get("EventID"))
+                .or_else(|| self.get_nested_value(&v, "event_id"))
+                .or_else(|| self.get_nested_value(&v, "winlog.event_id")) {
+                let id_str = match id {
+                    Value::Number(n) => n.to_string(),
+                    Value::String(s) => s.clone(),
+                    _ => id.to_string(),
+                };
+                metadata.insert("EventID".to_string(), id_str);
+            }
+        }
+
         // Forensic Mirroring: Ensure extracted message is available as metadata for attribution
         metadata.insert("captured_message".to_string(), message.clone());
 
@@ -129,16 +144,72 @@ impl JsonParser {
             redactions: Vec::new(),
             bridge_hash: None,
             chain_hash: None,
-            parent_process_id: metadata.get("ParentProcessId")
-                .or_else(|| metadata.get("parent_process_id"))
+            parent_process_id: metadata.get("ParentProcessId").map(|s| s.as_str())
+                .or_else(|| metadata.get("parent_process_id").map(|s| s.as_str()))
                 .and_then(|id| {
                     if id.starts_with("0x") { u32::from_str_radix(&id[2..], 16).ok() }
                     else { id.parse::<u32>().ok() }
+                })
+                .or_else(|| {
+                    self.get_nested_value(&v, "Event.EventData.ParentProcessId")
+                        .or_else(|| v.get("ParentProcessId"))
+                        .or_else(|| v.get("parent_process_id"))
+                        .and_then(|id| {
+                            id.as_u64().map(|n| n as u32).or_else(|| {
+                                id.as_str().and_then(|s| {
+                                    if s.starts_with("0x") { u32::from_str_radix(&s[2..], 16).ok() }
+                                    else { s.parse().ok() }
+                                })
+                            })
+                        })
                 }),
-            parent_process_name: metadata.get("ParentImage")
-                .or_else(|| metadata.get("ParentProcessName"))
-                .or_else(|| metadata.get("parent_image"))
-                .cloned(),
+            parent_process_name: metadata.get("ParentImage").map(|s| s.clone())
+                .or_else(|| metadata.get("ParentProcessName").map(|s| s.clone()))
+                .or_else(|| metadata.get("parent_image").map(|s| s.clone()))
+                .or_else(|| {
+                    self.get_nested_value(&v, "Event.EventData.ParentImage")
+                        .or_else(|| v.get("ParentImage"))
+                        .and_then(|img| img.as_str()).map(|s| s.to_string())
+                }),
+            process_id: metadata.get("ProcessId").map(|s| s.as_str())
+                .or_else(|| metadata.get("process_id").map(|s| s.as_str()))
+                .or_else(|| metadata.get("NewProcessId").map(|s| s.as_str()))
+                .and_then(|id| {
+                    if id.starts_with("0x") { u32::from_str_radix(&id[2..], 16).ok() }
+                    else { id.parse::<u32>().ok() }
+                })
+                .or_else(|| {
+                    self.get_nested_value(&v, "Event.EventData.NewProcessId")
+                        .or_else(|| self.get_nested_value(&v, "Event.EventData.ProcessId"))
+                        .or_else(|| v.get("ProcessId"))
+                        .or_else(|| v.get("process_id"))
+                        .and_then(|id| {
+                            id.as_u64().map(|n| n as u32).or_else(|| {
+                                id.as_str().and_then(|s| {
+                                    if s.starts_with("0x") { u32::from_str_radix(&s[2..], 16).ok() }
+                                    else { s.parse().ok() }
+                                })
+                            })
+                        })
+                }),
+            image: metadata.get("Image").map(|s| s.clone())
+                .or_else(|| metadata.get("image").map(|s| s.clone()))
+                .or_else(|| metadata.get("NewProcessName").map(|s| s.clone()))
+                .or_else(|| {
+                    self.get_nested_value(&v, "Event.EventData.NewProcessName")
+                        .or_else(|| self.get_nested_value(&v, "Event.EventData.Image"))
+                        .or_else(|| v.get("Image"))
+                        .or_else(|| v.get("image"))
+                        .and_then(|img| img.as_str()).map(|s| s.to_string())
+                }),
+            command_line: metadata.get("CommandLine").map(|s| s.clone())
+                .or_else(|| metadata.get("command_line").map(|s| s.clone()))
+                .or_else(|| {
+                    self.get_nested_value(&v, "Event.EventData.CommandLine")
+                        .or_else(|| v.get("CommandLine"))
+                        .or_else(|| v.get("ProcessCommandLine"))
+                        .and_then(|cmd| cmd.as_str()).map(|s| s.to_string())
+                }),
             ..Default::default()
         }
     }

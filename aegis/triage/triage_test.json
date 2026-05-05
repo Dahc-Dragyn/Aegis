@@ -1,0 +1,17 @@
+{
+  "Event": {
+    "System": {
+      "EventID": 10,
+      "Task": 10,
+      "Keywords": "0x8000000000000000",
+      "TimeCreated": { "@SystemTime": "2026-04-30T15:30:00.0000000Z" },
+      "Computer": "AEGIS-TERMINAL-01"
+    },
+    "EventData": {
+      "SourceImage": "C:\\Windows\\System32\\svchost.exe",
+      "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+      "GrantedAccess": "0x1fffff",
+      "CallTrace": "C:\\Windows\\SYSTEM32\\ntdll.dll+a0000|C:\\Windows\\System32\\KERNELBASE.dll+20000"
+    }
+  }
+}

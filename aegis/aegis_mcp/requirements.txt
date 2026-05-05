@@ -1,3 +1,8 @@
-fastmcp
 google-genai
 python-dotenv
+mcp[server]
+fastmcp
+fastapi
+uvicorn
+python-multipart
+aiofiles

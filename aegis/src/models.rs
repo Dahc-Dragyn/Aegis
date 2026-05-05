@@ -66,6 +66,10 @@ pub struct LogRecord {
     pub target_image: Option<String>,
     pub granted_access: Option<String>,
     pub evidence_vault: Option<String>,
+    pub log_source: Option<String>,
+    pub process_id: Option<u32>,
+    pub image: Option<String>,
+    pub command_line: Option<String>,
 }
 
 impl Default for LogRecord {
@@ -98,6 +102,10 @@ impl Default for LogRecord {
             target_image: None,
             granted_access: None,
             evidence_vault: None,
+            log_source: None,
+            process_id: None,
+            image: None,
+            command_line: None,
         }
     }
 }

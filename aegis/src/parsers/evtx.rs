@@ -230,6 +230,14 @@ impl LogParser for EvtxParser {
             chain_hash: None,
             parent_process_id: metadata.get("ParentProcessId")
                 .or_else(|| metadata.get("parent_process_id"))
+                .or_else(|| {
+                    // Security 4688: ProcessId is the Creator (Parent)
+                    if metadata.contains_key("NewProcessId") {
+                        metadata.get("ProcessId")
+                    } else {
+                        None
+                    }
+                })
                 .and_then(|id| {
                     if id.starts_with("0x") {
                         u32::from_str_radix(&id[2..], 16).ok()
@@ -240,6 +248,23 @@ impl LogParser for EvtxParser {
             parent_process_name: metadata.get("ParentImage")
                 .or_else(|| metadata.get("ParentProcessName"))
                 .or_else(|| metadata.get("parent_image"))
+                .cloned(),
+            process_id: metadata.get("NewProcessId") // Security 4688 Child
+                .or_else(|| metadata.get("ProcessId")) // Sysmon Child
+                .or_else(|| metadata.get("process_id"))
+                .and_then(|id| {
+                    if id.starts_with("0x") {
+                        u32::from_str_radix(&id[2..], 16).ok()
+                    } else {
+                        id.parse::<u32>().ok()
+                    }
+                }),
+            image: metadata.get("Image")
+                .or_else(|| metadata.get("image"))
+                .or_else(|| metadata.get("NewProcessName"))
+                .cloned(),
+            command_line: metadata.get("CommandLine")
+                .or_else(|| metadata.get("command_line"))
                 .cloned(),
             ..Default::default()
         }

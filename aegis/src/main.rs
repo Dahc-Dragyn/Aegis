@@ -7,6 +7,7 @@ use aegis::NistEngine;
 use aegis::compliance_cache::ComplianceCache;
 use aegis::audit_receipt::{ReceiptManager, ReceiptMetrics};
 use aegis::config::{AppConfig, ActiveFramework};
+use aegis::models::LogRecord;
 use aegis::correlation::FusionWorker;
 use aegis::parsers::{
     json::JsonParser, 
@@ -16,7 +17,7 @@ use aegis::parsers::{
     web_log::WebLogParser,
     LogParser, AutoDetector, LogFormat
 };
-use anyhow::{Result, Context};
+use anyhow::Result;
 use std::sync::Arc;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
@@ -28,6 +29,7 @@ use chrono::Local;
 use crossterm::event::{self, Event, KeyCode};
 use clap::Parser;
 use sha2::{Sha256, Digest};
+use rayon::prelude::*;
 
 // Rename the external crate to avoid collision with our internal module
 extern crate evtx as evtx_crate;
@@ -35,8 +37,9 @@ extern crate evtx as evtx_crate;
 #[derive(Parser, Debug)]
 #[command(author = "DeepMind", version, about = "Aegis: The Compliance Sentinel", long_about = None)]
 struct Cli {
-    /// Path to the log file to monitor
-    log_file: Option<PathBuf>,
+    /// Paths to the log files to monitor
+    #[arg(name = "LOG_FILES")]
+    log_files: Vec<PathBuf>,
 
     /// Override log format (json, plain, ndjson, auto)
     #[arg(short, long)]
@@ -77,6 +80,10 @@ struct Cli {
     /// Run only forensic pre-flight checks and exit
     #[arg(long, default_value_t = false)]
     check_only: bool,
+
+    /// Output directory for artifacts
+    #[arg(short, long, default_value = "artifacts")]
+    output_dir: String,
 }
 
 fn calculate_file_hash(path: &PathBuf) -> Result<String> {
@@ -149,26 +156,29 @@ async fn main() -> Result<()> {
     }
 
     // 3. Selection of AI Proxy Parser (Priority Override for Phase 7)
-    let is_ai_rmf = matches!(config.active_framework, ActiveFramework::AiRmf100);
+    let _is_ai_rmf = matches!(config.active_framework, ActiveFramework::AiRmf100);
 
-    // 4. Select Target Log (with Auto-Discovery)
-    let is_watchtower = cli.watch && cli.log_file.is_none();
+    // 4. Select Target Logs (with Auto-Discovery)
+    let is_watchtower = cli.watch && cli.log_files.is_empty();
     
-    let log_path = if is_watchtower {
-        PathBuf::from("WATCHTOWER")
+    let log_paths = if is_watchtower {
+        vec![PathBuf::from("WATCHTOWER")]
     } else {
-        match cli.log_file.clone() {
-            Some(path) => path,
-            None => {
-                let candidates = vec![PathBuf::from("auth.log"), PathBuf::from("cloudlogs.json")];
-                candidates.into_iter().find(|p| p.exists()).context("No log file found. Provide one via 'aegis.exe <PATH>' or use --watch for live events.")?
+        if !cli.log_files.is_empty() {
+            cli.log_files.clone()
+        } else {
+            let candidates = vec![PathBuf::from("auth.log"), PathBuf::from("cloudlogs.json")];
+            let found: Vec<PathBuf> = candidates.into_iter().filter(|p| p.exists()).collect();
+            if found.is_empty() {
+                return Err(anyhow::anyhow!("No log files found. Provide one or more via 'aegis.exe <PATH1> <PATH2> ...' or use --watch for live events."));
             }
+            found
         }
     };
 
-    // 🔬 Intelligent Forensic Offset (AU-10): Hash the canonical path to ensure 
-    // that switching between logs (e.g., auth.log vs evtx) never overlaps offsets.
-    let log_abs = std::fs::canonicalize(&log_path).unwrap_or(log_path.clone());
+    // 🔬 Intelligent Forensic Offset (AU-10): Use the first log for the session hash
+    let primary_log = log_paths[0].clone();
+    let log_abs = std::fs::canonicalize(&primary_log).unwrap_or(primary_log.clone());
     let mut hasher = Sha256::new();
     hasher.update(log_abs.to_string_lossy().as_bytes());
     let log_hash = format!("{:x}", hasher.finalize());
@@ -176,8 +186,7 @@ async fn main() -> Result<()> {
     
     let audit_path = PathBuf::from("aegis.audit.jsonl");
 
-    // 🔬 SI-7 Self-Integrity Hashing (Information Integrity): We delay this until 
-    // the target log and its specific offset file are identified.
+    // 🔬 SI-7 Self-Integrity Hashing
     if let Ok(exe_path) = std::env::current_exe() {
         if let Ok(h) = calculate_file_hash(&exe_path) {
             let _ = std::fs::write("aegis.bin.hash", h);
@@ -194,7 +203,7 @@ async fn main() -> Result<()> {
         let _ = std::fs::write("aegis.pos.hash", "NEW_SESSION_INITIALIZED");
     }
 
-    // 🔭 Reset Logic (Forensic Clean Slate)
+    // 🔭 Reset Logic
     if cli.reset {
         if offset_path.exists() {
             std::fs::remove_file(&offset_path)?;
@@ -211,17 +220,16 @@ async fn main() -> Result<()> {
     let engine = Arc::new(NistEngine::new(config.clone())?);
     let monitor = Arc::new(PostureMonitor::new());
     let mut ledger_obj = AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512)?;
-    ledger_obj.set_source_artifact(&log_path.to_string_lossy());
+    ledger_obj.set_source_artifact(&primary_log.to_string_lossy());
     let ledger = Arc::new(ledger_obj);
     
     let compliance_cache_path = PathBuf::from("aegis.compliance.db");
     let compliance_cache = Arc::new(ComplianceCache::new(&compliance_cache_path)?);
     
-    let output_dir = "forensic_results";
+    let output_dir = &cli.output_dir;
     let _ = std::fs::create_dir_all(output_dir);
     let receipt_manager = ReceiptManager::new(output_dir)?;
     
-    // Automatic cache pruning (NIST CA-5)
     let _ = compliance_cache.prune_old_records();
     
     let (initial_signals, ledger_healthy) = ledger.verify_integrity()?;
@@ -230,89 +238,6 @@ async fn main() -> Result<()> {
     } else {
         println!("✅ NIST Audit Integrity: VERIFIED | 📜 {} signals confirmed.", initial_signals);
     }
-
-    // 6. Initialize Format-Specific Parser (with Watch Mode Resilience)
-    if is_watchtower {
-        println!("🔭 Aegis Watchtower: Entering active sentinel mode (Live Events).");
-    } else if cli.watch && log_path.exists() {
-        println!("🔭 Aegis Sentinel: Watching {:?} in the background.", log_path);
-    } else if cli.watch && !log_path.exists() {
-        println!("🔭 Aegis Sentinel: Target {:?} not found. Entering active wait state...", log_path);
-        while !log_path.exists() {
-            std::thread::sleep(Duration::from_secs(2));
-        }
-        println!("✅ Aegis Sentinel: Origin detected at {:?}. Initializing ingestion...", log_path);
-    }
-
-    let detected_format = if let Some(fmt_str) = cli.format.as_deref() {
-        match fmt_str {
-            "json" | "gcp" => LogFormat::JsonArray,
-            "plain" | "txt" => LogFormat::PlainText,
-            "csv" => LogFormat::Csv,
-            "evtx" => LogFormat::Evtx,
-            "ai_proxy" => LogFormat::AiProxy,
-            "syslog" => LogFormat::Syslog,
-            "web" | "access" => LogFormat::WebLog,
-            _ => {
-                let content = std::fs::read(&log_path).context(format!("Failed to read {:?}", log_path))?;
-                AutoDetector::detect(&content[..std::cmp::min(1024, content.len())], Some(&log_path))
-            }
-        }
-    } else {
-        let content = std::fs::read(&log_path).context(format!("Failed to read {:?}", log_path))?;
-        let mut fmt = AutoDetector::detect(&content[..std::cmp::min(1024, content.len())], Some(&log_path));
-        // Priority Override: If profile is 100-1, assume AI Proxy metadata unless explicit override
-        if is_ai_rmf && (fmt == LogFormat::NdJson || fmt == LogFormat::PlainText) {
-             fmt = LogFormat::AiProxy;
-        }
-        fmt
-    };
-
-    let parser: Arc<dyn LogParser> = match detected_format {
-        LogFormat::AiProxy => {
-            log_fn("Initializing AI RMF Proxy Parser (LiteLLM/OpenAI)...");
-            Arc::new(aegis::parsers::ai_proxy::AiProxyParser::new())
-        },
-        LogFormat::Elastic => {
-            log_fn("Initializing High-Fidelity Elastic/Endpoint Forensic Parser...");
-            let elastic_config = config.formats.get("elastic").cloned().unwrap_or(config.formats.values().next().unwrap().clone());
-            Arc::new(JsonParser::new(elastic_config, "elastic"))
-        },
-        LogFormat::JsonArray => {
-            let (name, gcp_config) = if let Some(c) = config.formats.get("gcp") {
-                ("gcp", c.clone())
-            } else {
-                ("json_generic", config.formats.values().next().unwrap().clone())
-            };
-            Arc::new(JsonParser::new(gcp_config, name))
-        },
-        LogFormat::NdJson => {
-            let config = config.formats.get("gcp").cloned().unwrap_or(config.formats.values().next().unwrap().clone());
-            Arc::new(JsonParser::new(config, "ndjson"))
-        },
-        LogFormat::Csv => Arc::new(CsvParser::new()),
-        LogFormat::Evtx => {
-            log_fn("Initializing Binary Forensic Parser (evtx)...");
-            Arc::new(aegis::parsers::evtx::EvtxParser::new())
-        },
-        LogFormat::Pcap => {
-            log_fn("Initializing Network Forensic Parser (pcap)...");
-            Arc::new(aegis::parsers::pcap::PcapParser::new())
-        },
-        LogFormat::Syslog => {
-            log_fn("Initializing High-Fidelity Syslog Parser (RFC 5424/3164)...");
-            Arc::new(SyslogParser)
-        },
-        LogFormat::WebLog => {
-            log_fn("Initializing Web Server Forensic Parser (Combined/CLF)...");
-            Arc::new(WebLogParser)
-        },
-        LogFormat::SplunkBots => {
-            log_fn("Initializing Splunk BOTS Schema Crosswalk (Universal Translator)...");
-            Arc::new(aegis::parsers::splunk::SplunkParser::new())
-        },
-        _ => Arc::new(PlainTextParser),
-    };
 
     // 6. Resilience Buffer & Dispatcher
     let edge_db_path = PathBuf::from("aegis.edge.db");
@@ -324,11 +249,11 @@ async fn main() -> Result<()> {
         edge_db_path, 
         Arc::clone(&ledger), 
         50000, 
-        !cli.offline
+        true // Standalone FOB: Local Ledger is always "Online"
     )?;
     let edge_buffer = Arc::new(edge_buffer);
 
-    let batch_threshold = if cli.dashboard { 512 } else if cli.watch { 1 } else { 1 };
+    let batch_threshold = if cli.dashboard { 512 } else if cli.watch { 1 } else { 512 };
     let (fusion_tx, fusion_rx) = mpsc::channel(10000);
     
     let dispatcher = Arc::new(Dispatcher::new(
@@ -339,7 +264,6 @@ async fn main() -> Result<()> {
         batch_threshold
     ));
 
-    // 7. Initialize Fusion Worker (NIST IR-4 Correlation Engine)
     let edge_buffer_clone = Arc::clone(&edge_buffer);
     let monitor_clone = Arc::clone(&monitor);
     let mut fusion_worker = FusionWorker::new(fusion_rx, edge_buffer_clone, monitor_clone);
@@ -359,65 +283,140 @@ async fn main() -> Result<()> {
         }
     });
 
-    // 7. Forensic Branch: .evtx vs Standard Stream vs Watchtower
+    // 7. Concurrent Multi-Log Ingestion (Phase 1)
     let mut sentry_ptr = None;
-    let mut event_sentry_ptr = None;
+    let mut _event_sentry_ptr = None;
 
     if is_watchtower {
         log_fn("Initializing Operation Watchtower (Real-Time Subscription)...");
         let mut event_sentry = aegis::watcher::EventSentry::new(Arc::clone(&monitor));
         let tx_clone = tx.clone();
-        
-        // Start the subscription daemon
         event_sentry.start_watching(tx_clone).await?;
-        event_sentry_ptr = Some(event_sentry);
-        
-        monitor.increment_sources(3); // Security, Sysmon, System
-    } else if detected_format == LogFormat::Evtx {
-        log_fn("Pivoting to Binary Forensic Ingestion (.evtx)...");
-        // Windows Forensic Logic: Read from path again via crate specialized iterator
-        let evtx_path_str = log_path.to_string_lossy().to_string();
-        let mut evtx_file = evtx_crate::EvtxParser::from_path(evtx_path_str)?;
-        for rec_json in evtx_file.records_json().flatten() {
-            let log_rec = parser.parse(&rec_json.data);
-            tx.send(Arc::new(log_rec)).await.ok();
-        }
-    } else if detected_format == LogFormat::Pcap {
-        log_fn("Pivoting to Network Forensic Ingestion (.pcap/ng)...");
-        if let Some(pcap_parser) = parser.as_any().downcast_ref::<aegis::parsers::pcap::PcapParser>() {
-            let records = pcap_parser.parse_binary(&log_path);
-            for rec in records {
-                tx.send(Arc::new(rec)).await.ok();
-            }
-        }
+        _event_sentry_ptr = Some(event_sentry);
+        monitor.increment_sources(3); 
     } else {
-        let sentry = Arc::new(Sentry::with_parser(
-            log_path.clone(), 
-            offset_path.clone(), 
-            parser, 
-            Arc::clone(&monitor)
-        )?);
+        println!("🚀 Aegis: Initializing Concurrent Multi-Log Fusion (FOB Mode)...");
         
-        if let Ok(metadata) = std::fs::metadata(&audit_path) {
-            if metadata.len() == 0 && offset_path.exists() {
-                let _ = std::fs::remove_file(&offset_path);
+        let config_arc = Arc::new(config.clone());
+        let records: Vec<LogRecord> = log_paths.par_iter()
+            .map(|path| {
+                let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                let mut local_records = Vec::new();
+                
+                let content = match std::fs::read(&path) {
+                    Ok(c) => c,
+                    Err(_) => return local_records,
+                };
+
+                let format = AutoDetector::detect(&content[..std::cmp::min(1024, content.len())], Some(&path));
+                
+                // Parser selection logic
+                let parser: Box<dyn LogParser> = match format {
+                    LogFormat::Evtx => Box::new(aegis::parsers::evtx::EvtxParser::new()),
+                    LogFormat::JsonArray => {
+                        let cfg = config_arc.formats.get("gcp").cloned().unwrap_or(config_arc.formats.values().next().unwrap().clone());
+                        Box::new(JsonParser::new(cfg, "json"))
+                    },
+                    LogFormat::NdJson => {
+                        let cfg = config_arc.formats.get("gcp").cloned().unwrap_or(config_arc.formats.values().next().unwrap().clone());
+                        Box::new(JsonParser::new(cfg, "ndjson"))
+                    },
+                    LogFormat::Csv => Box::new(CsvParser::new()),
+                    LogFormat::Syslog => Box::new(SyslogParser),
+                    LogFormat::WebLog => Box::new(WebLogParser),
+                    _ => Box::new(PlainTextParser),
+                };
+
+                if format == LogFormat::Evtx {
+                    if let Ok(mut evtx_file) = evtx_crate::EvtxParser::from_path(path.to_string_lossy().to_string()) {
+                        for rec_json in evtx_file.records_json().flatten() {
+                            let mut log_rec = parser.parse(&rec_json.data);
+                            log_rec.log_source = Some(filename.clone());
+                            local_records.push(log_rec);
+                        }
+                    }
+                } else {
+                    let lines = String::from_utf8_lossy(&content);
+                    for line in lines.lines() {
+                        let mut log_rec = parser.parse(line);
+                        log_rec.log_source = Some(filename.clone());
+                        local_records.push(log_rec);
+                    }
+                }
+                local_records
+            })
+            .flatten()
+            .collect();
+
+        // println!("DEBUG [Main]: Records count after ingestion: {}", records.len());
+
+        // 🛡️ ARCHITECTURAL GUARDRAIL: Chronological Sorting (NIST AU-11)
+        let mut sorted_records = records;
+        sorted_records.sort_by_key(|r| r.timestamp);
+
+        // 🔬 Phase 2: Offline Provenance Engine (petgraph)
+        let mut lineage = aegis::lineage::LineageGraph::new();
+        for record in &sorted_records {
+            lineage.add_record(record);
+        }
+        
+        let anomalies = lineage.detect_anomalies();
+        if !anomalies.is_empty() {
+            for anomaly in anomalies {
+                let mut record = LogRecord {
+                    timestamp: anomaly.timestamp,
+                    message: format!("[LINEAGE ANOMALY] {}", anomaly.description),
+                    severity: Some(format!("{:?}", anomaly.severity).to_uppercase()),
+                    source: Some("LineageEngine".to_string()),
+                    outcome: Some("AnomalyDetected".to_string()),
+                    ..Default::default()
+                };
+                record.metadata.insert("parent_pid".to_string(), anomaly.parent_pid.to_string());
+                record.metadata.insert("parent_image".to_string(), anomaly.parent_image);
+                record.metadata.insert("child_pid".to_string(), anomaly.child_pid.to_string());
+                record.metadata.insert("child_image".to_string(), anomaly.child_image);
+                if let Some(cmd) = anomaly.child_cmd {
+                    record.metadata.insert("child_command_line".to_string(), cmd);
+                }
+                
+                // Promote to NIST-compliant signal
+                record.metadata.insert("nist_control_id".to_string(), "SI-4 [Ghost Hunter]".to_string());
+                record.metadata.insert("forensic_tag".to_string(), "LineageAnomaly".to_string());
+                record.metadata.insert("captured_message".to_string(), record.message.clone());
+                
+                tx.send(Arc::new(record)).await.ok();
             }
         }
 
-        monitor.increment_signals(initial_signals as u64);
-        monitor.increment_sources(1);
+        println!("⚖️  Timeline Stabilized. Dispatching to Forensic Engine...");
+        
+        for record in &sorted_records {
+            tx.send(Arc::new(record.clone())).await.ok();
+        }
+        
+        monitor.increment_signals(sorted_records.len() as u64);
+        monitor.increment_sources(log_paths.len());
 
-        let sentry_clone = Arc::clone(&sentry);
-        let tx_clone = tx.clone();
-        sentry_ptr = Some(sentry);
-
-        if cli.watch {
+        if cli.watch && log_paths.len() == 1 {
+            // Restore watch mode for single file if requested
+            let path = log_paths[0].clone();
+            let format = AutoDetector::detect(&[0u8; 0], Some(&path)); // Re-detect for parser
+            let parser: Arc<dyn LogParser> = match format {
+                LogFormat::Evtx => Arc::new(aegis::parsers::evtx::EvtxParser::new()),
+                _ => Arc::new(PlainTextParser),
+            };
+            let sentry = Arc::new(Sentry::with_parser(
+                path, 
+                offset_path.clone(), 
+                parser, 
+                Arc::clone(&monitor)
+            )?);
+            let sentry_clone = Arc::clone(&sentry);
+            let tx_clone = tx.clone();
+            sentry_ptr = Some(sentry);
             tokio::spawn(async move {
                 let _ = sentry_clone.tail_live(tx_clone).await;
             });
-        } else {
-            println!("🚀 Aegis Automated Mode: Processing stream for NIST manifest...");
-            sentry_clone.process_once(tx_clone, 0).await?;
         }
     }
 
@@ -456,20 +455,14 @@ async fn main() -> Result<()> {
             let current_count = monitor.get_snapshot().total_processed;
             
             if current_count > last_flush_count {
-                // New events ingested
                 no_change_ticks = 0;
                 last_flush_count = current_count;
             } else {
-                // No new events, check if we need to flush (debounce)
                 if no_change_ticks == 5 {
                     println!("🔄 Pulse Stable. Syncing artifacts ({} total events).", current_count);
                     let _ = AuditLedger::prep_vault(output_dir);
                     let _ = ledger.generate_manifest(&PathBuf::from(output_dir).join("NIST_MANIFEST.md"));
-                    let _ = std::fs::write(PathBuf::from(output_dir).join("COMMANDERS_BRIEF.md"), {
-                        let count = ledger.verify_integrity().unwrap_or((0, false)).0;
-                        let ts = Local::now().format("%Y-%m-%d %H:%M:%S");
-                        format!("# 🛡️ COMMANDER'S BRIEF: AEGIS STATUS\n\n**Audit Pulse**: {}\n**Signals Captured**: {}\n**Compliance State**: NIST-CERTIFIED\n\n*Notice: Review NIST_MANIFEST.md for full technical details.*", ts, count)
-                    });
+                    let _ = ledger.generate_commanders_brief(&PathBuf::from(output_dir).join("COMMANDERS_BRIEF.md"));
                     if let Ok(events) = ledger.get_posture_events() {
                         let _ = std::fs::write(PathBuf::from(output_dir).join("oscal-assessment-results.json"), aegis::report::OscalExporter::generate_assessment_results(&events, "Aegis-Sentinel", &config).unwrap_or_default());
                         let _ = std::fs::write(PathBuf::from(output_dir).join("oscal-poam.json"), aegis::report::OscalExporter::generate_poam(&events, &compliance_cache, &config).unwrap_or_default());
@@ -496,7 +489,6 @@ async fn main() -> Result<()> {
         let _ = AuditLedger::prep_vault(output_dir);
         let manifest_path = PathBuf::from(output_dir).join("NIST_MANIFEST.md");
         ledger.generate_manifest(&manifest_path)?;
-        
         let brief_path = PathBuf::from(output_dir).join("COMMANDERS_BRIEF.md");
         ledger.generate_commanders_brief(&brief_path)?;
 
@@ -559,9 +551,9 @@ async fn main() -> Result<()> {
         ledger.produce_final_artifact(output_dir)?;
         
         // Targeted Purge: Only debug trace (Excluding .pos, .hash, and .db per Directive)
-        if PathBuf::from("aegis.debug.log").exists() {
-            let _ = std::fs::remove_file("aegis.debug.log");
-        }
+        // if PathBuf::from("aegis.debug.log").exists() {
+        //     let _ = std::fs::remove_file("aegis.debug.log");
+        // }
     }
 
     if let Some(s) = sentry_ptr {

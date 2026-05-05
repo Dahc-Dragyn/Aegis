@@ -266,7 +266,6 @@ impl Sentry {
 // --- OPERATION WATCHTOWER: Real-Time Event Subscription ---
 
 use windows::Win32::System::EventLog::*;
-use windows::Win32::Foundation::*;
 use std::ffi::c_void;
 
 pub struct EventSentry {

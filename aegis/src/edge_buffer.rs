@@ -110,27 +110,50 @@ impl BufferWorker {
 
         Self { db, rx, ledger, status, last_hash, next_id }
     }
-
     async fn run(&mut self) -> Result<()> {
         println!("🛡️ Aegis: Tactical Edge Resilience Buffer ACTIVE.");
-        
-        while let Some(record) = self.rx.recv().await {
-            if self.status.is_online() {
-                // Check if we have cached data to flush first
-                match self.has_backlog() {
-                    Ok(true) => self.reconcile().await?,
-                    Ok(false) => {},
-                    Err(_) => {}, // Table likely doesn't exist yet, which is fine
+        let mut batch = Vec::new();
+        let mut last_flush = std::time::Instant::now();
+
+        loop {
+            tokio::select! {
+                record = self.rx.recv() => {
+                    if let Some(record) = record {
+                        batch.push((*record).clone());
+                        if batch.len() >= 500 {
+                            self.flush_batch(&mut batch).await?;
+                            last_flush = std::time::Instant::now();
+                        }
+                    } else {
+                        // Channel closed
+                        self.flush_batch(&mut batch).await?;
+                        break;
+                    }
                 }
-                
-                // Normal live forwarding
-                self.ledger.log_batch(vec![(*record).clone()])?;
-                
-                // Real-time forensic notification (NIST IR-4)
-                self.ledger.live_notify(&record);
-            } else {
-                // Spillover Mode: Persistence & Chaining
-                self.spill_to_disk(record)?;
+                _ = tokio::time::sleep(std::time::Duration::from_millis(100)) => {
+                    if !batch.is_empty() && last_flush.elapsed().as_millis() > 100 {
+                        self.flush_batch(&mut batch).await?;
+                        last_flush = std::time::Instant::now();
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    async fn flush_batch(&mut self, batch: &mut Vec<LogRecord>) -> Result<()> {
+        if batch.is_empty() { return Ok(()); }
+        let count = batch.len();
+        let records = std::mem::take(batch);
+        println!("💾 Aegis: Flushing batch of {} records to ledger...", count);
+        
+        if self.status.is_online() {
+            // Forward
+            self.ledger.log_batch(records)?;
+        } else {
+
+            for rec in records {
+                self.spill_to_disk(Arc::new(rec))?;
             }
         }
         Ok(())

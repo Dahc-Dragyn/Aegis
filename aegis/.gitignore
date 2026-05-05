@@ -29,6 +29,13 @@ scratch/
 draft_tickets/
 audit_vault/
 LocaleMetaData/
+temp_repos/
+temp_rules/
+temp_sigma/
+
+# Intelligence & Compliance (EXCLUDING lean maps)
+intel/compliance/NIST_SP-800-53_rev5_catalog.json
+intel/compliance/*-profile_catalog.json
 
 # Environment & Secrets
 .env
@@ -44,3 +51,8 @@ LocaleMetaData/
 aegis_mcp/.venv/
 __pycache__/
 *.pyc
+
+# Frontend Caches
+frontend/.next/
+frontend/node_modules/
+frontend/out/

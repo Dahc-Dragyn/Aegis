@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  aegis-backend:
+    build:
+      context: .
+      dockerfile: aegis_mcp/Dockerfile
+    container_name: aegis-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./forensic_results:/app/forensic_results
+      - ./aegis_mcp:/app/aegis_mcp
+      - ./triage:/app/triage
+    restart: always
+
+  aegis-frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: aegis-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - aegis-backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+    restart: always
+

@@ -14,6 +14,7 @@ pub mod edge_buffer;
 pub mod compliance_cache;
 pub mod audit_receipt;
 pub mod correlation;
+pub mod lineage;
 pub mod crosswalk;
 pub mod crosswalk_ai;
 pub mod redaction;
@@ -22,7 +23,7 @@ pub mod extraction;
 pub use nist_engine::{NistEngine, ControlMapping, PostureEvent, AegisError};
 
 mod nist_engine {
-    use crate::extraction::TriggeredExtraction;
+    
     use regex::Regex;
     use serde::{Deserialize, Serialize};
     use chrono::{DateTime, Local};
@@ -35,7 +36,7 @@ mod nist_engine {
     use crate::config::AppConfig;
     
     use std::sync::Arc;
-    use std::path::Path;
+    
 
     #[derive(Error, Debug)]
     pub enum AegisError {
@@ -43,7 +44,7 @@ mod nist_engine {
         InvalidSignature(String),
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, Default)]
     pub struct ControlMapping {
         pub control_id: String,
         pub category: String,
@@ -55,6 +56,10 @@ mod nist_engine {
         pub target_field: Option<String>,
         pub default_status: crate::models::ComplianceStatus,
         pub severity: crate::models::SeverityLevel,
+        pub pattern_str: Option<String>,
+        pub adversary_profile: Option<String>,
+        pub tactical_intent: Option<String>,
+        pub attack_mechanism: Option<String>,
         #[serde(skip)]
         pub pattern: Option<Regex>,
     }
@@ -66,7 +71,13 @@ mod nist_engine {
         pub status: crate::models::ComplianceStatus,
         pub severity: crate::models::SeverityLevel,
         pub description: String,
+        pub human_title: String,
+        pub human_action: String,
+        pub long_description: String,
         pub remediation: String,
+        pub adversary_profile: String,
+        pub tactical_intent: String,
+        pub attack_mechanism: String,
         pub raw_log: String,
         pub metadata: BTreeMap<String, String>,
         pub incident_id: Option<Uuid>,
@@ -88,7 +99,24 @@ mod nist_engine {
 
     impl NistEngine {
         pub fn new(config: crate::config::AppConfig) -> Result<Self> {
-            let mappings = vec![
+            let mut mappings = vec![
+                ControlMapping {
+                    control_id: "SI-4 [Ghost Hunter]".to_string(),
+                    category: "System and Information Integrity".to_string(),
+                    description: "Operation Ghost Hunter: Lineage-based parent-child anomaly detection".to_string(),
+                    human_title: "Suspicious Process Lineage Detected".to_string(),
+                    human_action: "Isolate host and investigate the process tree for malicious activity.".to_string(),
+                    long_description: "Detection of anomalous parent-child relationships, such as Office applications spawning shells or system utilities spawning unusual binaries.".to_string(),
+                    remediation: "Investigate suspicious process parent-child relationship. Office app spawning shells is a high-fidelity indicator of exploit/macro execution.".to_string(),
+                    adversary_profile: Some("Hostile Lineage (LotL/LotB)".to_string()),
+                    tactical_intent: Some("Execution of malicious code via trusted parent processes.".to_string()),
+                    attack_mechanism: Some("Parent-Child Anomaly (LotL/LotB)".to_string()),
+                    target_field: Some("message".to_string()),
+                    default_status: crate::models::ComplianceStatus::Fail,
+                    severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"\[LINEAGE ANOMALY\]".to_string()),
+                    pattern: Some(Regex::new(r"\[LINEAGE ANOMALY\]").unwrap()),
+                },
                 ControlMapping {
                     control_id: "SC-7 [C2 Exfiltration]".to_string(),
                     category: "System & Comms Protection".to_string(),
@@ -97,26 +125,36 @@ mod nist_engine {
                     human_action: "Large amounts of data are being sent from your computer to an unknown location. This often indicates an active security breach or data theft.".to_string(),
                     long_description: "Detection of massive data exfiltration via HTTP POST bodies. This pattern, characterized by high-entropy encoded payloads in single parameters, is a definitive signature of backdoor C2 beaconing.".to_string(),
                     remediation: "Immediately isolate the host. Extract the 'Host:' header from the forensic evidence to identify the C2/DGA domain. Blacklist the domain at the perimeter firewall/DNS sinkhole. Perform full forensic audit of the exfiltrated payload.".to_string(),
+                    adversary_profile: Some("Unknown (C2 Beaconing)".to_string()),
+                    tactical_intent: Some("Establish Command and Control channel and exfiltrate data.".to_string()),
+                    attack_mechanism: Some("High-entropy network payloads.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"(?is)txt=.{500,}".to_string()),
                     pattern: Some(Regex::new(r"(?is)txt=.{500,}")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
-                ControlMapping {
-                    control_id: "AC-2 [Cloud IAM Expansion]".to_string(),
-                    category: "Account Management".to_string(),
-                    description: "AWS: Unauthorized IAM Credential Creation / Policy Attachment".to_string(),
-                    human_title: "Cloud Account Hijack Attempt".to_string(),
-                    human_action: "Deactivate the new Access Key immediately and verify your AWS account security settings.".to_string(),
-                    long_description: "Detection of secret access key creation or policy attachment to IAM users. These are primary persistence and privilege escalation vectors in AWS environments.".to_string(),
-                    remediation: "Immediately deactivate the new Access Key. Audit the actor ARN for suspicious activity. Re-verify the necessity of the attached policy.".to_string(),
-                    target_field: Some("raw".to_string()),
-                    default_status: crate::models::ComplianceStatus::Fail,
-                    severity: crate::models::SeverityLevel::Critical,
-                    pattern: Some(Regex::new(r#"(?i)"operation":\s*"(CreateAccessKey|AttachUserPolicy)""#)
-                        .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
-                },
+            ];
+
+            // Try to load from external file
+            let rules_path = "intel/nist_mappings.json";
+            if std::path::Path::new(rules_path).exists() {
+                if let Ok(content) = std::fs::read_to_string(rules_path) {
+                    if let Ok(mut loaded_mappings) = serde_json::from_str::<Vec<ControlMapping>>(&content) {
+                        for mapping in &mut loaded_mappings {
+                            if let Some(ref p_str) = mapping.pattern_str {
+                                if let Ok(re) = Regex::new(p_str) {
+                                    mapping.pattern = Some(re);
+                                }
+                            }
+                        }
+                        mappings.extend(loaded_mappings);
+                    }
+                }
+            }
+
+            mappings.extend(vec![
                 ControlMapping {
                     control_id: "AC-3 [Cloud Identity Expansion]".to_string(),
                     category: "Access Enforcement".to_string(),
@@ -125,9 +163,13 @@ mod nist_engine {
                     human_action: "Check your Azure/Office 365 permissions and revoke any unauthorized 'Service Principal' role assignments.".to_string(),
                     long_description: "Detection of app role assignments to service principals. Targeted role assignment (e.g., Mail.Read.All) is a critical precursor to O365 data exfiltration and domain dominance.".to_string(),
                     remediation: "Audit the Service Principal for over-privileged Graph permissions. Immediately revoke unauthorized AppRole assignments. Review sign-in logs for the affected Service Principal ID.".to_string(),
+                    adversary_profile: Some("Unknown (Cloud Identity Hijack)".to_string()),
+                    tactical_intent: Some("Gain unauthorized access to identity infrastructure.".to_string()),
+                    attack_mechanism: Some("Azure AD Service Principal role assignment.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::High,
+                    pattern_str: Some(r#"(?i)"Operation":\s*"Add app role assignment to service principal.""#.to_string()),
                     pattern: Some(Regex::new(r#"(?i)"Operation":\s*"Add app role assignment to service principal.""#)
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -139,9 +181,13 @@ mod nist_engine {
                     human_action: "Change your main user password and re-enable Multi-Factor Authentication (MFA) for the affected account immediately.".to_string(),
                     long_description: "Detection of O365 mailbox permission changes (Add-MailboxPermission) or MFA disabling operations. These represent attempts to gain persistent access to executive communications or bypass identity security controls.".to_string(),
                     remediation: "Verify user identity via out-of-band communication. Rollback mailbox permission changes. Immediately enforce MFA re-enrollment for the affected account.".to_string(),
+                    adversary_profile: Some("Unknown (O365 Tampering)".to_string()),
+                    tactical_intent: Some("Gain access to executive communications by tampering with mail permissions.".to_string()),
+                    attack_mechanism: Some("MFA disabling or mailbox permission modification.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r#"(?i)"Operation":\s*"(Add-MailboxPermission|Disable-Mfa|Set-Mailbox)""#.to_string()),
                     pattern: Some(Regex::new(r#"(?i)"Operation":\s*"(Add-MailboxPermission|Disable-Mfa|Set-Mailbox)""#)
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -153,10 +199,14 @@ mod nist_engine {
                     human_action: "1. Disconnect your computer from the internet immediately. 2. Run Windows Update as soon as you reconnect securely. 3. Change your main Windows/Admin password.".to_string(),
                     long_description: "Detection of system manifest corruption, execution of discovery tools, or highly definitive protocol-level exploit markers.".to_string(),
                     remediation: "Immediately isolate host and freeze network segment. Run 'dism /online /cleanup-image /restorehealth' for manifest corruption.".to_string(),
+                    adversary_profile: Some("Unknown (Windows Exploitation)".to_string()),
+                    tactical_intent: Some("Compromise system integrity via exploit or baseline deviation.".to_string()),
+                    attack_mechanism: Some("Generic system exploit marker.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
-                    pattern: Some(Regex::new(r#"(?i)CBS_E_MANIFEST_INVALID_ITEM|0x800f080d|EventID 2004|Resource-Exhaustion-Detector|0x80042100|netstat\s+-ano|ipconfig\s+/all|\bnmap\b|\bnc\s+-|\bncat\b|\bexploit\b|ZAM64|BYOV|CVE-2021-21551|doppel|proc_doppel|doppelgang|ntds\.dit|ntdsutil|herpaderp|scriptblocklogging|transcription|powershell.*policies|System\.Management\.Automation|psinject|\[Net\.ServicePointManager\]|\$env:temp|DownloadFile|Invoke-WebRequest|IWR|javascript:|mshtml,RunHTMLApplication|mshta.*\.hta|mshta.*(http|https)|user shell folders.*startup|mscfile\\shell\\open\\command|ms-settings\\shell\\open\\command|eventvwr\.exe|bitsadmin|start-bitstransfer|openvpn|BITS-Client|-s EventLog|wevtutil(\.exe)?\s+cl|clear-eventlog|cmstp(\.exe)?.*(/au|/ni|/s|\.inf|\.ini)|timestomp|Set-ItemProperty.*CreationTime|(\\[a-z0-9_]{15,}\.exe)|(\\AppData\\Local\\Temp\\[a-z0-9_]+\.exe)|promptforcredential|getnetworkcredential|validatecredentials|Suspicious_C2_Tunnel|DNS_TXT_C2_Tunneling|DNS-TXT|SMBGhost|CVE-2020-0796|ZeroLogon|CVE-2020-1472|NetrServerAuthenticate: Bad password 0|NetrServerAuthenticate returns Success|PetitPotam|MS-EFSR|EFS_RPC|CVE-2021-36942|byt3bl33d3r|Event Log Crash|Defense Evasion|/etc/shadow|authorized_keys|crontab\s+-e|systemctl\s+stop|(\.env|config\.php|wp-admin|phpinfo)|TCC\.db|PipeName"#)
+                    pattern_str: Some(r#"(?i)CBS_E_MANIFEST_INVALID_ITEM|0x800f080d|EventID 2004|Resource-Exhaustion-Detector|0x80042100|netstat\s+-ano|ipconfig\s+/all|\bnmap\b|\bnc\s+-|\bncat\b|\bexploit\b|ZAM64|BYOV|CVE-2021-21551|doppel|proc_doppel|doppelgang|ntds\.dit|ntdsutil|herpaderp|scriptblocklogging|transcription|powershell.*policies|System\.Management\.Automation|psinject|\[Net\.ServicePointManager\]|\$env:temp|DownloadFile|Invoke-WebRequest|IWR|javascript:|mshtml,RunHTMLApplication|mshta.*\.hta|mshta.*(http|https)|user shell folders.*startup|mscfile\\shell\\open\\command|ms-settings\\shell\\open\\command|eventvwr\.exe|bitsadmin|start-bitstransfer|openvpn|BITS-Client|-s EventLog|wevtutil(\.exe)?\s+cl|clear-eventlog|cmstp(\.exe)?.*(/au|/ni|/s|\.inf|\.ini)|timestomp|Set-ItemProperty.*CreationTime|(\\[a-z0-9_]{15,}\.exe)|(\\AppData\\Local\\Temp\\[a-z0-9_]+\.exe)|promptforcredential|getnetworkcredential|validatecredentials|Suspicious_C2_Tunnel|DNS_TXT_C2_Tunneling|DNS-TXT|SMBGhost|CVE-2020-0796|ZeroLogon|CVE-2020-1472|NetrServerAuthenticate: Bad password 0|NetrServerAuthenticate returns Success|PetitPotam|MS-EFSR|EFS_RPC|CVE-2021-36942|byt3bl33d3r|Event Log Crash|Defense Evasion|/etc/shadow|authorized_keys|crontab\\s+-e|systemctl\\s+stop|(\.env|config\.php|wp-admin|phpinfo)|TCC\.db|PipeName"#.to_string()),
+                    pattern: Some(Regex::new(r#"(?i)CBS_E_MANIFEST_INVALID_ITEM|0x800f080d|EventID 2004|Resource-Exhaustion-Detector|0x80042100|netstat\s+-ano|ipconfig\s+/all|\bnmap\b|\bnc\s+-|\bncat\b|\bexploit\b|ZAM64|BYOV|CVE-2021-21551|doppel|proc_doppel|doppelgang|ntds\.dit|ntdsutil|herpaderp|scriptblocklogging|transcription|powershell.*policies|System\.Management\.Automation|psinject|\[Net\.ServicePointManager\]|\$env:temp|DownloadFile|Invoke-WebRequest|IWR|javascript:|mshtml,RunHTMLApplication|mshta.*\.hta|mshta.*(http|https)|user shell folders.*startup|mscfile\\shell\\open\\command|ms-settings\\shell\\open\\command|eventvwr\.exe|bitsadmin|start-bitstransfer|openvpn|BITS-Client|-s EventLog|wevtutil(\.exe)?\s+cl|clear-eventlog|cmstp(\.exe)?.*(/au|/ni|/s|\.inf|\.ini)|timestomp|Set-ItemProperty.*CreationTime|(\\[a-z0-9_]{15,}\.exe)|(\\AppData\\Local\\Temp\\[a-z0-9_]+\.exe)|promptforcredential|getnetworkcredential|validatecredentials|Suspicious_C2_Tunnel|DNS_TXT_C2_Tunneling|DNS-TXT|SMBGhost|CVE-2020-0796|ZeroLogon|CVE-2020-1472|NetrServerAuthenticate: Bad password 0|NetrServerAuthenticate returns Success|PetitPotam|MS-EFSR|EFS_RPC|CVE-2021-36942|byt3bl33d3r|Event Log Crash|Defense Evasion|/etc/shadow|authorized_keys|crontab\\s+-e|systemctl\\s+stop|(\.env|config\.php|wp-admin|phpinfo)|TCC\.db|PipeName"#)
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
                 ControlMapping {
@@ -167,9 +217,13 @@ mod nist_engine {
                     human_action: "A core identity certificates system was accessed or tampered with.".to_string(),
                     long_description: "Audit of Active Directory Certificate Services (AD CS) requests (4886) and approvals (4887).".to_string(),
                     remediation: "Verify the requested Template and Subject Alternative Name (SAN).".to_string(),
+                    adversary_profile: Some("Unknown (Identity Infrastructure)".to_string()),
+                    tactical_intent: Some("Abuse Active Directory Certificate Services.".to_string()),
+                    attack_mechanism: Some("AD CS Certificate request/abuse.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Medium,
+                    pattern_str: Some(r"(?i)EventID.*?488(6|7)".to_string()),
                     pattern: Some(Regex::new(r"(?i)EventID.*?488(6|7)")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -181,9 +235,13 @@ mod nist_engine {
                     human_action: "Your security logs were just cleared.".to_string(),
                     long_description: "Clearing audit logs or stopping the logging service is a high-severity indicator of anti-forensic activity.".to_string(),
                     remediation: "Investigate why the log service was stopped or cleared.".to_string(),
+                    adversary_profile: Some("Unknown (Anti-Forensic Actor)".to_string()),
+                    tactical_intent: Some("Cover tracks by deleting forensic evidence.".to_string()),
+                    attack_mechanism: Some("Audit log clearing or service tampering.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"(?i)(log cleared|audit log was cleared|EventID.*?1102|EventID.*?104|systemctl stop (rsyslog|auditd)|net stop (eventlog|sysmon)|kill -9.*(rsyslog|auditd|eventlog))".to_string()),
                     pattern: Some(Regex::new(r"(?i)(log cleared|audit log was cleared|EventID.*?1102|EventID.*?104|systemctl stop (rsyslog|auditd)|net stop (eventlog|sysmon)|kill -9.*(rsyslog|auditd|eventlog))")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -195,9 +253,13 @@ mod nist_engine {
                     human_action: "An automated threat or actor touched a security 'trap'.".to_string(),
                     long_description: "Access to 'honeypot' resources is a reliable indicator of malicious intent.".to_string(),
                     remediation: "Initiate full Incident Response (IR) for the host.".to_string(),
+                    adversary_profile: Some("Unknown (Honeypot Trigger)".to_string()),
+                    tactical_intent: Some("Unauthorized discovery or reconnaissance.".to_string()),
+                    attack_mechanism: Some("Access to trap/honeypot resource.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"(?i)\[HONEYPOT\]".to_string()),
                     pattern: Some(Regex::new(r"(?i)\[HONEYPOT\]")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -209,9 +271,13 @@ mod nist_engine {
                     human_action: "Someone tried to steal your saved passwords.".to_string(),
                     long_description: "Detection of explicit offensive tooling (Mimikatz, Procdump, etc.).".to_string(),
                     remediation: "Assume all local and domain credentials cached on this system are compromised.".to_string(),
+                    adversary_profile: Some("Unknown (Credential Harvester)".to_string()),
+                    tactical_intent: Some("Harvest administrative credentials to facilitate domain-wide escalation.".to_string()),
+                    attack_mechanism: Some("Credential extraction via Mimikatz/Procdump.".to_string()),
                     target_field: Some("raw".to_string()),
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"(?i)\b(mimikatz|mimidrv|procdump|pypykatz|ppldump|LsarSetSecret|AS-REQ|Kerbrute)\b|comsvcs\.dll.*?MiniDump|rdp-tcp|psexesvc|wmiprvse|lsarpc|samr|DCSync|krbtgt|DRSUAPI|MachineAccount Password|Policy\\Secrets|TGS-REQ|sname=krbtgt|RC4-HMAC|EType 23".to_string()),
                     pattern: Some(Regex::new(r"(?i)\b(mimikatz|mimidrv|procdump|pypykatz|ppldump|LsarSetSecret|AS-REQ|Kerbrute)\b|comsvcs\.dll.*?MiniDump|rdp-tcp|psexesvc|wmiprvse|lsarpc|samr|DCSync|krbtgt|DRSUAPI|MachineAccount Password|Policy\\Secrets|TGS-REQ|sname=krbtgt|RC4-HMAC|EType 23")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -223,9 +289,13 @@ mod nist_engine {
                     human_action: "A hidden task was created to run programs automatically.".to_string(),
                     long_description: "Audit of schtasks.exe activity and Event IDs 4698 (Task Created) / 4702 (Task Updated).".to_string(),
                     remediation: "Immediately delete the suspicious task: 'schtasks /delete /tn \"TASK_NAME\" /f'.".to_string(),
+                    adversary_profile: Some("Unknown (Persistence Actor)".to_string()),
+                    tactical_intent: Some("Maintain long-term access via automated task execution.".to_string()),
+                    attack_mechanism: Some("Unauthorized Scheduled Task creation.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::High,
+                    pattern_str: Some(r"(?i)(schtasks(\.exe)?\s+/create|EventID.*?469(8)|EventID.*?4702).*?\\(AppData\\Local\\Temp|Windows\\Temp|Public)".to_string()),
                     pattern: Some(Regex::new(r"(?i)(schtasks(\.exe)?\s+/create|EventID.*?469(8)|EventID.*?4702).*?\\(AppData\\Local\\Temp|Windows\\Temp|Public)")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -237,9 +307,13 @@ mod nist_engine {
                     human_action: "An attacker tried to hide a program in your system's 'Automatic Startup' list.".to_string(),
                     long_description: "Detection of modifications to high-value auto-run keys via EventID 4657.".to_string(),
                     remediation: "Audit the registry key using 'reg query'.".to_string(),
+                    adversary_profile: Some("Unknown (Persistence Actor)".to_string()),
+                    tactical_intent: Some("Establish persistence via registry auto-run hijacking.".to_string()),
+                    attack_mechanism: Some("Registry 'Run' key modification.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::High,
+                    pattern_str: Some(r"(?i)(reg\s+add.*\\(CurrentVersion\\(Run|RunOnce)|Winlogon\\Shell|Image\s+File\s+Execution\s+Options)|EventID.*?4657).*?(cmd\.exe\s+/c|powershell\s+-enc|\\Temp\\|\\AppData\\)".to_string()),
                     pattern: Some(Regex::new(r"(?i)(reg\s+add.*\\(CurrentVersion\\(Run|RunOnce)|Winlogon\\Shell|Image\s+File\s+Execution\s+Options)|EventID.*?4657).*?(cmd\.exe\s+/c|powershell\s+-enc|\\Temp\\|\\AppData\\)")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -251,9 +325,13 @@ mod nist_engine {
                     human_action: "A stealthy WMI script was set up to run in the background.".to_string(),
                     long_description: "Detection of WMI Filter-to-Consumer bindings (Event IDs 5857/5858).".to_string(),
                     remediation: "List WMI consumers and remove unauthorized ones.".to_string(),
+                    adversary_profile: Some("Unknown (Stealth Persistence Actor)".to_string()),
+                    tactical_intent: Some("Establish stealthy persistence via WMI event filters.".to_string()),
+                    attack_mechanism: Some("WMI Permanent Event Consumer establishment.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::High,
+                    pattern_str: Some(r"(?i)EventID.*?585(7|8)".to_string()),
                     pattern: Some(Regex::new(r"(?i)EventID.*?585(7|8)")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -265,9 +343,13 @@ mod nist_engine {
                     human_action: "A standard Windows program is behaving like a virus.".to_string(),
                     long_description: "Detection of signature-mismatch or behaviorally inconsistent common processes.".to_string(),
                     remediation: "Isolate the host from the network. Capture a memory dump.".to_string(),
+                    adversary_profile: Some("Unknown (Stealth Process Actor)".to_string()),
+                    tactical_intent: Some("Bypass process monitoring via hollowing or masquerading.".to_string()),
+                    attack_mechanism: Some("Mirror Test / Process Hollowing signature.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Fail,
                     severity: crate::models::SeverityLevel::Critical,
+                    pattern_str: Some(r"(?i)(ProcessHollowing|MirrorTestFail|mimic__aegis|EventID.*?wevtutil.*?cl|clear-eventlog)".to_string()),
                     pattern: Some(Regex::new(r"(?i)(ProcessHollowing|MirrorTestFail|mimic__aegis|EventID.*?wevtutil.*?cl|clear-eventlog)")
                         .map_err(|e| AegisError::InvalidSignature(e.to_string()))?),
                 },
@@ -279,12 +361,16 @@ mod nist_engine {
                     human_action: "Aegis is protecting your private data.".to_string(),
                     long_description: "Audit records should be redacted of PII/PHI.".to_string(),
                     remediation: "No action required.".to_string(),
+                    adversary_profile: Some("Aegis Privacy Engine".to_string()),
+                    tactical_intent: Some("Protect PII/PHI via automated redaction.".to_string()),
+                    attack_mechanism: Some("Baseline security audit.".to_string()),
                     target_field: None,
                     default_status: crate::models::ComplianceStatus::Pass,
                     severity: crate::models::SeverityLevel::Low,
+                    pattern_str: None,
                     pattern: None,
                 },
-            ];
+            ]);
 
             Ok(Self { 
                 mappings, 
@@ -344,6 +430,10 @@ mod nist_engine {
         use crate::extraction::TriggeredExtraction;
 
         let mut tagged_record = (*record).clone();
+
+        if let Some(ref source) = tagged_record.log_source {
+            tagged_record.metadata.insert("log_source".to_string(), source.clone());
+        }
         
         match &self.config.active_framework {
             crate::config::ActiveFramework::AiRmf100 => {
@@ -444,7 +534,7 @@ mod nist_engine {
                     tagged_record.metadata.insert("lineage_chain".to_string(), chain.clone());
                 }
 
-                let mut nist_match = self.matches(&tagged_record);
+                let nist_match = self.matches(&tagged_record);
                 let mut final_severity = nist_match.as_ref().map(|(m, _)| m.severity).unwrap_or(crate::models::SeverityLevel::Info);
                 
                 if let Some((ref mapping, ref match_str)) = nist_match {
@@ -462,11 +552,6 @@ mod nist_engine {
                             *start_time = now;
                         } else {
                             *count += 1;
-                        }
-                        if *count > 500 {
-                            final_severity = crate::models::SeverityLevel::Medium;
-                            tagged_record.outcome = Some("HighVolumeNoise".to_string());
-                            tagged_record.metadata.insert("noise_suppression".to_string(), "true".to_string());
                         }
                     }
                 }
@@ -488,13 +573,7 @@ mod nist_engine {
 
                 let mut heuristic_hit = false;
 
-                if is_verified_origin {
-                    if final_severity >= crate::models::SeverityLevel::High {
-                        final_severity = crate::models::SeverityLevel::Info;
-                        tagged_record.outcome = Some("VerifiedOrigin".to_string());
-                        tagged_record.message = format!("[Lineage Verified] System maintenance/install activity confirmed: {}", chain);
-                    }
-                }
+                // Note: Verified origin suppression moved to end of pipeline to avoid blocking heuristics
 
                 if is_orphan && (final_severity >= crate::models::SeverityLevel::High || nist_match.is_none()) {
                     if tagged_record.destination_ip.is_some() {
@@ -518,65 +597,8 @@ mod nist_engine {
                         heuristic_hit = true;
                     }
                 } else {
-                    // 5. Operation Shadow Vault: Credential Protection Layer
-                    let image_name = current_image.clone().unwrap_or_default().to_lowercase();
-                    let target = target_image.clone().unwrap_or_default().to_lowercase();
-                    let access = granted_access.clone().unwrap_or_default().to_lowercase();
-                    let cmd = tagged_record.message.to_lowercase();
-                    
-                    // --- LSASS Memory Protection (Identity Vault) ---
-                    if target.contains("lsass.exe") && (access.contains("0x1fffff") || access.contains("0x1010")) {
-                        // Aegis Baseline: Surgical Precision Suppression
-                        let verified_accessors = ["msmpeng.exe", "wininit.exe", "csrss.exe", "lsass.exe"];
-                        let is_verified_accessor = verified_accessors.iter().any(|v| image_name.contains(v));
-
-                        if !is_verified_accessor {
-                            final_severity = crate::models::SeverityLevel::Critical;
-                            let dump_msg = format!("☢️ CRITICAL: CREDENTIAL DUMPING ATTEMPT! Unauthorized process {} accessed LSASS memory with mask {}.", 
-                                image_name, access);
-                            tagged_record.message = dump_msg.clone();
-                            tagged_record.metadata.insert("forensic_tag".to_string(), "CredentialDumping".to_string());
-                            tagged_record.metadata.insert("captured_message".to_string(), dump_msg);
-                            tagged_record.metadata.insert("nist_control_id".to_string(), "IA-2 [Shadow Vault]".to_string());
-                            tagged_record.metadata.insert("nist_category".to_string(), "Identification and Authentication".to_string());
-                            heuristic_hit = true;
-                        }
-                    }
-
-                    // --- Registry Exfiltration Trap (SAM/SECURITY/SYSTEM) ---
-                    let reg_targets = ["hklm\\sam", "hklm\\security", "hklm\\system", "sam.hiv", "security.hiv"];
-                    let is_reg_dump = (cmd.contains("reg") && (cmd.contains("save") || cmd.contains("export"))) 
-                        || cmd.contains("invoke-ninjacopy") 
-                        || cmd.contains("mimikatz") 
-                        || cmd.contains("lsadump");
-                    
-                    let targets_sensitive_hive = reg_targets.iter().any(|t| cmd.contains(t)) 
-                        || relative_target.clone().map(|r| r.to_lowercase()).map(|r| r.contains("sam") || r.contains("security")).unwrap_or(false);
-
-                    if is_reg_dump && targets_sensitive_hive {
-                        final_severity = crate::models::SeverityLevel::Critical;
-                        let reg_msg = format!("☢️ CRITICAL: REGISTRY HIVE EXFILTRATION! Attempt to steal sensitive identity database (SAM/SECURITY) detected via: {}", 
-                            tagged_record.message);
-                        tagged_record.message = reg_msg.clone();
-                        tagged_record.metadata.insert("forensic_tag".to_string(), "RegistryExfiltration".to_string());
-                        tagged_record.metadata.insert("captured_message".to_string(), reg_msg);
-                        tagged_record.metadata.insert("nist_control_id".to_string(), "AC-6 [Shadow Vault]".to_string());
-                        tagged_record.metadata.insert("nist_category".to_string(), "Access Control".to_string());
-                        heuristic_hit = true;
-                    }
-
-                    // Remoting Heuristics: WMI/WinRM suspicious children (Iron Sights)
-                    let parent_image = chain.to_lowercase();
-                    if !heuristic_hit && (parent_image.contains("wmiprvse.exe") || parent_image.contains("wsmprovhost.exe")) 
-                        && (image_name.contains("cmd.exe") || image_name.contains("powershell.exe")) {
-                        final_severity = crate::models::SeverityLevel::High;
-                        tagged_record.metadata.insert("forensic_tag".to_string(), "RemoteExecution".to_string());
-                        let rem_msg = format!("⚠️ [Iron Sights] Suspicious Remote Execution: {} spawned from {}", image_name, parent_image);
-                        tagged_record.message = rem_msg.clone();
-                        tagged_record.metadata.insert("captured_message".to_string(), rem_msg);
-                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Remote Pivot]".to_string());
-                        heuristic_hit = true;
-                    }
+                    // Note: Heuristics for LSASS, Registry, and LOLBAS have been externalized to intel/nist_mappings.json
+                    // to eliminate the 'Whack-a-Mole' recompilation cycle.
                 }
 
                 // 6. Operation Black Box: Point-of-Detection Extraction Trigger
@@ -590,10 +612,36 @@ mod nist_engine {
                     }
                 }
 
+                // 7. Verified Origin Suppression (NIST AU-12 Low-Noise)
+                if is_verified_origin && !heuristic_hit {
+                    if final_severity >= crate::models::SeverityLevel::High {
+                        final_severity = crate::models::SeverityLevel::Info;
+                        tagged_record.outcome = Some("VerifiedOrigin".to_string());
+                        tagged_record.message = format!("[Lineage Verified] System maintenance/install activity confirmed: {}", chain);
+                    }
+                }
+
+                // 8. High-Volume Noise Suppression (Anti-Flood)
+                // Only suppress if it's NOT a heuristic hit and NOT already Critical
+                if !heuristic_hit && final_severity < crate::models::SeverityLevel::Critical {
+                    if let Some((_, match_str)) = nist_match.as_ref() {
+                        let mapping = &nist_match.as_ref().unwrap().0;
+                        let signal_key = format!("{}:{}", mapping.control_id, match_str);
+                        if let Some(entry) = self.signal_counts.get(&signal_key) {
+                            let (count, _) = entry.value();
+                            if *count > 500 {
+                                final_severity = crate::models::SeverityLevel::Medium;
+                                tagged_record.outcome = Some("HighVolumeNoise".to_string());
+                                tagged_record.metadata.insert("noise_suppression".to_string(), "true".to_string());
+                            }
+                        }
+                    }
+                }
+
                 if nist_match.is_some() || heuristic_hit || tagged_record.outcome.is_some() {
                     // Fill in defaults for heuristics if missing nist info
                     if tagged_record.metadata.get("nist_control_id").is_none() {
-                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4".to_string());
+                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Windows Integrity]".to_string());
                         tagged_record.metadata.insert("nist_category".to_string(), "System and Information Integrity".to_string());
                     }
                     
