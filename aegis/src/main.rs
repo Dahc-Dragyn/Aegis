@@ -265,8 +265,7 @@ async fn main() -> Result<()> {
     ));
 
     let edge_buffer_clone = Arc::clone(&edge_buffer);
-    let monitor_clone = Arc::clone(&monitor);
-    let mut fusion_worker = FusionWorker::new(fusion_rx, edge_buffer_clone, monitor_clone);
+    let mut fusion_worker = FusionWorker::new(fusion_rx, edge_buffer_clone);
     
     let fusion_handle = tokio::spawn(async move {
         if let Err(e) = fusion_worker.run().await {

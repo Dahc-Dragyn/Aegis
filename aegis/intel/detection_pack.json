@@ -1,0 +1,54 @@
+[
+  {
+    "control_id": "qakbot-chain-01",
+    "category": "Behavioral",
+    "description": "Detects Mimikatz followed by reconnaissance tools within 5 minutes.",
+    "human_title": "ALERT: Qakbot Execution Chain",
+    "human_action": "Investigate behavioral sequence correlation",
+    "long_description": "Detected behavioral sequence based on Sigma rule: Qakbot Execution Chain",
+    "remediation": "Review process lineage and temporal correlation for adversarial patterns.",
+    "severity": "Critical",
+    "rule_type": "sequence",
+    "sequence_steps": [
+      "(?i)mimikatz",
+      "(?i)net1\\.exe"
+    ],
+    "time_window_ms": 300000
+  },
+  {
+    "control_id": "SIGMA [qakbot-recon-01]",
+    "category": "Sigma Import",
+    "description": "Detects Qakbot discovery activity using net.exe and net1.exe",
+    "human_title": "RULE: Qakbot Reconnaissance Activity",
+    "human_action": "Sigma indicator detected. Triage endpoint.",
+    "long_description": "Imported Sigma Rule: Detects Qakbot discovery activity using net.exe and net1.exe",
+    "remediation": "Refer to Sigma documentation for TTP mitigation.",
+    "severity": "High",
+    "pattern": "(?is)(1|(\\\\net\\.exe|\\\\net1\\.exe)|(\\ /stats|\\ group\\ |\\ localgroup\\ ))",
+    "rule_type": "regex"
+  },
+  {
+    "control_id": "registry-persistence-01",
+    "category": "Persistence",
+    "description": "Detects unauthorized Run/RunOnce key modifications.",
+    "human_title": "ALERT: Registry Persistence Vector",
+    "human_action": "Investigate Run/RunOnce key modification",
+    "long_description": "Detected unauthorized modification to Windows Run/RunOnce keys, a common persistence mechanism.",
+    "remediation": "Review the registry path and remove anomalous values.",
+    "severity": "High",
+    "pattern": "(?i)(CurrentVersion\\\\Run|CurrentVersion\\\\RunOnce)",
+    "rule_type": "regex"
+  },
+  {
+    "control_id": "obfuscation-detection-01",
+    "category": "Execution",
+    "description": "Detects high-entropy PowerShell or CMD obfuscation.",
+    "human_title": "ALERT: Command Obfuscation Detected",
+    "human_action": "Review obfuscated command line",
+    "long_description": "Detected high-entropy command line arguments suggesting Base64 or XOR obfuscation.",
+    "remediation": "Deobfuscate command and review for malicious payloads.",
+    "severity": "High",
+    "pattern": "(?i)(-enc| -e | -encodedcommand|iex\\()",
+    "rule_type": "regex"
+  }
+]

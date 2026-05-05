@@ -142,7 +142,13 @@ impl BufferWorker {
     }
 
     async fn flush_batch(&mut self, batch: &mut Vec<LogRecord>) -> Result<()> {
-        if batch.is_empty() { return Ok(()); }
+        if batch.is_empty() { 
+            // If empty but online, check for backlog anyway
+            if self.status.is_online() && self.has_backlog().unwrap_or(false) {
+                self.reconcile().await?;
+            }
+            return Ok(()); 
+        }
         let count = batch.len();
         let records = std::mem::take(batch);
         println!("💾 Aegis: Flushing batch of {} records to ledger...", count);
@@ -150,8 +156,12 @@ impl BufferWorker {
         if self.status.is_online() {
             // Forward
             self.ledger.log_batch(records)?;
+            
+            // Check for backlog to reconcile
+            if self.has_backlog().unwrap_or(false) {
+                self.reconcile().await?;
+            }
         } else {
-
             for rec in records {
                 self.spill_to_disk(Arc::new(rec))?;
             }

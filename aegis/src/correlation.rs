@@ -1,11 +1,8 @@
 use crate::models::LogRecord;
-use crate::monitor::PostureMonitor;
 use tokio::sync::mpsc;
 use uuid::Uuid;
-use moka::future::Cache;
-use std::time::Duration;
 use std::sync::Arc;
-use anyhow::{Result, Context};
+use anyhow::Result;
 
 use dashmap::DashMap;
 
@@ -13,7 +10,6 @@ use dashmap::DashMap;
 pub struct FusionWorker {
     rx: mpsc::Receiver<Arc<LogRecord>>,
     edge_buffer_tx: Arc<crate::edge_buffer::EdgeBuffer>,
-    monitor: Arc<PostureMonitor>,
     /// Thread-safe synchronous cache for O(1) correlation
     cache: Arc<DashMap<String, Uuid>>,
 }
@@ -22,12 +18,10 @@ impl FusionWorker {
     pub fn new(
         rx: mpsc::Receiver<Arc<LogRecord>>, 
         edge_buffer_tx: Arc<crate::edge_buffer::EdgeBuffer>,
-        monitor: Arc<PostureMonitor>
     ) -> Self {
         Self { 
             rx, 
             edge_buffer_tx, 
-            monitor, 
             cache: Arc::new(DashMap::new()) 
         }
     }

@@ -6,7 +6,6 @@ use aegis::NistEngine;
 use aegis::models::{LogRecord, ParsingQuality};
 use std::sync::Arc;
 
-use chrono::Utc;
 use tempfile::tempdir;
 
 #[tokio::test]

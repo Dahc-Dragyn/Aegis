@@ -164,7 +164,11 @@ async def exfil_upload(request: Request):
                         if line:
                             event = json.loads(line)
                             ledger.insert(0, event)
-                results.append({"file": f_name, "status": "HYDRATED", "path": "A"})
+                    # Path A Sitrep (Automated)
+                    async with aiofiles.open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w") as f:
+                        await f.write(f"# TACTICAL SITREP: HYDRA_INGESTED\n---\n**STATUS**: Forensic payload hydrated.\n**ASSETS**: {f_name}\n**TIMESTAMP**: {datetime.now().strftime('%H:%M:%S')}\n---")
+                    
+                    results.append({"file": f_name, "status": "HYDRATED", "path": "A"})
             except Exception as e:
                 print(f"[PATH-A] ERROR: {e}")
                 results.append({"file": f_name, "status": "FAILED", "error": str(e)})
@@ -208,9 +212,9 @@ async def exfil_upload(request: Request):
         else:
             results.append({"file": f_name, "status": "VAULTED", "path": "OTHER"})
 
-    # Save updated ledger
+    # Save updated ledger (100k capacity)
     async with aiofiles.open(LEDGER_PATH, "w") as f:
-        await f.write(json.dumps(ledger[:1000]))
+        await f.write(json.dumps(ledger[:100000]))
             
     return {"status": "SUCCESS", "ingested": results}
 

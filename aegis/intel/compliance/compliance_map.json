@@ -1,0 +1,310 @@
+{
+  "AC-1": {
+    "title": "Policy and Procedures",
+    "requirement": "Develop, document, and disseminate to {{ insert: param, ac-1_prm_1 }}: Designate an {{ insert: param, ac-01_odp.04 }} to manage the development, documentation, and dissemination of the access control policy and procedures; and Review and update the current access control:"
+  },
+  "AC-2": {
+    "title": "Account Management",
+    "requirement": "Define and document the types of accounts allowed and specifically prohibited for use within the system; Assign account managers; Require {{ insert: param, ac-02_odp.01 }} for group and role membership; Specify: Require approvals by {{ insert: param, ac-02_odp.03 }} for requests to create accounts; Create, enable, modify, disable, and remove accounts in accordance with {{ insert: param, ac-02_odp.04 }}; Monitor the use of accounts; Notify account managers and {{ insert: param, ac-02_odp.05 }} within: Authorize access to the system based on: Review accounts for compliance with account management requirements {{ insert: param, ac-02_odp.10 }}; Establish and implement a process for changing shared or group account authenticators (if deployed) when individuals are removed from the group; and Align account management processes with personnel termination and transfer processes."
+  },
+  "AC-3": {
+    "title": "Access Enforcement",
+    "requirement": ""
+  },
+  "AC-4": {
+    "title": "Information Flow Enforcement",
+    "requirement": ""
+  },
+  "AC-5": {
+    "title": "Separation of Duties",
+    "requirement": "Identify and document {{ insert: param, ac-05_odp }} ; and Define system access authorizations to support separation of duties."
+  },
+  "AC-6": {
+    "title": "Least Privilege",
+    "requirement": ""
+  },
+  "AC-7": {
+    "title": "Unsuccessful Logon Attempts",
+    "requirement": "Enforce a limit of {{ insert: param, ac-07_odp.01 }} consecutive invalid logon attempts by a user during a {{ insert: param, ac-07_odp.02 }} ; and Automatically {{ insert: param, ac-07_odp.03 }} when the maximum number of unsuccessful attempts is exceeded."
+  },
+  "AC-8": {
+    "title": "System Use Notification",
+    "requirement": "Display {{ insert: param, ac-08_odp.01 }} to users before granting access to the system that provides privacy and security notices consistent with applicable laws, executive orders, directives, regulations, policies, standards, and guidelines and state that: Retain the notification message or banner on the screen until users acknowledge the usage conditions and take explicit actions to log on to or further access the system; and For publicly accessible systems:"
+  },
+  "AC-9": {
+    "title": "Previous Logon Notification",
+    "requirement": ""
+  },
+  "AC-10": {
+    "title": "Concurrent Session Control",
+    "requirement": ""
+  },
+  "AC-11": {
+    "title": "Device Lock",
+    "requirement": "Prevent further access to the system by {{ insert: param, ac-11_odp.01 }} ; and Retain the device lock until the user reestablishes access using established identification and authentication procedures."
+  },
+  "AC-12": {
+    "title": "Session Termination",
+    "requirement": ""
+  },
+  "AC-13": {
+    "title": "Supervision and Review \u2014 Access Control",
+    "requirement": ""
+  },
+  "AC-14": {
+    "title": "Permitted Actions Without Identification or Authentication",
+    "requirement": "Identify {{ insert: param, ac-14_odp }} that can be performed on the system without identification or authentication consistent with organizational mission and business functions; and Document and provide supporting rationale in the security plan for the system, user actions not requiring identification or authentication."
+  },
+  "AC-15": {
+    "title": "Automated Marking",
+    "requirement": ""
+  },
+  "AC-16": {
+    "title": "Security and Privacy Attributes",
+    "requirement": "Provide the means to associate {{ insert: param, ac-16_prm_1 }} with {{ insert: param, ac-16_prm_2 }} for information in storage, in process, and/or in transmission; Ensure that the attribute associations are made and retained with the information; Establish the following permitted security and privacy attributes from the attributes defined in [AC-16a](#ac-16_smt.a) for {{ insert: param, ac-16_prm_3 }}: {{ insert: param, ac-16_prm_4 }}; Determine the following permitted attribute values or ranges for each of the established attributes: {{ insert: param, ac-16_odp.09 }}; Audit changes to attributes; and Review {{ insert: param, ac-16_prm_6 }} for applicability {{ insert: param, ac-16_prm_7 }}."
+  },
+  "AC-17": {
+    "title": "Remote Access",
+    "requirement": "Establish and document usage restrictions, configuration/connection requirements, and implementation guidance for each type of remote access allowed; and Authorize each type of remote access to the system prior to allowing such connections."
+  },
+  "AC-18": {
+    "title": "Wireless Access",
+    "requirement": "Establish configuration requirements, connection requirements, and implementation guidance for each type of wireless access; and Authorize each type of wireless access to the system prior to allowing such connections."
+  },
+  "AC-19": {
+    "title": "Access Control for Mobile Devices",
+    "requirement": "Establish configuration requirements, connection requirements, and implementation guidance for organization-controlled mobile devices, to include when such devices are outside of controlled areas; and Authorize the connection of mobile devices to organizational systems."
+  },
+  "AC-20": {
+    "title": "Use of External Systems",
+    "requirement": "{{ insert: param, ac-20_odp.01 }} , consistent with the trust relationships established with other organizations owning, operating, and/or maintaining external systems, allowing authorized individuals to: Prohibit the use of {{ insert: param, ac-20_odp.04 }}."
+  },
+  "AC-21": {
+    "title": "Information Sharing",
+    "requirement": "Enable authorized users to determine whether access authorizations assigned to a sharing partner match the information\u2019s access and use restrictions for {{ insert: param, ac-21_odp.01 }} ; and Employ {{ insert: param, ac-21_odp.02 }} to assist users in making information sharing and collaboration decisions."
+  },
+  "AC-22": {
+    "title": "Publicly Accessible Content",
+    "requirement": "Designate individuals authorized to make information publicly accessible; Train authorized individuals to ensure that publicly accessible information does not contain nonpublic information; Review the proposed content of information prior to posting onto the publicly accessible system to ensure that nonpublic information is not included; and Review the content on the publicly accessible system for nonpublic information {{ insert: param, ac-22_odp }} and remove such information, if discovered."
+  },
+  "AC-23": {
+    "title": "Data Mining Protection",
+    "requirement": ""
+  },
+  "AC-24": {
+    "title": "Access Control Decisions",
+    "requirement": ""
+  },
+  "AC-25": {
+    "title": "Reference Monitor",
+    "requirement": ""
+  },
+  "AU-1": {
+    "title": "Policy and Procedures",
+    "requirement": "Develop, document, and disseminate to {{ insert: param, au-1_prm_1 }}: Designate an {{ insert: param, au-01_odp.04 }} to manage the development, documentation, and dissemination of the audit and accountability policy and procedures; and Review and update the current audit and accountability:"
+  },
+  "AU-2": {
+    "title": "Event Logging",
+    "requirement": "Identify the types of events that the system is capable of logging in support of the audit function: {{ insert: param, au-02_odp.01 }}; Coordinate the event logging function with other organizational entities requiring audit-related information to guide and inform the selection criteria for events to be logged; Specify the following event types for logging within the system: {{ insert: param, au-2_prm_2 }}; Provide a rationale for why the event types selected for logging are deemed to be adequate to support after-the-fact investigations of incidents; and Review and update the event types selected for logging {{ insert: param, au-02_odp.04 }}."
+  },
+  "AU-3": {
+    "title": "Content of Audit Records",
+    "requirement": "What type of event occurred; When the event occurred; Where the event occurred; Source of the event; Outcome of the event; and Identity of any individuals, subjects, or objects/entities associated with the event."
+  },
+  "AU-4": {
+    "title": "Audit Log Storage Capacity",
+    "requirement": ""
+  },
+  "AU-5": {
+    "title": "Response to Audit Logging Process Failures",
+    "requirement": "Alert {{ insert: param, au-05_odp.01 }} within {{ insert: param, au-05_odp.02 }} in the event of an audit logging process failure; and Take the following additional actions: {{ insert: param, au-05_odp.03 }}."
+  },
+  "AU-6": {
+    "title": "Audit Record Review, Analysis, and Reporting",
+    "requirement": "Review and analyze system audit records {{ insert: param, au-06_odp.01 }} for indications of {{ insert: param, au-06_odp.02 }} and the potential impact of the inappropriate or unusual activity; Report findings to {{ insert: param, au-06_odp.03 }} ; and Adjust the level of audit record review, analysis, and reporting within the system when there is a change in risk based on law enforcement information, intelligence information, or other credible sources of information."
+  },
+  "AU-7": {
+    "title": "Audit Record Reduction and Report Generation",
+    "requirement": "Supports on-demand audit record review, analysis, and reporting requirements and after-the-fact investigations of incidents; and Does not alter the original content or time ordering of audit records."
+  },
+  "AU-8": {
+    "title": "Time Stamps",
+    "requirement": "Use internal system clocks to generate time stamps for audit records; and Record time stamps for audit records that meet {{ insert: param, au-08_odp }} and that use Coordinated Universal Time, have a fixed local time offset from Coordinated Universal Time, or that include the local time offset as part of the time stamp."
+  },
+  "AU-9": {
+    "title": "Protection of Audit Information",
+    "requirement": "Protect audit information and audit logging tools from unauthorized access, modification, and deletion; and Alert {{ insert: param, au-09_odp }} upon detection of unauthorized access, modification, or deletion of audit information."
+  },
+  "AU-10": {
+    "title": "Non-repudiation",
+    "requirement": ""
+  },
+  "AU-11": {
+    "title": "Audit Record Retention",
+    "requirement": ""
+  },
+  "AU-12": {
+    "title": "Audit Record Generation",
+    "requirement": "Provide audit record generation capability for the event types the system is capable of auditing as defined in [AU-2a](#au-2_smt.a) on {{ insert: param, au-12_odp.01 }}; Allow {{ insert: param, au-12_odp.02 }} to select the event types that are to be logged by specific components of the system; and Generate audit records for the event types defined in [AU-2c](#au-2_smt.c) that include the audit record content defined in [AU-3](#au-3)."
+  },
+  "AU-13": {
+    "title": "Monitoring for Information Disclosure",
+    "requirement": "Monitor {{ insert: param, au-13_odp.01 }} {{ insert: param, au-13_odp.02 }} for evidence of unauthorized disclosure of organizational information; and If an information disclosure is discovered:"
+  },
+  "AU-14": {
+    "title": "Session Audit",
+    "requirement": "Provide and implement the capability for {{ insert: param, au-14_odp.01 }} to {{ insert: param, au-14_odp.02 }} the content of a user session under {{ insert: param, au-14_odp.03 }} ; and Develop, integrate, and use session auditing activities in consultation with legal counsel and in accordance with applicable laws, executive orders, directives, regulations, policies, standards, and guidelines."
+  },
+  "AU-15": {
+    "title": "Alternate Audit Logging Capability",
+    "requirement": ""
+  },
+  "AU-16": {
+    "title": "Cross-organizational Audit Logging",
+    "requirement": ""
+  },
+  "IA-1": {
+    "title": "Policy and Procedures",
+    "requirement": "Develop, document, and disseminate to {{ insert: param, ia-1_prm_1 }}: Designate an {{ insert: param, ia-01_odp.04 }} to manage the development, documentation, and dissemination of the identification and authentication policy and procedures; and Review and update the current identification and authentication:"
+  },
+  "IA-2": {
+    "title": "Identification and Authentication (Organizational Users)",
+    "requirement": ""
+  },
+  "IA-3": {
+    "title": "Device Identification and Authentication",
+    "requirement": ""
+  },
+  "IA-4": {
+    "title": "Identifier Management",
+    "requirement": "Receiving authorization from {{ insert: param, ia-04_odp.01 }} to assign an individual, group, role, service, or device identifier; Selecting an identifier that identifies an individual, group, role, service, or device; Assigning the identifier to the intended individual, group, role, service, or device; and Preventing reuse of identifiers for {{ insert: param, ia-04_odp.02 }}."
+  },
+  "IA-5": {
+    "title": "Authenticator Management",
+    "requirement": "Verifying, as part of the initial authenticator distribution, the identity of the individual, group, role, service, or device receiving the authenticator; Establishing initial authenticator content for any authenticators issued by the organization; Ensuring that authenticators have sufficient strength of mechanism for their intended use; Establishing and implementing administrative procedures for initial authenticator distribution, for lost or compromised or damaged authenticators, and for revoking authenticators; Changing default authenticators prior to first use; Changing or refreshing authenticators {{ insert: param, ia-05_odp.01 }} or when {{ insert: param, ia-05_odp.02 }} occur; Protecting authenticator content from unauthorized disclosure and modification; Requiring individuals to take, and having devices implement, specific controls to protect authenticators; and Changing authenticators for group or role accounts when membership to those accounts changes."
+  },
+  "IA-6": {
+    "title": "Authentication Feedback",
+    "requirement": ""
+  },
+  "IA-7": {
+    "title": "Cryptographic Module Authentication",
+    "requirement": ""
+  },
+  "IA-8": {
+    "title": "Identification and Authentication (Non-organizational Users)",
+    "requirement": ""
+  },
+  "IA-9": {
+    "title": "Service Identification and Authentication",
+    "requirement": ""
+  },
+  "IA-10": {
+    "title": "Adaptive Authentication",
+    "requirement": ""
+  },
+  "IA-11": {
+    "title": "Re-authentication",
+    "requirement": ""
+  },
+  "IA-12": {
+    "title": "Identity Proofing",
+    "requirement": "Identity proof users that require accounts for logical access to systems based on appropriate identity assurance level requirements as specified in applicable standards and guidelines; Resolve user identities to a unique individual; and Collect, validate, and verify identity evidence."
+  },
+  "IA-13": {
+    "title": "Identity Providers and Authorization Servers",
+    "requirement": ""
+  },
+  "SI-1": {
+    "title": "Policy and Procedures",
+    "requirement": "Develop, document, and disseminate to {{ insert: param, si-1_prm_1 }}: Designate an {{ insert: param, si-01_odp.04 }} to manage the development, documentation, and dissemination of the system and information integrity policy and procedures; and Review and update the current system and information integrity:"
+  },
+  "SI-2": {
+    "title": "Flaw Remediation",
+    "requirement": "Identify, report, and correct system flaws; Test software and firmware updates related to flaw remediation for effectiveness and potential side effects before installation; Install security-relevant software and firmware updates within {{ insert: param, si-02_odp }} of the release of the updates; and Incorporate flaw remediation into the organizational configuration management process."
+  },
+  "SI-3": {
+    "title": "Malicious Code Protection",
+    "requirement": "Implement {{ insert: param, si-03_odp.01 }} malicious code protection mechanisms at system entry and exit points to detect and eradicate malicious code; Automatically update malicious code protection mechanisms as new releases are available in accordance with organizational configuration management policy and procedures; Configure malicious code protection mechanisms to: Address the receipt of false positives during malicious code detection and eradication and the resulting potential impact on the availability of the system."
+  },
+  "SI-4": {
+    "title": "System Monitoring",
+    "requirement": "Monitor the system to detect: Identify unauthorized use of the system through the following techniques and methods: {{ insert: param, si-04_odp.02 }}; Invoke internal monitoring capabilities or deploy monitoring devices: Analyze detected events and anomalies; Adjust the level of system monitoring activity when there is a change in risk to organizational operations and assets, individuals, other organizations, or the Nation; Obtain legal opinion regarding system monitoring activities; and Provide {{ insert: param, si-04_odp.03 }} to {{ insert: param, si-04_odp.04 }} {{ insert: param, si-04_odp.05 }}."
+  },
+  "SI-5": {
+    "title": "Security Alerts, Advisories, and Directives",
+    "requirement": "Receive system security alerts, advisories, and directives from {{ insert: param, si-05_odp.01 }} on an ongoing basis; Generate internal security alerts, advisories, and directives as deemed necessary; Disseminate security alerts, advisories, and directives to: {{ insert: param, si-05_odp.02 }} ; and Implement security directives in accordance with established time frames, or notify the issuing organization of the degree of noncompliance."
+  },
+  "SI-6": {
+    "title": "Security and Privacy Function Verification",
+    "requirement": "Verify the correct operation of {{ insert: param, si-6_prm_1 }}; Perform the verification of the functions specified in SI-6a {{ insert: param, si-06_odp.03 }}; Alert {{ insert: param, si-06_odp.06 }} to failed security and privacy verification tests; and {{ insert: param, si-06_odp.07 }} when anomalies are discovered."
+  },
+  "SI-7": {
+    "title": "Software, Firmware, and Information Integrity",
+    "requirement": "Employ integrity verification tools to detect unauthorized changes to the following software, firmware, and information: {{ insert: param, si-7_prm_1 }} ; and Take the following actions when unauthorized changes to the software, firmware, and information are detected: {{ insert: param, si-7_prm_2 }}."
+  },
+  "SI-8": {
+    "title": "Spam Protection",
+    "requirement": "Employ spam protection mechanisms at system entry and exit points to detect and act on unsolicited messages; and Update spam protection mechanisms when new releases are available in accordance with organizational configuration management policy and procedures."
+  },
+  "SI-9": {
+    "title": "Information Input Restrictions",
+    "requirement": ""
+  },
+  "SI-10": {
+    "title": "Information Input Validation",
+    "requirement": ""
+  },
+  "SI-11": {
+    "title": "Error Handling",
+    "requirement": "Generate error messages that provide information necessary for corrective actions without revealing information that could be exploited; and Reveal error messages only to {{ insert: param, si-11_odp }}."
+  },
+  "SI-12": {
+    "title": "Information Management and Retention",
+    "requirement": ""
+  },
+  "SI-13": {
+    "title": "Predictable Failure Prevention",
+    "requirement": "Determine mean time to failure (MTTF) for the following system components in specific environments of operation: {{ insert: param, si-13_odp.01 }} ; and Provide substitute system components and a means to exchange active and standby components in accordance with the following criteria: {{ insert: param, si-13_odp.02 }}."
+  },
+  "SI-14": {
+    "title": "Non-persistence",
+    "requirement": ""
+  },
+  "SI-15": {
+    "title": "Information Output Filtering",
+    "requirement": ""
+  },
+  "SI-16": {
+    "title": "Memory Protection",
+    "requirement": ""
+  },
+  "SI-17": {
+    "title": "Fail-safe Procedures",
+    "requirement": ""
+  },
+  "SI-18": {
+    "title": "Personally Identifiable Information Quality Operations",
+    "requirement": "Check the accuracy, relevance, timeliness, and completeness of personally identifiable information across the information life cycle {{ insert: param, si-18_prm_1 }} ; and Correct or delete inaccurate or outdated personally identifiable information."
+  },
+  "SI-19": {
+    "title": "De-identification",
+    "requirement": "Remove the following elements of personally identifiable information from datasets: {{ insert: param, si-19_odp.01 }} ; and Evaluate {{ insert: param, si-19_odp.02 }} for effectiveness of de-identification."
+  },
+  "SI-20": {
+    "title": "Tainting",
+    "requirement": ""
+  },
+  "SI-21": {
+    "title": "Information Refresh",
+    "requirement": ""
+  },
+  "SI-22": {
+    "title": "Information Diversity",
+    "requirement": "Identify the following alternative sources of information for {{ insert: param, si-22_odp.02 }}: {{ insert: param, si-22_odp.01 }} ; and Use an alternative information source for the execution of essential functions or services on {{ insert: param, si-22_odp.03 }} when the primary source of information is corrupted or unavailable."
+  },
+  "SI-23": {
+    "title": "Information Fragmentation",
+    "requirement": "Fragment the following information: {{ insert: param, si-23_odp.02 }} ; and Distribute the fragmented information across the following systems or system components: {{ insert: param, si-23_odp.03 }}."
+  }
+}

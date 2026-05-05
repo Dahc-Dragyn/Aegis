@@ -1,0 +1,93 @@
+{
+  "assessment-results": {
+    "uuid": "1ee40d4a-b95c-4d13-999b-4d519727b7e7",
+    "metadata": {
+      "title": "Aegis Forensic Assessment Results",
+      "last-modified": "2026-04-26T09:15:38.302634",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "c941da2a-ddc5-4e81-9c07-e32c1a90a86e",
+        "title": "Automated Forensic Roll-Up",
+        "description": "Aggregated audit containing 373 signals.",
+        "start": "2026-04-26T09:15:38.302647",
+        "findings": [
+          {
+            "uuid": "ff24a3eb-07a9-4db9-af16-07db0fc5fe4b",
+            "title": "Compliance Deviation: None",
+            "description": "DEGRADED: Malformed JSON",
+            "occurrence-count": 368,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "a5d99ce1-5162-4e04-a42c-e61c047ea4c2",
+            "title": "Compliance Deviation: SI-4 [macOS Integrity]",
+            "description": "macOS Persistence Vector Detected",
+            "occurrence-count": 1,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "a5bdb67d-aad3-41d8-a07c-2bd99a1ab6f6",
+            "title": "Compliance Deviation: AC-7 [MSSQL Brute Force]",
+            "description": "\u26a0\ufe0f SQL Server Brute Force Attempt",
+            "occurrence-count": 1,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "0f712e7c-5a8e-419a-9217-3a185f3fc25c",
+            "title": "Compliance Deviation: SI-4 [macOS Hidden Login Item]",
+            "description": "Hidden Login Item Detected",
+            "occurrence-count": 1,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "ca616360-a3f5-4dcd-b739-0189093983d9",
+            "title": "Compliance Deviation: SC-7 [Lateral Movement]",
+            "description": "\u2622\ufe0f Internal Network Pivot Detected",
+            "occurrence-count": 1,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "4344342a-0619-47db-95a2-e297bcc753f1",
+            "title": "Compliance Deviation: SI-7 [macOS Path Masquerading]",
+            "description": "Suspicious Path Execution",
+            "occurrence-count": 1,
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

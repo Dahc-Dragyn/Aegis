@@ -1,0 +1,47 @@
+# RUST CORE EXCLUSION (STRICT)
+target/
+src/
+aegis.exe
+aegis.pyd*
+Cargo.toml
+Cargo.lock
+.cargo/
+
+# FORENSIC DATA & LOGS
+logs/
+*.log
+*.evtx
+*.pcap
+*.audit
+*.jsonl
+*.gz
+forensic_results/vault_*
+forensic_results/telemetry_ledger.json
+aegis.audit.jsonl
+aegis.edge.db
+aegis.compliance.db
+
+# DEVELOPMENT ARTIFACTS
+artifacts/
+scratch/
+scripts/
+tests/
+DOCUMENTS/
+.git/
+.vscode/
+.idea/
+.gemini/
+__pycache__/
+aegis_mcp/.venv/
+generate_stress_data.py
+stress_test_*.jsonl
+anomaly_test.json
+
+# FRONTEND BUILD CACHES
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# ENVIRONMENT
+.env
+.env.*

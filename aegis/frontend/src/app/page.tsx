@@ -11,14 +11,27 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { List } from 'react-window';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
-import { Responsive, WidthProvider, Layout } from 'react-grid-layout/legacy';
+import dynamic from 'next/dynamic';
+const RGL: any = require('react-grid-layout');
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const GridWrapper = (props: any) => {
+  const { children, ...rest } = props;
+  return <div {...rest}>{children}</div>;
+};
 
-const DEFAULT_LAYOUTS: Partial<Record<string, Layout[]>> = {
+const ResponsiveGridLayout = dynamic(
+  async () => {
+    const { Responsive, WidthProvider } = (await import('react-grid-layout')) as any;
+    const Component = WidthProvider(Responsive);
+    return (props: any) => <Component {...props} />;
+  },
+  { ssr: false }
+);
+
+const DEFAULT_LAYOUTS: any = {
   lg: [
     { i: 'vitals', x: 0, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
     { i: 'vault', x: 0, y: 4, w: 3, h: 8, minW: 2, minH: 4 },
@@ -68,7 +81,7 @@ const TacticalPane = React.forwardRef(({ style, className, onMouseDown, onMouseU
 });
 TacticalPane.displayName = 'TacticalPane';
 
-export default function TacticalHUD() {
+function TacticalHUD() {
   const [telemetry, setTelemetry] = useState<TelemetryEntry[]>([]);
   const [sitrep, setSitrep] = useState("ANALYZING MANIFOLD... WAITING FOR INGESTION.");
   const [displayedSitrep, setDisplayedSitrep] = useState("");
@@ -81,7 +94,7 @@ export default function TacticalHUD() {
   const [feedMode, setFeedMode] = useState<'tactical' | 'forensic'>('tactical');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [layouts, setLayouts] = useState<Partial<Record<string, Layout[]>>>(DEFAULT_LAYOUTS);
+  const [layouts, setLayouts] = useState<any>(DEFAULT_LAYOUTS);
 
   useEffect(() => {
     const saved = localStorage.getItem('aegis-hud-layout');
@@ -182,7 +195,7 @@ export default function TacticalHUD() {
     refreshData();
   };
 
-  const onLayoutChange = (currentLayout: Layout[], allLayouts: Partial<Record<string, Layout[]>>) => {
+  const onLayoutChange = (currentLayout: any[], allLayouts: any) => {
     setLayouts(allLayouts);
     localStorage.setItem('aegis-hud-layout', JSON.stringify(allLayouts));
   };
@@ -628,3 +641,5 @@ export default function TacticalHUD() {
     </main>
   );
 }
+
+export default TacticalHUD;

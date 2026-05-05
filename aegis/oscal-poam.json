@@ -1,0 +1,68 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "c34a8310-c2fd-4ee5-b8eb-83e04e39fb61",
+    "metadata": {
+      "title": "Aegis Managed PoAM",
+      "last-modified": "2026-04-26T09:15:38.315698",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "poam-items": [
+      {
+        "uuid": "573e8370-3987-4416-a3bd-a9f423d76fea",
+        "title": "PoAM Item: SI-4 [macOS Integrity]",
+        "description": "Automated PoAM draft for SI-4 [macOS Integrity] based on forensic evidence.",
+        "status": "Draft",
+        "occurrence_count": 1,
+        "entry_timestamp": "2026-04-26T09:15:38.315460",
+        "last_seen": "2026-04-26T09:15:38.315470",
+        "impacted_system": "DESKTOP-9V0ND36",
+        "remediation_remarks": "[Action Required] Manual review of the forensic brief is required."
+      },
+      {
+        "uuid": "f2e07b8f-05b9-47f0-a61b-dceb2cfd3463",
+        "title": "PoAM Item: AC-7 [MSSQL Brute Force]",
+        "description": "Automated PoAM draft for AC-7 [MSSQL Brute Force] based on forensic evidence.",
+        "status": "Draft",
+        "occurrence_count": 1,
+        "entry_timestamp": "2026-04-26T09:15:38.315542",
+        "last_seen": "2026-04-26T09:15:38.315546",
+        "impacted_system": "DESKTOP-9V0ND36",
+        "remediation_remarks": "[Action Required] Manual review of the forensic brief is required."
+      },
+      {
+        "uuid": "ccff5e7c-0ebb-486c-8af6-22d3046f369f",
+        "title": "PoAM Item: SI-4 [macOS Hidden Login Item]",
+        "description": "Automated PoAM draft for SI-4 [macOS Hidden Login Item] based on forensic evidence.",
+        "status": "Draft",
+        "occurrence_count": 1,
+        "entry_timestamp": "2026-04-26T09:15:38.315585",
+        "last_seen": "2026-04-26T09:15:38.315588",
+        "impacted_system": "DESKTOP-9V0ND36",
+        "remediation_remarks": "[Action Required] Manual review of the forensic brief is required."
+      },
+      {
+        "uuid": "a3074b86-71bf-463b-a7ad-9c63a11f5cf3",
+        "title": "PoAM Item: SC-7 [Lateral Movement]",
+        "description": "Automated PoAM draft for SC-7 [Lateral Movement] based on forensic evidence.",
+        "status": "Draft",
+        "occurrence_count": 1,
+        "entry_timestamp": "2026-04-26T09:15:38.315623",
+        "last_seen": "2026-04-26T09:15:38.315625",
+        "impacted_system": "DESKTOP-9V0ND36",
+        "remediation_remarks": "[Action Required] Manual review of the forensic brief is required."
+      },
+      {
+        "uuid": "8563322b-e0a3-4174-819f-0d4efd5b5655",
+        "title": "PoAM Item: SI-7 [macOS Path Masquerading]",
+        "description": "Automated PoAM draft for SI-7 [macOS Path Masquerading] based on forensic evidence.",
+        "status": "Draft",
+        "occurrence_count": 1,
+        "entry_timestamp": "2026-04-26T09:15:38.315660",
+        "last_seen": "2026-04-26T09:15:38.315663",
+        "impacted_system": "DESKTOP-9V0ND36",
+        "remediation_remarks": "[Action Required] Manual review of the forensic brief is required."
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "assessment-results": {
+    "uuid": "82a63030-be7a-4322-af3c-a05acc5acfe6",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-03T12:29:59.623057-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "c868eaba-24b5-4a1f-a60f-eca78412aa68",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 60000 signals (Aggregated).",
+        "start": "2026-05-03T12:29:59.623049900-07:00",
+        "observations": [
+          {
+            "uuid": "33da17f7-5230-48c9-b4a4-09acf0a21739",
+            "description": "NIST Control Capture: AC-3 [Identity Infrastructure]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 39,
+            "sample-evidence": [
+              "{\"timestamp\": \"2026-05-03T10:00:06.010000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 1581, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_81.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_81.exe --args 598\", \"Hashes\": \"SHA256=a19ca2c1a1c2922cd2b8846641425dba7e5a0617fee1d0e2146e234b244886f4\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:13.380000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 1377, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_77.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_77.exe --args 955\", \"Hashes\": \"SHA256=9ab4bb36339f160ee9a90e2785224887a7d54dffb520915e9207eecd8e113215\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:47.550000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 11684, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_84.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_84.exe --args 514\", \"Hashes\": \"SHA256=99cbfff1236a644c2d48877ecea9f7c34a656338345e6fb8db848b5d1ef27740\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:53.450000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 2802, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_2.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_2.exe --args 193\", \"Hashes\": \"SHA256=4871bcf42acbea6500239e73bfd92f466c848869acae6cd8ed22cc84ca631642\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:59.890000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 12960, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_60.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_60.exe --args 33\", \"Hashes\": \"SHA256=419ad481ff877562856bae41f96d80b48867f36d35d5e18516aa8b9cdb756d1d\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:07:59.720000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 16442, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_42.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_42.exe --args 529\", \"Hashes\": \"SHA256=f93417b6ad9332860052ca488652f6b183b0c4d8e52d4b2189dcb3d5efbf8b32\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:08:21.550000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 16339, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_39.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_39.exe --args 105\", \"Hashes\": \"SHA256=4886ad7df8fe3223e60840431f285c60bf40d37d4d0c16369dcfeca7a072499f\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:08:40.610000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 17904, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_4.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_4.exe --args 814\", \"Hashes\": \"SHA256=852228c0157650f39fdb9dbdacf4488603bf3a8be5d44adb0c6265d7165a5fbe\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:22.560000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 5120, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_20.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_20.exe --args 847\", \"Hashes\": \"SHA256=95a30bf3f7aecb71ead9a62e02719ef75ff41c5774886c11d108acd62d709ba6\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:33.720000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 17884, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_84.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_84.exe --args 311\", \"Hashes\": \"SHA256=c42334bd65845dae98ace0b8aaa6ddc9fb16bfd24887e714ec5b535b2c23514a\", \"ParentProcessId\": 1000}}}"
+            ],
+            "relevant-evidence": []
+          },
+          {
+            "uuid": "491fd2db-437d-4be8-96dd-eeecfee21d0d",
+            "description": "NIST Control Capture: AU-9 [Tampering]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 644,
+            "sample-evidence": [
+              "{\"timestamp\": \"2026-05-03T10:00:00.290000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 2246, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_46.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_46.exe --args 952\", \"Hashes\": \"SHA256=4f6eee134164fdcc442dc49ec28811af3104d1851423e5ca157226a86a52b2a5\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:01.840000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 10492, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_92.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_92.exe --args 52\", \"Hashes\": \"SHA256=b288d9f07e242e662f4d95145d7df56737d3afdb971f17d7d2018ba329d591ed\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:03.280000Z\", \"Event\": {\"System\": {\"EventID\": 4624}, \"EventData\": {\"TargetUserName\": \"user_40\", \"IpAddress\": \"192.168.1.104\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:03.410000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 11040, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_40.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_40.exe --args 960\", \"Hashes\": \"SHA256=a90539feb15d398a6e0ae1f4febda4a002e2653e4c9df0130c3e25d81913e4b9\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:03.530000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 1527, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_27.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_27.exe --args 820\", \"Hashes\": \"SHA256=8e10444c8e33134edb32398eae1fbaf00c545f447dc07ce543ff7120253d42a2\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:52.600000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 14350, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_50.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_50.exe --args 104\", \"Hashes\": \"SHA256=28b621a9fa46ab83bc74873c2873664e9ba43c19783f10134edb9785ad146656\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:54.180000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 10457, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_57.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_57.exe --args 922\", \"Hashes\": \"SHA256=aebe53c7bd0c0983bd96c0af284c1fd6ebbda20f8bd6e2be11f9a9c342a2e861\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:54.500000Z\", \"Event\": {\"System\": {\"EventID\": 4624}, \"EventData\": {\"TargetUserName\": \"user_2\", \"IpAddress\": \"192.168.1.104\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:56.740000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 1719, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_19.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_19.exe --args 520\", \"Hashes\": \"SHA256=aa0c756696100616561a639e104c5715fabc7b08eaed2e0095a6a0ff81d41bc5\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:57.460000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 11024, \"Image\": \"C:\\\\Windows\\\\System32\\\\proc_24.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\proc_24.exe --args 557\", \"Hashes\": \"SHA256=647721f9b7b6bed354c513a487c79ec8244e83c3f4bb4c58aff7d62c6baca84b\", \"ParentProcessId\": 1000}}}"
+            ],
+            "relevant-evidence": []
+          },
+          {
+            "uuid": "ffaf590b-c3ba-43f8-a179-f3ae222945dc",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 59317,
+            "sample-evidence": [
+              "{\"timestamp\": \"2026-05-03T10:00:00.000000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 6036, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_36.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_36.exe --args 234\", \"Hashes\": \"SHA256=541bda7e478602737a0d8acb38a5f33d8e81a7b33b04aeb97f06bb987cd5b649\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:00.010000Z\", \"Event\": {\"System\": {\"EventID\": 4624}, \"EventData\": {\"TargetUserName\": \"user_47\", \"IpAddress\": \"192.168.1.55\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:00.020000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 10105, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_5.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_5.exe --args 618\", \"Hashes\": \"SHA256=2c6aadd6384d2d33e13ee1113f287b4dc083cdb66de7d5d7cf9b3b45f1512006\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:00.030000Z\", \"Event\": {\"System\": {\"EventID\": 1}, \"EventData\": {\"ProcessId\": 17554, \"Image\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_54.exe\", \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\sysmon_proc_54.exe --args 902\", \"Hashes\": \"SHA256=d0110856cdbab37297dd17094d9ac1216265518939724bfd9fe5b7bc7de3eae0\", \"ParentProcessId\": 1000}}}",
+              "{\"timestamp\": \"2026-05-03T10:00:00.040000Z\", \"Event\": {\"System\": {\"EventID\": 4624}, \"EventData\": {\"TargetUserName\": \"user_23\", \"IpAddress\": \"192.168.1.119\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:59.950000Z\", \"Event\": {\"System\": {\"EventID\": 4688}, \"EventData\": {\"NewProcessId\": \"0x3be6\", \"NewProcessName\": \"C:\\\\Windows\\\\System32\\\\proc_34.exe\", \"ProcessId\": \"0x3e8\", \"ParentProcessName\": \"C:\\\\Windows\\\\explorer.exe\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:59.960000Z\", \"Event\": {\"System\": {\"EventID\": 4688}, \"EventData\": {\"NewProcessId\": \"0x31d5\", \"NewProcessName\": \"C:\\\\Windows\\\\System32\\\\proc_57.exe\", \"ProcessId\": \"0x3e8\", \"ParentProcessName\": \"C:\\\\Windows\\\\explorer.exe\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:59.970000Z\", \"Event\": {\"System\": {\"EventID\": 4688}, \"EventData\": {\"NewProcessId\": \"0x1cb4\", \"NewProcessName\": \"C:\\\\Windows\\\\System32\\\\proc_48.exe\", \"ProcessId\": \"0x3e8\", \"ParentProcessName\": \"C:\\\\Windows\\\\explorer.exe\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:59.980000Z\", \"Event\": {\"System\": {\"EventID\": 4624}, \"EventData\": {\"TargetUserName\": \"user_47\", \"IpAddress\": \"192.168.1.126\"}}}",
+              "{\"timestamp\": \"2026-05-03T10:09:59.990000Z\", \"Event\": {\"System\": {\"EventID\": 4688}, \"EventData\": {\"NewProcessId\": \"0x5b5\", \"NewProcessName\": \"C:\\\\Windows\\\\System32\\\\proc_61.exe\", \"ProcessId\": \"0x3e8\", \"ParentProcessName\": \"C:\\\\Windows\\\\explorer.exe\"}}}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "677090b8-93be-4832-a52c-3cc8e0df4fe9",
+            "title": "Compliance Deviation: AC-3 [Identity Infrastructure]",
+            "description": "An aggregated security deficiency was detected for control AC-3 [Identity Infrastructure]. Total incidents: 39.",
+            "occurrence-count": 39,
+            "incident-id": "9238f5a7-5b69-479e-871e-29409657791e",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "980ff615-e2e8-4e3a-906c-8b4ff938536f",
+            "title": "Compliance Deviation: AU-9 [Tampering]",
+            "description": "An aggregated security deficiency was detected for control AU-9 [Tampering]. Total incidents: 644.",
+            "occurrence-count": 644,
+            "incident-id": "9238f5a7-5b69-479e-871e-29409657791e",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "fc4dd059-f767-4e45-935f-521306d7d2ec",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 59317.",
+            "occurrence-count": 59317,
+            "incident-id": "9238f5a7-5b69-479e-871e-29409657791e",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

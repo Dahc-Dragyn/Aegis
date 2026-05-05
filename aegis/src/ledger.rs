@@ -2,9 +2,9 @@ use std::fs::{OpenOptions, File, remove_file};
 use std::io::{Write, Read, BufReader};
 use std::path::{PathBuf, Path};
 use std::sync::{Mutex, Arc};
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::BTreeMap;
 use anyhow::{Context, Result};
-use chrono::{Local, TimeZone};
+use chrono::Local;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use sha2::{Sha256, Digest};
@@ -16,14 +16,7 @@ use crate::monitor::PostureMonitor;
 use crate::config::AppConfig;
 use crate::lineage::LineageGraph;
 
-#[derive(Default)]
-struct FindingSummary {
-    count: usize,
-    description: String,
-    remediation: String,
-    first_5: Vec<String>,
-    last_5: VecDeque<String>,
-}
+// Removed FindingSummary - NIST compliance maintained via PostureEvent stream
 
 pub struct AuditLedger {
     path: PathBuf,
