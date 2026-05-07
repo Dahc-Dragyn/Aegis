@@ -246,10 +246,12 @@ async fn main() -> Result<()> {
     }
     
     let (edge_buffer, buffer_handle) = aegis::edge_buffer::EdgeBuffer::new(
+        "Standalone".to_string(), // Default node ID
         edge_db_path, 
         Arc::clone(&ledger), 
         50000, 
-        true // Standalone FOB: Local Ledger is always "Online"
+        true, // Standalone FOB: Local Ledger is always "Online"
+        None // No whisper cache in standalone mode
     )?;
     let edge_buffer = Arc::new(edge_buffer);
 

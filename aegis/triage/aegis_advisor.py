@@ -29,12 +29,21 @@ class AegisAdvisor:
             return "--- AEGIS TACTICAL SITREP ---\n\nSTATUS: OPERATIONAL - NO ACTIVE THREATS DETECTED.\n\n--- END OF BRIEF ---"
 
         signal = signals[0]
-        severity = signal.get("severity", "INFO").upper()
         event = signal.get("message", "Unknown Event")
+        severity = signal.get("severity", "INFO").upper()
         raw = str(signal.get("raw_data", ""))
-        
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         is_hostile = severity in ["HIGH", "CRITICAL"]
+        
+        # [SIGNAL SILENCE] Handle Noise Detection vs Breach
+        is_signal_storm = any("NOISE DETECTED" in str(s.get("message", "")) for s in signals)
+        if is_signal_storm:
+            # Breach-in-the-Storm: If any signal is hostile during a storm, prioritize the breach brief
+            hostile_signal = next((s for s in signals if s.get("severity") in ["HOSTILE", "CRITICAL"]), None)
+            if hostile_signal:
+                return self._generate_breach_brief(hostile_signal, now)
+            else:
+                return self._generate_noise_brief(signal)
         
         brief = [
             "--- 🛡️ AEGIS COMMANDER'S TACTICAL BRIEF ---",
@@ -70,6 +79,60 @@ class AegisAdvisor:
             "--- END OF BRIEF ---"
         ]
 
+        return "\n".join(brief)
+
+    def _generate_breach_brief(self, signal, now):
+        event = signal.get("message", "Unknown Event")
+        raw = str(signal.get("raw_data", ""))
+        brief = [
+            "--- 🛡️ AEGIS: BREACH-IN-THE-STORM [AUTO-EXPAND] ---",
+            f"TIMESTAMP: {now}",
+            "URGENCY: IMMEDIATE ACTION REQUIRED",
+            "----------------------------------------------------------------",
+            "## [!] CRITICAL SIGNAL IDENTIFIED DURING SUPPRESSION",
+            "> [!CAUTION]",
+            "> **A surgical hostile action has been detected amidst high-velocity noise.**",
+            "",
+            "### TACTICAL ANALYSIS:",
+            f"* **Threat**: {self._extract_who(event, raw)}",
+            f"* **Action**: {event}",
+            f"* **Impact**: {self._extract_why(event, raw)}",
+            "",
+            "### SURGICAL REMEDIATION:",
+            f"1. **Isolation**: {self._get_action('CRITICAL', event)}",
+            "2. **Divergence**: Signal Silence active, but this threat bypassed all sampling filters.",
+            "",
+            "----------------------------------------------------------------",
+            "**AUTHENTICATION**: AEGIS_CORE_01 // BREACH_IN_THE_STORM_TRIGGER",
+            "--- END OF BRIEF ---"
+        ]
+        return "\n".join(brief)
+
+    def _generate_noise_brief(self, signal):
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        brief = [
+            "--- 🛡️ AEGIS TACTICAL ADVISORY: SIGNAL SILENCE ---",
+            f"TIMESTAMP: {now}",
+            "STATUS: HIGH-VELOCITY INGESTION DETECTED",
+            "----------------------------------------------------------------",
+            "## [!] FORENSIC COLLAPSE ACTIVE",
+            "> [!WARNING]",
+            "> **The Aegis Manifold is currently suppressing low-fidelity noise.**",
+            "",
+            "### TACTICAL SUMMARY:",
+            f"* **Alert**: {signal.get('message')}",
+            "* **Heuristic**: Adaptive Sampling (1:100 Ratio Applied)",
+            "* **Priority**: High-Fidelity Signals (Credential Access/Lateral Movement) are bypassed.",
+            "",
+            "### COMMANDER'S GUIDANCE:",
+            "1. **Alert Fatigue Protection**: Nominal system noise has been collapsed to preserve cognitive bandwidth.",
+            "2. **Forensic Continuity**: A 1% sample is maintained for historical reconstruction.",
+            "3. **Detection Status**: Still 100% active for high-threat signatures.",
+            "",
+            "----------------------------------------------------------------",
+            "**AUTHENTICATION**: AEGIS_CORE_01 // SNR_GOVERNOR",
+            "--- END OF BRIEF ---"
+        ]
         return "\n".join(brief)
 
     def _extract_who(self, event, raw):

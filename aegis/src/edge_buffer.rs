@@ -13,7 +13,7 @@ const METADATA_TABLE: TableDefinition<&str, &[u8]> = TableDefinition::new("metad
 
 /// Connectivity status for the edge node.
 pub struct ConnectivityStatus {
-    is_online: AtomicBool,
+    pub is_online: AtomicBool,
 }
 
 impl ConnectivityStatus {
@@ -28,21 +28,33 @@ impl ConnectivityStatus {
     }
 }
 
+/// A cryptographic receipt broadcasted to peers before a record is committed locally.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AuditReceipt {
+    pub node_id: String,
+    pub chain_hash: String,
+    pub timestamp: chrono::DateTime<chrono::Local>,
+}
+
 pub struct EdgeBuffer {
     tx: mpsc::Sender<Arc<LogRecord>>,
     pub status: Arc<ConnectivityStatus>,
+    pub node_id: String,
 }
 
 impl EdgeBuffer {
     pub fn new(
+        node_id: String,
         db_path: PathBuf,
         ledger: Arc<AuditLedger>,
         capacity: usize,
         initial_online: bool,
+        whisper_tx: Option<tokio::sync::broadcast::Sender<AuditReceipt>>,
     ) -> Result<(Self, tokio::task::JoinHandle<()>)> {
         let (tx, rx) = mpsc::channel(capacity);
         let status = Arc::new(ConnectivityStatus::new(initial_online));
         let status_clone = Arc::clone(&status);
+        let node_id_clone = node_id.clone();
 
         // Initialize redb
         let db = Database::builder()
@@ -51,13 +63,13 @@ impl EdgeBuffer {
 
         // Start background worker
         let handle = tokio::spawn(async move {
-            let mut worker = BufferWorker::new(db, rx, ledger, status_clone);
+            let mut worker = BufferWorker::new(node_id_clone, db, rx, ledger, status_clone, whisper_tx);
             if let Err(e) = worker.run().await {
                 eprintln!("❌ Aegis EdgeBuffer Worker Failure: {:?}", e);
             }
         });
 
-        Ok((Self { tx, status }, handle))
+        Ok((Self { tx, status, node_id }, handle))
     }
 
     pub async fn push(&self, record: Arc<LogRecord>) -> Result<()> {
@@ -73,16 +85,25 @@ impl EdgeBuffer {
 }
 
 struct BufferWorker {
+    node_id: String,
     db: Database,
     rx: mpsc::Receiver<Arc<LogRecord>>,
     ledger: Arc<AuditLedger>,
     status: Arc<ConnectivityStatus>,
+    whisper_tx: Option<tokio::sync::broadcast::Sender<AuditReceipt>>,
     last_hash: Vec<u8>,
     next_id: u64,
+    // SNR Stress Test Fields
+    velocity_count: usize,
+    velocity_start: std::time::Instant,
+    current_velocity: usize,
+    sampling_mode: bool,
+    sampling_cooldown: std::time::Instant,
+    suppressed_count: usize,
 }
 
 impl BufferWorker {
-    fn new(db: Database, rx: mpsc::Receiver<Arc<LogRecord>>, ledger: Arc<AuditLedger>, status: Arc<ConnectivityStatus>) -> Self {
+    fn new(node_id: String, db: Database, rx: mpsc::Receiver<Arc<LogRecord>>, ledger: Arc<AuditLedger>, status: Arc<ConnectivityStatus>, whisper_tx: Option<tokio::sync::broadcast::Sender<AuditReceipt>>) -> Self {
         // Recover last state if it exists
         let (last_hash, next_id) = {
             let read_txn = db.begin_read().expect("Failed to begin read transaction");
@@ -108,7 +129,15 @@ impl BufferWorker {
             (last_hash, next_id)
         };
 
-        Self { db, rx, ledger, status, last_hash, next_id }
+        Self { 
+            node_id, db, rx, ledger, status, whisper_tx, last_hash, next_id,
+            velocity_count: 0,
+            velocity_start: std::time::Instant::now(),
+            current_velocity: 0,
+            sampling_mode: false,
+            sampling_cooldown: std::time::Instant::now(),
+            suppressed_count: 0,
+        }
     }
     async fn run(&mut self) -> Result<()> {
         println!("🛡️ Aegis: Tactical Edge Resilience Buffer ACTIVE.");
@@ -117,23 +146,50 @@ impl BufferWorker {
 
         loop {
             tokio::select! {
+                biased;
+                _ = tokio::time::sleep(std::time::Duration::from_millis(100)) => {
+                    if !batch.is_empty() && last_flush.elapsed().as_millis() > 100 {
+                        self.flush_batch(&mut batch).await?;
+                        last_flush = std::time::Instant::now();
+                    }
+                }
                 record = self.rx.recv() => {
                     if let Some(record) = record {
+                        self.velocity_count += 1;
+                        
+                        // Periodic Velocity Update (Every 100ms)
+                        if self.velocity_start.elapsed().as_millis() >= 100 {
+                            self.current_velocity = self.velocity_count * 10;
+                            self.velocity_count = 0;
+                            self.velocity_start = std::time::Instant::now();
+
+                            if self.current_velocity > 1000 {
+                                if !self.sampling_mode {
+                                    println!("⚠️ Aegis: SNR Threshold Exceeded ({} eps). Engaging Sampling Mode.", self.current_velocity);
+                                }
+                                self.sampling_mode = true;
+                                self.sampling_cooldown = std::time::Instant::now() + std::time::Duration::from_secs(10);
+                            } else if self.sampling_mode && std::time::Instant::now() > self.sampling_cooldown {
+                                println!("✅ Aegis: Signal Noise Stabilized. Returning to Full Fidelity.");
+                                self.sampling_mode = false;
+                            }
+                        }
+
+                        if self.sampling_mode && !record.is_high_fidelity() {
+                            self.suppressed_count += 1;
+                            if self.suppressed_count % 100 != 0 {
+                                continue;
+                            }
+                        }
+
                         batch.push((*record).clone());
                         if batch.len() >= 500 {
                             self.flush_batch(&mut batch).await?;
                             last_flush = std::time::Instant::now();
                         }
                     } else {
-                        // Channel closed
                         self.flush_batch(&mut batch).await?;
                         break;
-                    }
-                }
-                _ = tokio::time::sleep(std::time::Duration::from_millis(100)) => {
-                    if !batch.is_empty() && last_flush.elapsed().as_millis() > 100 {
-                        self.flush_batch(&mut batch).await?;
-                        last_flush = std::time::Instant::now();
                     }
                 }
             }
@@ -142,6 +198,17 @@ impl BufferWorker {
     }
 
     async fn flush_batch(&mut self, batch: &mut Vec<LogRecord>) -> Result<()> {
+        // [SIGNAL SILENCE] Inject Noise Suppression Summary
+        if self.suppressed_count > 0 {
+            let mut summary = LogRecord::default();
+            summary.node_id = self.node_id.clone();
+            summary.severity = Some("warning".to_string());
+            summary.message = format!("[!] NOISE DETECTED: {} decoy events suppressed", self.suppressed_count);
+            summary.metadata.insert("details".to_string(), format!("SNR Stress Test: Sampling active due to velocity of {} eps", self.current_velocity));
+            batch.push(summary);
+            self.suppressed_count = 0;
+        }
+
         if batch.is_empty() { 
             // If empty but online, check for backlog anyway
             if self.status.is_online() && self.has_backlog().unwrap_or(false) {
@@ -151,11 +218,11 @@ impl BufferWorker {
         }
         let count = batch.len();
         let records = std::mem::take(batch);
-        println!("💾 Aegis: Flushing batch of {} records to ledger...", count);
+        println!("💾 Aegis: Node [{}] flushing batch of {} records to ledger...", self.node_id, count);
         
         if self.status.is_online() {
             // Forward
-            self.ledger.log_batch(records)?;
+            self.ledger.log_batch(&records)?;
             
             // Check for backlog to reconcile
             if self.has_backlog().unwrap_or(false) {
@@ -185,7 +252,19 @@ impl BufferWorker {
         let mut hasher = Sha256::new();
         hasher.update(&self.last_hash);
         hasher.update(&serialized);
-        let current_hash = hasher.finalize().to_vec();
+        let hash_result = hasher.finalize();
+        let current_hash = hash_result.to_vec();
+
+        // [HYDRA'S REACH] P2P Whisper Cache Broadcast
+        if let Some(tx) = &self.whisper_tx {
+            let receipt = AuditReceipt {
+                node_id: self.node_id.clone(),
+                chain_hash: format!("{:x}", hash_result),
+                timestamp: chrono::Local::now(),
+            };
+            // Send receipt. We ignore the error if there are no active receivers.
+            let _ = tx.send(receipt);
+        }
 
         // Atomic write to redb
         let write_txn = self.db.begin_write()?;
@@ -225,7 +304,7 @@ impl BufferWorker {
 
         if !records_to_send.is_empty() {
             // Forward in one verified batch
-            self.ledger.log_batch(records_to_send)?;
+            self.ledger.log_batch(&records_to_send)?;
             
             // Clear cache
             let write_txn = self.db.begin_write()?;

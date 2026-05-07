@@ -45,10 +45,20 @@ const DEFAULT_LAYOUTS: any = {
 
 interface TelemetryEntry {
   timestamp: string;
-  event: string;
+  event?: string;
+  message?: string;
   severity: 'hostile' | 'warning' | 'friendly' | 'neutral' | 'critical';
   details?: string;
+  node_id?: string;
+  ingestion_timestamp?: string;
 }
+
+const isTimeTravel = (log: TelemetryEntry) => {
+  if (!log.ingestion_timestamp || !log.timestamp) return false;
+  const ingestTime = new Date(log.ingestion_timestamp).getTime();
+  const eventTime = new Date(log.timestamp).getTime();
+  return (ingestTime - eventTime) > 5000;
+};
 
 const TacticalPane = React.forwardRef(({ style, className, onMouseDown, onMouseUp, onTouchEnd, children, title, icon: Icon, ...props }: any, ref: any) => {
   return (
@@ -95,6 +105,8 @@ function TacticalHUD() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [layouts, setLayouts] = useState<any>(DEFAULT_LAYOUTS);
+  const [clarity, setClarity] = useState({ ingested: 0, suppressed: 0, clarity: 100 });
+  const [isTheaterExpanded, setIsTheaterExpanded] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('aegis-hud-layout');
@@ -134,29 +146,35 @@ function TacticalHUD() {
   const refreshData = async () => {
     try {
       const t = Date.now();
-      const [histRes, sitRes, isoRes] = await Promise.all([
+      const [histRes, sitRes, isoRes, healthRes] = await Promise.all([
         fetch(`http://127.0.0.1:8000/telemetry/history?t=${t}`),
         fetch(`http://127.0.0.1:8000/sitrep?t=${t}`),
-        fetch(`http://127.0.0.1:8000/isolation/status?t=${t}`)
+        fetch(`http://127.0.0.1:8000/isolation/status?t=${t}`),
+        fetch(`http://127.0.0.1:8000/system/health?t=${t}`)
       ]);
       if (histRes.ok) {
         const histData = await histRes.json();
         setTelemetry(histData);
         setHubStatus("ONLINE");
       } else {
-        const errorData = await histRes.json().catch(() => ({}));
-        const errorMsg = typeof errorData.detail === 'string' 
-          ? errorData.detail 
-          : JSON.stringify(errorData.detail) || "EXFIL_BRIDGE_FAILED";
-        throw new Error(errorMsg);
+        throw new Error("EXFIL_BRIDGE_FAILED");
       }
       if (sitRes.ok) {
         const sitData = await sitRes.json();
         setSitrep(sitData.sitrep);
+        
+        // [SIGNAL SILENCE] Breach-in-the-Storm Auto-Expand
+        if (sitData.sitrep.includes("AUTO-EXPAND") && !isTheaterExpanded) {
+            setIsTheaterExpanded(true);
+        }
       }
       if (isoRes.ok) {
         const isoData = await isoRes.json();
         setIsIsolated(isoData.isolated);
+      }
+      if (healthRes.ok) {
+        const healthData = await healthRes.json();
+        setClarity(healthData);
       }
     } catch (e: any) {
       setHubStatus("OFFLINE");
@@ -201,6 +219,10 @@ function TacticalHUD() {
   };
 
   // 4. DATA PROCESSING (TACTICAL FILTER)
+  const isSignalSilenceActive = React.useMemo(() => {
+    return clarity.clarity < 50;
+  }, [clarity.clarity]);
+
   const processedTelemetry = React.useMemo(() => {
     if (feedMode === 'forensic') return telemetry;
     
@@ -208,14 +230,21 @@ function TacticalHUD() {
     let currentSummary: any = null;
 
     telemetry.forEach((log) => {
-      const isCritical = log.severity === 'hostile' || log.severity === 'critical' || log.severity === 'warning';
+      const isNoiseSummary = log.message?.includes("NOISE DETECTED");
+      const isCritical = log.severity === 'hostile' || log.severity === 'critical' || log.severity === 'warning' || isNoiseSummary;
       
       if (isCritical) {
         if (currentSummary) {
           results.push(currentSummary);
           currentSummary = null;
         }
-        results.push(log);
+        
+        // If it's a noise summary, tag it for special rendering
+        if (isNoiseSummary) {
+          results.push({ ...log, type: 'noise_alert' });
+        } else {
+          results.push(log);
+        }
       } else {
         if (!currentSummary) {
           currentSummary = { 
@@ -234,6 +263,23 @@ function TacticalHUD() {
     if (currentSummary) results.push(currentSummary);
     return results;
   }, [telemetry, feedMode]);
+
+  // 5. SWARM HEALTH TRACKER
+  const activeNodes = React.useMemo(() => {
+    const nodes = new Map<string, boolean>();
+    const now = Date.now();
+    telemetry.forEach(log => {
+      if (!log.node_id) return;
+      // If ingested within last 60 seconds, node is ONLINE
+      const logTime = new Date(log.ingestion_timestamp || log.timestamp).getTime();
+      if (now - logTime < 60000) {
+        nodes.set(log.node_id, true);
+      } else if (!nodes.has(log.node_id)) {
+        nodes.set(log.node_id, false);
+      }
+    });
+    return nodes;
+  }, [telemetry]);
 
   return (
     <main className="h-screen w-screen bg-black text-slate-300 flex flex-col p-3 overflow-hidden font-mono selection:bg-cyan-500/30">
@@ -323,6 +369,14 @@ function TacticalHUD() {
               <span className="text-slate-500">Network:</span>
               <span className={isIsolated ? "text-rose-500" : "text-cyan-500"}>{isIsolated ? "Restricted" : "Open"}</span>
             </div>
+            {isSignalSilenceActive && (
+              <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
+                <div className="bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded flex items-center gap-1.5 animate-pulse">
+                  <Zap className="w-2.5 h-2.5 text-amber-500" />
+                  <span className="text-amber-500 font-black text-[9px] tracking-widest">SIGNAL SILENCE ACTIVE</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -421,6 +475,32 @@ function TacticalHUD() {
                   <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
                     <div className="h-full bg-cyan-500/50 w-[45%]" />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold">
+                    <span className="text-slate-400">Forensic Clarity</span>
+                    <span className={clarity.clarity < 10 ? "text-amber-500" : "text-cyan-400"}>
+                      {clarity.clarity.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
+                    <div className={`h-full transition-all duration-500 ${clarity.clarity < 10 ? "bg-amber-500" : "bg-cyan-500/50"}`} style={{ width: `${clarity.clarity}%` }} />
+                  </div>
+                </div>
+                
+                {/* SWARM HEALTH GUTTER */}
+                <div className="space-y-2 mt-6 border-t border-slate-800 pt-4">
+                  <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2">Swarm Status</div>
+                  {activeNodes.size === 0 && (
+                    <div className="text-[10px] text-slate-600 font-mono italic">NO NODES DETECTED</div>
+                  )}
+                  {Array.from(activeNodes.entries()).map(([node, isOnline]) => (
+                    <div key={node} className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold">
+                      <span className="text-slate-400">[{node}]</span>
+                      <span className={isOnline ? "text-emerald-500" : "text-rose-500"}>{isOnline ? "ONLINE" : "OFFLINE"}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </TacticalPane>
@@ -528,12 +608,30 @@ function TacticalHUD() {
                                   <span className="text-slate-600 text-[9px]">[{log.timestamp}]</span>
                                   <div className="h-px flex-1 bg-slate-800" />
                                   <span className="text-[9px] font-bold text-slate-500 tracking-tighter italic uppercase">
-                                    {log.count} Signals Suppressed
+                                    {log.count} Signals Suppressed (UI Level)
                                   </span>
                                   <div className="h-px flex-1 bg-slate-800" />
                                 </div>
                               );
                             }
+                            
+                            if (log.type === 'noise_alert') {
+                              return (
+                                <div style={style} className="flex items-center gap-3 px-4 border-b border-amber-500/30 bg-amber-900/20">
+                                  <span className="text-amber-700 text-[9px] font-mono">[{log.timestamp}]</span>
+                                  <Zap className="w-3 h-3 text-amber-500 shrink-0" />
+                                  <span className="text-[10px] font-black text-amber-500 tracking-widest uppercase">
+                                    {log.message}
+                                  </span>
+                                  <div className="h-px flex-1 bg-amber-900/20" />
+                                  <span className="text-[8px] font-mono text-amber-700/60 italic uppercase">Signal Silence Active</span>
+                                </div>
+                              );
+                            }
+                            const tt = isTimeTravel(log);
+                            const eventName = log.event || log.message || "UNKNOWN_EVENT";
+                            const badgeColor = log.node_id === 'Alpha' ? 'text-slate-400' : (log.node_id === 'Beta' ? 'text-slate-500' : 'text-slate-400');
+                            
                             return (
                               <div 
                                 style={style} 
@@ -541,17 +639,29 @@ function TacticalHUD() {
                                   setSelectedNodeId(log.details?.match(/PID: (\d+)/)?.[1] || null);
                                   setActiveView('graph');
                                 }}
-                                className={`flex items-start gap-3 p-3 border-b border-slate-800 text-[10px] cursor-pointer hover:bg-white/5 transition-colors ${log.severity === 'hostile' || log.severity === 'critical' ? 'bg-rose-500/10' : ''}`}
+                                className={`flex items-start gap-3 p-3 border-b text-[10px] cursor-pointer hover:bg-white/5 transition-colors 
+                                  ${log.severity === 'hostile' || log.severity === 'critical' ? 'bg-rose-500/10' : ''} 
+                                  ${tt ? 'border-dashed border-cyan-500/40 bg-cyan-950/10' : 'border-slate-800'}`}
                               >
                                 <span className="text-slate-600 shrink-0 w-16 font-mono">[{log.timestamp}]</span>
-                                <span className={`font-bold shrink-0 w-32 tracking-tighter uppercase ${
-                                  log.severity === 'hostile' || log.severity === 'critical' ? 'text-rose-500' :
-                                  log.severity === 'warning' ? 'text-amber-500' :
-                                  log.severity === 'friendly' ? 'text-emerald-500' :
-                                  'text-blue-400'
-                                }`}>
-                                  {log.event}
+                                <span className={`shrink-0 w-16 text-center font-bold tracking-widest uppercase ${badgeColor}`}>
+                                  [{log.node_id || 'LOCAL'}]
                                 </span>
+                                <div className="flex flex-col shrink-0 w-32 gap-1">
+                                  <span className={`font-bold tracking-tighter uppercase ${
+                                    log.severity === 'hostile' || log.severity === 'critical' ? 'text-rose-500' :
+                                    log.severity === 'warning' ? 'text-amber-500' :
+                                    log.severity === 'friendly' ? 'text-emerald-500' :
+                                    'text-blue-400'
+                                  }`}>
+                                    {eventName}
+                                  </span>
+                                  {tt && (
+                                    <span className="text-[8px] italic font-bold tracking-widest text-slate-500">
+                                      [RECONCILED]
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="text-slate-300 truncate flex-1 leading-relaxed">{log.details}</span>
                               </div>
                             );

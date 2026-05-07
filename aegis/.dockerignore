@@ -1,10 +1,10 @@
 # RUST CORE EXCLUSION (STRICT)
 target/
-src/
+
 aegis.exe
 aegis.pyd*
-Cargo.toml
-Cargo.lock
+
+
 .cargo/
 
 # FORENSIC DATA & LOGS
@@ -45,3 +45,4 @@ frontend/out/
 # ENVIRONMENT
 .env
 .env.*
+!target/release/aegis.exe

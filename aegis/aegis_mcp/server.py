@@ -14,6 +14,12 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
+# Force UTF-8 for console output
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 # --- PATH ROBUSTNESS ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path: sys.path.append(BASE_DIR)
@@ -37,6 +43,8 @@ ISOLATION_STATE_PATH = os.path.join(RESULTS_DIR, "isolation_state.json")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # --- MISSION-ZERO: COLD START PURGE ---
+CLARITY_STATE = {"ingested": 0, "suppressed": 0, "clarity": 100.0}
+
 def _cold_start_purge():
     """Wipes the forensic vault on startup to ensure a clean-room state."""
     print("[MISSION-ZERO] INITIATING COLD START PURGE...")
@@ -154,21 +162,74 @@ async def exfil_upload(request: Request):
             await buffer.write(content)
         
         # --- THE INGESTION FORK ---
-        if f_name.endswith(".jsonl.gz"):
+        if f_name.endswith(".jsonl.gz") or f_name.endswith(".jsonl"):
             # PATH A: RUST EDGE SENSOR LEDGER
-            print(f"[PATH-A] DECOMPRESSING RUST LEDGER: {f_name}")
+            print(f"[PATH-A] INGESTING RUST LEDGER: {f_name}")
             try:
-                with gzip.open(save_path, "rb") as f_in:
-                    content = f_in.read().decode("utf-8")
-                    for line in content.strip().split("\n"):
-                        if line:
-                            event = json.loads(line)
-                            ledger.insert(0, event)
-                    # Path A Sitrep (Automated)
-                    async with aiofiles.open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w") as f:
+                if f_name.endswith(".gz"):
+                    with gzip.open(save_path, "rb") as f_in:
+                        content_str = f_in.read().decode("utf-8")
+                else:
+                    async with aiofiles.open(save_path, "r") as f_in:
+                        content_str = await f_in.read()
+                
+                current_iso = datetime.now().isoformat()
+                signals_of_interest = []
+                for i, line in enumerate(content_str.strip().split("\n")):
+                    if line:
+                        event = json.loads(line)
+                        if "ingestion_timestamp" not in event:
+                            event["ingestion_timestamp"] = current_iso
+                        ledger.insert(0, event)
+                        CLARITY_STATE["ingested"] += 1
+                        
+                        # Identify signals of interest (Noise or High-Severity)
+                        msg = event.get("message", "")
+                        sev = event.get("severity", "").upper()
+                        
+                        # Check additional_context for nested severity if root is generic
+                        nested_context = event.get("additional_context", {})
+                        if isinstance(nested_context, dict):
+                            nested_sev = str(nested_context.get("severity", "")).upper()
+                            if nested_sev in ["HOSTILE", "CRITICAL"]:
+                                sev = nested_sev
+
+                        if "[!] NOISE DETECTED" in msg:
+                            try:
+                                parts = msg.split(" ")
+                                count = int(parts[3])
+                                CLARITY_STATE["suppressed"] += count
+                            except: pass
+                            signals_of_interest.append({
+                                "severity": "WARNING",
+                                "message": msg,
+                                "raw_data": json.dumps(event)
+                            })
+                        elif sev in ["HOSTILE", "CRITICAL"]:
+                            signals_of_interest.append({
+                                "severity": sev,
+                                "message": msg,
+                                "raw_data": json.dumps(event)
+                            })
+                
+                # Update Clarity Index
+                total = CLARITY_STATE["ingested"] + CLARITY_STATE["suppressed"]
+                if total > 0:
+                    CLARITY_STATE["clarity"] = (CLARITY_STATE["ingested"] / total) * 100
+                
+                # Generate Sitrep if we have signals
+                if signals_of_interest:
+                    with open("signals_debug.json", "w") as df:
+                        json.dump(signals_of_interest, df)
+                    sitrep = advisor.synthesize_triage(signals_of_interest)
+                    async with aiofiles.open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w", encoding="utf-8") as f:
+                        await f.write(sitrep)
+                else:
+                    async with aiofiles.open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w", encoding="utf-8") as f:
                         await f.write(f"# TACTICAL SITREP: HYDRA_INGESTED\n---\n**STATUS**: Forensic payload hydrated.\n**ASSETS**: {f_name}\n**TIMESTAMP**: {datetime.now().strftime('%H:%M:%S')}\n---")
                     
-                    results.append({"file": f_name, "status": "HYDRATED", "path": "A"})
+                    
+                results.append({"file": f_name, "status": "HYDRATED", "path": "A"})
             except Exception as e:
                 print(f"[PATH-A] ERROR: {e}")
                 results.append({"file": f_name, "status": "FAILED", "error": str(e)})
@@ -179,7 +240,7 @@ async def exfil_upload(request: Request):
             if advisor:
                 try:
                     # Read content for triage
-                    async with aiofiles.open(save_path, "r", errors="ignore") as f:
+                    async with aiofiles.open(save_path, "r", encoding="utf-8", errors="ignore") as f:
                         raw_content = await f.read()
                     
                     # Generate Pentad
@@ -187,15 +248,19 @@ async def exfil_upload(request: Request):
                     nist = advisor.generate_nist_manifest(raw_content, f_name)
                     
                     # Save artifacts
-                    async with aiofiles.open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w") as f:
-                        await f.write(brief)
-                    async with aiofiles.open(os.path.join(RESULTS_DIR, "NIST_MANIFEST.md"), "w") as f:
-                        await f.write(nist)
+                    with open(os.path.join(RESULTS_DIR, "COMMANDERS_BRIEF.md"), "w", encoding="utf-8") as f:
+                        f.write(brief)
+                    with open(os.path.join(RESULTS_DIR, "NIST_MANIFEST.md"), "w", encoding="utf-8") as f:
+                        f.write(nist)
                     
                     # Create Mock OSCAL/POAM for HUD completion
                     oscal = {"report": "OSCAL_V1_CERTIFIED", "source": f_name, "timestamp": datetime.now().isoformat()}
-                    async with aiofiles.open(os.path.join(RESULTS_DIR, "OSCAL_REPORT.json"), "w") as f:
-                        await f.write(json.dumps(oscal))
+                    with open(os.path.join(RESULTS_DIR, "OSCAL_REPORT.json"), "w", encoding="utf-8") as f:
+                        f.write(json.dumps(oscal))
+                    
+                    poam = {"status": "OPEN", "remediation": "PENDING_REVIEW", "artifact": f_name}
+                    with open(os.path.join(RESULTS_DIR, "POAM_STUB.json"), "w", encoding="utf-8") as f:
+                        f.write(json.dumps(poam))
                         
                     ledger.insert(0, {
                         "timestamp": datetime.now().strftime("%H:%M:%S"),
@@ -213,7 +278,7 @@ async def exfil_upload(request: Request):
             results.append({"file": f_name, "status": "VAULTED", "path": "OTHER"})
 
     # Save updated ledger (100k capacity)
-    async with aiofiles.open(LEDGER_PATH, "w") as f:
+    async with aiofiles.open(LEDGER_PATH, "w", encoding="utf-8") as f:
         await f.write(json.dumps(ledger[:100000]))
             
     return {"status": "SUCCESS", "ingested": results}
@@ -222,7 +287,7 @@ async def exfil_upload(request: Request):
 async def get_history():
     if not os.path.exists(LEDGER_PATH): return []
     try:
-        async with aiofiles.open(LEDGER_PATH, "r") as f:
+        async with aiofiles.open(LEDGER_PATH, "r", encoding="utf-8") as f:
             content = await f.read()
             return JSONResponse(content=json.loads(content))
     except Exception as e:
@@ -232,7 +297,7 @@ async def get_history():
 @app.get("/isolation/status")
 async def isolation_status():
     if os.path.exists(ISOLATION_STATE_PATH):
-        async with aiofiles.open(ISOLATION_STATE_PATH, "r") as f: 
+        async with aiofiles.open(ISOLATION_STATE_PATH, "r", encoding="utf-8") as f: 
             return json.loads(await f.read())
     return {"isolated": False}
 
@@ -243,9 +308,13 @@ async def toggle_isolation():
         async with aiofiles.open(ISOLATION_STATE_PATH, "r") as f: 
             state = json.loads(await f.read())
     state["isolated"] = not state["isolated"]
-    async with aiofiles.open(ISOLATION_STATE_PATH, "w") as f: 
+    async with aiofiles.open(ISOLATION_STATE_PATH, "w", encoding="utf-8") as f: 
         await f.write(json.dumps(state))
     return state
 
+@app.get("/system/health")
+async def system_health():
+    return CLARITY_STATE
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8020)

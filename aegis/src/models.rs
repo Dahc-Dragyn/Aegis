@@ -70,6 +70,7 @@ pub struct LogRecord {
     pub process_id: Option<u32>,
     pub image: Option<String>,
     pub command_line: Option<String>,
+    pub node_id: String, // NIST AU-3: Globally unique source node identifier
 }
 
 impl Default for LogRecord {
@@ -106,6 +107,7 @@ impl Default for LogRecord {
             process_id: None,
             image: None,
             command_line: None,
+            node_id: String::from("Standalone"),
         }
     }
 }
@@ -118,5 +120,34 @@ impl LogRecord {
             original_format: format.to_string(),
             ..Default::default()
         }
+    }
+
+    pub fn is_high_fidelity(&self) -> bool {
+        // 1. Severity check (Literal strings from tactical HUD)
+        if let Some(sev) = self.severity.as_deref() {
+            let s = sev.to_lowercase();
+            if s == "hostile" || s == "critical" || s == "warning" || s == "warn" || s == "error" {
+                return true;
+            }
+        }
+
+        // 2. Event ID check (NIST AU-12: Process Creation is always high-fidelity)
+        if let Some(id) = self.metadata.get("EventID") {
+            if id == "4688" || id == "1" {
+                return true;
+            }
+        }
+
+        // 3. Keyword heuristic (Heuristic Forensic Strings)
+        let msg = self.message.to_lowercase();
+        if msg.contains("mimikatz") || 
+           msg.contains("lsass") || 
+           msg.contains("wmi") || 
+           msg.contains("powershell -enc") ||
+           msg.contains("suppressed") { // Don't sample out our own noise alerts
+            return true;
+        }
+
+        false
     }
 }

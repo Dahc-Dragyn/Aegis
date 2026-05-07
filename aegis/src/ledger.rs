@@ -1,5 +1,5 @@
 use std::fs::{OpenOptions, File, remove_file};
-use std::io::{Write, Read, BufReader};
+use std::io::{Write, Read, BufReader, BufRead};
 use std::path::{PathBuf, Path};
 use std::sync::{Mutex, Arc};
 use std::collections::BTreeMap;
@@ -60,18 +60,19 @@ impl AuditLedger {
         let severity = record.severity.as_deref().unwrap_or("INFO");
         let timestamp = record.timestamp.format("%H:%M:%S%.3f");
         let message = &record.message;
+        let node = &record.node_id;
         
         match severity.to_uppercase().as_str() {
             "CRITICAL" => {
-                println!("\n🔴 [{}] ☢️ CRITICAL ALERT!", timestamp);
+                println!("\n🔴 [{}][{}] ☢️ CRITICAL ALERT!", timestamp, node);
                 println!("   MESSAGE: {}", message);
                 if let Some(vault) = &record.evidence_vault {
                     println!("   📂 Evidence Secured: {}", vault);
                 }
                 println!();
             },
-            "HIGH" => println!("⚠️ [{}] HIGH: {}", timestamp, message),
-            _ => println!("ℹ️ [{}] INFO: {}", timestamp, message),
+            "HIGH" => println!("⚠️ [{}][{}] HIGH: {}", timestamp, node, message),
+            _ => println!("ℹ️ [{}][{}] INFO: {}", timestamp, node, message),
         }
     }
 
@@ -97,9 +98,7 @@ impl AuditLedger {
     }
 
     /// Optimized batch logging for the Edge Buffer (NIST AU-12 Acceleration)
-    pub fn log_batch(&self, records: Vec<LogRecord>) -> Result<()> {
-        self.rotate_if_needed()?;
-
+    pub fn log_batch(&self, records: &[LogRecord]) -> Result<()> {
         let mut file = self.active_file.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
         let mut size = self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
         let mut graph = self.lineage_graph.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
@@ -108,14 +107,25 @@ impl AuditLedger {
             let serialized = serde_json::to_string(&record)?;
             writeln!(file, "{}", serialized)?;
             *size += serialized.len() as u64 + 1;
-            graph.add_record(&record);
+            graph.add_record(record);
         }
         
         file.sync_all()?;
-
         Ok(())
     }
 
+    pub fn get_records(&self) -> Vec<LogRecord> {
+        let mut records = Vec::new();
+        if let Ok(file) = File::open(&self.path) {
+            let reader = BufReader::new(file);
+            for line in reader.lines().flatten() {
+                if let Ok(record) = serde_json::from_str::<LogRecord>(&line) {
+                    records.push(record);
+                }
+            }
+        }
+        records
+    }
     fn rotate_if_needed(&self) -> Result<()> {
         let size = *self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
         if size >= self.max_size {

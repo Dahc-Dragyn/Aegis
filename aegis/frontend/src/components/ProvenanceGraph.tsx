@@ -9,6 +9,7 @@ interface Node {
   severity: 'hostile' | 'critical' | 'warning' | 'friendly' | 'info';
   timestamp: string;
   type: 'hostile' | 'friendly' | 'unknown';
+  node_id?: string;
 }
 
 interface Link {
@@ -28,6 +29,8 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
   const simulationRef = useRef<any>(null);
   const gRef = useRef<SVGGElement | null>(null);
   const [graphData, setGraphData] = useState<{ nodes: Node[], links: Link[] }>({ nodes: [], links: [] });
+  const [selectedNodeData, setSelectedNodeData] = useState<Node | null>(null);
+  const [governorActive, setGovernorActive] = useState(false);
 
   const fetchGraphData = async () => {
     try {
@@ -39,23 +42,34 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
       const links: Link[] = [];
       const nodeSet = new Set<string>();
 
-      const addNode = (id: string, name: string, severity: any, timestamp: string, ppid: string | null) => {
+      // --- SNR HEURISTIC: Detect Signal Storm ---
+      const noiseDetected = logs.some((l: any) => (l.message || "").includes("NOISE DETECTED"));
+      const isHighVolume = logs.length > 200 || noiseDetected;
+      setGovernorActive(isHighVolume);
+
+      const addNode = (id: string, name: string, severity: any, timestamp: string, ppid: string | null, node_id?: string) => {
         if (!id || id === "0") return;
         
+        const sevStr = (severity || 'info').toLowerCase();
         const type: 'hostile' | 'friendly' | 'unknown' = 
-          (severity === 'hostile' || severity === 'critical') ? 'hostile' :
-          (severity === 'friendly') ? 'friendly' : 'unknown';
+          (sevStr === 'hostile' || sevStr === 'critical') ? 'hostile' :
+          (sevStr === 'friendly') ? 'friendly' : 'unknown';
+
+        // GOVERNOR: Discard neutral/friendly nodes in High Volume mode
+        if (isHighVolume && type !== 'hostile' && sevStr !== 'warning') return;
 
         if (!nodeSet.has(id)) {
-          nodes.push({ id, name, severity: severity || 'info', timestamp, type });
+          nodes.push({ id, name, severity: severity || 'info', timestamp, type, node_id: node_id || 'LOCAL' });
           nodeSet.add(id);
         }
 
         if (ppid && ppid !== "0" && ppid !== "1000") {
+          // Only add links if both nodes exist (governor might have dropped parent)
           links.push({ source: ppid, target: id });
-          if (!nodeSet.has(ppid)) {
-            nodes.push({ id: ppid, name: "Unknown Parent", severity: 'info', timestamp: '', type: 'unknown' });
-            nodeSet.add(ppid);
+          if (!nodeSet.has(ppid) && (!isHighVolume || type !== 'unknown')) {
+             // We don't add "Unknown Parent" in high volume mode if it's likely to be noise
+             // but if the child is hostile, we might want the link?
+             // Actually, for simplicity, we just link what we have.
           }
         }
       };
@@ -74,13 +88,13 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
               const pid = parseInt(data.NewProcessId, 16).toString();
               const ppid = parseInt(data.ProcessId, 16).toString();
               const name = data.NewProcessName?.split('\\').pop() || "Unknown";
-              addNode(pid, name, log.severity, log.timestamp, ppid);
+              addNode(pid, name, log.severity, log.timestamp, ppid, log.node_id);
             } else if (eventId === 1) {
               // Sysmon: Process Creation
               const pid = data.ProcessId?.toString();
               const ppid = data.ParentProcessId?.toString();
               const name = data.Image?.split('\\').pop() || "Unknown";
-              addNode(pid, name, log.severity, log.timestamp, ppid);
+              addNode(pid, name, log.severity, log.timestamp, ppid, log.node_id);
             }
           }
         } else if (typeof eventObj === 'string') {
@@ -88,17 +102,16 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
           const match = eventObj.match(/Process Created: (.*?) \(PID: (\d+), Parent: (\d+)\)/);
           if (match) {
             const [_, name, pid, ppid] = match;
-            addNode(pid, name, log.severity, log.timestamp, ppid);
+            addNode(pid, name, log.severity, log.timestamp, ppid, log.node_id);
           }
         }
       });
 
-      // --- FRONTEND GOVERNOR: Limit to 500 active nodes ---
-      const limitedNodes = nodes.slice(0, 500);
-      const activeIds = new Set(limitedNodes.map(n => n.id));
-      const limitedLinks = links.filter(l => activeIds.has(l.source as string) && activeIds.has(l.target as string));
+      // --- FRONTEND GOVERNOR: Filter dead links and limit ---
+      const activeIds = new Set(nodes.map(n => n.id));
+      const validLinks = links.filter(l => activeIds.has(l.source as string) && activeIds.has(l.target as string));
 
-      setGraphData({ nodes: limitedNodes, links: limitedLinks });
+      setGraphData({ nodes: nodes.slice(0, 500), links: validLinks.slice(0, 1000) });
     } catch (e) {
       console.error("[HUD] GRAPH_FETCH_ERROR:", e);
     }
@@ -124,12 +137,14 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
     }
 
     // --- TUNED D3 PHYSICS: Faster convergence for dense data ---
+    const isGovernorEngaged = graphData.nodes.length > 200;
+    
     const simulation = d3.forceSimulation(graphData.nodes as any)
       .force("link", d3.forceLink(graphData.links).id((d: any) => d.id).distance(80))
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("charge", d3.forceManyBody().strength(isGovernorEngaged ? -50 : -300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(40))
-      .alphaDecay(0.05)
+      .alphaDecay(isGovernorEngaged ? 0.08 : 0.05)
       .velocityDecay(0.4);
 
     const g = svg.append("g");
@@ -240,6 +255,7 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
+      setSelectedNodeData(d);
     }
 
     function dragged(event: any, d: any) {
@@ -289,9 +305,39 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
               <div className="w-2.5 h-2.5 bg-[#FFFF00] border border-[#7f7f00]" /> Unknown
           </div>
       </div>
-      <div className="absolute top-2 right-2 text-[8px] font-mono text-slate-600 uppercase tracking-tighter">
-        D3_NODE_GOVERNOR: {graphData.nodes.length}/500 | FPS: 60
+      <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+        <div className="text-[8px] font-mono text-slate-600 uppercase tracking-tighter">
+          D3_NODE_GOVERNOR: {graphData.nodes.length}/500 | FPS: 60
+        </div>
+        {governorActive && (
+          <div className="bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 animate-pulse">
+            <span className="text-amber-500 text-[8px] font-black tracking-widest uppercase">
+              GOVERNOR ACTIVE: SIGNAL PRIORITY MODE
+            </span>
+          </div>
+        )}
       </div>
+      
+      {/* ASSET ORIGIN SIDE PANEL */}
+      {selectedNodeData && (
+        <div className="absolute top-2 left-2 w-56 bg-slate-950/90 border border-cyan-500/30 p-4 shadow-xl backdrop-blur-md">
+          <h3 className="text-cyan-400 font-black text-xs uppercase tracking-[0.2em] mb-3 border-b border-cyan-500/30 pb-1">Asset Origin</h3>
+          <div className="space-y-2 font-mono text-[10px]">
+            <div className="flex justify-between border-b border-slate-800 pb-1">
+              <span className="text-slate-500">Node ID:</span>
+              <span className={`font-bold uppercase ${selectedNodeData.node_id === 'Alpha' ? 'text-slate-400' : 'text-slate-500'}`}>[{selectedNodeData.node_id}]</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-800 pb-1">
+              <span className="text-slate-500">Process:</span>
+              <span className="text-slate-300 truncate max-w-[100px] text-right" title={selectedNodeData.name}>{selectedNodeData.name}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-800 pb-1">
+              <span className="text-slate-500">Time:</span>
+              <span className="text-slate-300 truncate max-w-[100px] text-right">{selectedNodeData.timestamp}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

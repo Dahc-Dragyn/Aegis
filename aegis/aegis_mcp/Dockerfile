@@ -28,3 +28,5 @@ EXPOSE 8000
 
 # Run with uvicorn
 CMD ["uvicorn", "aegis_mcp.server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+
