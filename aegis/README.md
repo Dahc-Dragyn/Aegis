@@ -22,8 +22,9 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 *   **Persistence**: NIST AU-9 compliant hardware-synced logging and AU-6 sealed receipts for forensic integrity.
 
 ### **3. The Command Hub & Tactical HUD**
-*   **Exfil Bridge**: High-performance Python Manifold with async GZIP decompression for field artifacts.
-*   **Tactical HUD**: Next.js C4ISR interface featuring **DOM Virtualization** and **Hydration-Stable Dynamic Layouts** (react-grid-layout) for 100k+ event streams.
+*   **Exfil Bridge**: High-performance Python Manifold with async GZIP decompression for field artifacts. Supports **Split-Site Synchronization** between host-based sensors and containerized hubs.
+*   **Tactical HUD**: Next.js C4ISR interface featuring **DOM Virtualization**, **60FPS Physics Governor**, and **Theater Mode** (React Portals) for immersive forensic deep-dives.
+*   **Signal Silence**: 1:100 noise suppression algorithm (SNR) to maintain UI stability during high-velocity telemetry floods (50k+ EPS).
 *   **AI Advisor**: Model-locked to `gemini-1.5-flash` for regulatory-grounded triage and automated SITREP generation.
 
 ---
@@ -35,16 +36,16 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 2. Execute: `.\aegis.exe <PATH_TO_LOGS> --offline --profile 53`
 3. **Result**: Full NIST-compliant forensic audit and compressed `.jsonl.gz` ledger generated on-disk.
 
-### **Tier 2: Enterprise Command (The Exfil Bridge)**
-1. Launch Command Hub: `python aegis_mcp/server.py`
-2. Launch Tactical HUD: `cd frontend && npm run dev`
-3. **Action**: Drag and drop field artifacts (`.jsonl.gz`) into the HUD.
-4. **Result**: Real-time hydration and AI-synthesized SITREPs.
+### **Tier 2: The Split-Site Manifold (Production Standard)**
+1. **Edge Deployment**: Run `aegis.exe` natively on the Windows host for direct forensic API access.
+2. **Hub Deployment**: Run the containerized bridge: `docker-compose up -d`.
+3. **Synchronization**: Automated exfiltration from the native sensor to the containerized bridge via `/exfil/upload`.
+4. **Result**: Real-time hydration of the Tactical HUD with 1:100 noise suppression (Signal Silence) active.
 
-### **Tier 3: Strategic Overwatch (Cloud/Container)**
+### **Tier 3: Strategic Overwatch (Containerized Cluster)**
 1. Launch: `docker-compose up --build -d`
 2. **Connectivity**: Access HUD at `http://localhost:3000`.
-3. **Resilience**: Verified "Live Fire" protocol supports automated reconciliation post-blackout.
+3. **Resilience**: Verified "Live Fire" protocol supports automated reconciliation post-blackout using `redb` disk-spillover.
 
 ---
 
@@ -55,4 +56,4 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 *   **Audit-Ready**: Native OSCAL, MANIFEST, and AU-6 receipt generation.
 
 ---
-**Status: 🟢 MISSION READY | CONDITION 1 VERIFIED | LIVE FIRE VALIDATED | Q2 2026**
+**Status: 🟢 MISSION READY | CONDITION 1 VERIFIED | GHOST PIVOT SUCCESSFUL | Q2 2026**
