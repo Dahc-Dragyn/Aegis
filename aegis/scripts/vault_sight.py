@@ -8,7 +8,7 @@ def push_artifact(filename, lines):
     print(f"[VAULT] GENERATING: {filename}")
     content = "\\n".join(lines)
     # Using a safer shell string for docker exec
-    cmd = f"docker exec aegis_sentinel sh -c \"echo '{content}' > /app/forensic_results/{filename}\""
+    cmd = f"docker exec aegis_sentinel sh -c \"echo '{content}' > /app/artifacts/{filename}\""
     subprocess.run(cmd, shell=True)
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ HUB_URL = "http://localhost:8080/ingest"
 
 def update_sitrep(text):
     print(f"[HUD] UPDATING SITREP: {text}")
-    cmd = f"docker exec aegis_sentinel sh -c \"echo '# Commander Brief\\n\\n{text}' > /app/forensic_results/COMMANDERS_BRIEF.md\""
+    cmd = f"docker exec aegis_sentinel sh -c \"echo '# Commander Brief\\n\\n{text}' > /app/artifacts/COMMANDERS_BRIEF.md\""
     subprocess.run(cmd, shell=True)
 
 def fire_signal(event, severity):

@@ -16,7 +16,7 @@ except ImportError:
 
 # --- CONFIGURATION ---
 MODEL_NAME = "gemini-2.0-flash" # Defaulting to available flash model
-RESULTS_DIR = "forensic_results"
+RESULTS_DIR = "artifacts"
 COMMANDER_BRIEF_OUTPUT = "COMMANDER_BRIEF.md"
 
 def get_latest_ledger():

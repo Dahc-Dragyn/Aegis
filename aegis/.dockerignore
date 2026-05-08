@@ -15,8 +15,8 @@ logs/
 *.audit
 *.jsonl
 *.gz
-forensic_results/vault_*
-forensic_results/telemetry_ledger.json
+artifacts/vault_*
+artifacts/telemetry_ledger.json
 aegis.audit.jsonl
 aegis.edge.db
 aegis.compliance.db

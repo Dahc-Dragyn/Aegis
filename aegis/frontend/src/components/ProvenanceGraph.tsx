@@ -34,7 +34,7 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
 
   const fetchGraphData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/telemetry/history');
+      const response = await fetch('/telemetry/history');
       if (!response.ok) return;
       const logs = await response.json();
       

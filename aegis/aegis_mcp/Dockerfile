@@ -17,7 +17,7 @@ COPY triage/ ./triage/
 COPY intel/ ./intel/
 
 # Create results directory for persistence
-RUN mkdir -p /app/forensic_results
+RUN mkdir -p /app/artifacts
 
 # Set environment variables
 ENV PYTHONPATH=/app

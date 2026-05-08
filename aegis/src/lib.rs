@@ -19,6 +19,7 @@ pub mod crosswalk;
 pub mod crosswalk_ai;
 pub mod redaction;
 pub mod extraction;
+pub mod server;
 
 pub use nist_engine::{NistEngine, ControlMapping, PostureEvent, AegisError};
 

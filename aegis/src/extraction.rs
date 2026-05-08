@@ -11,7 +11,7 @@ pub struct TriggeredExtraction;
 impl TriggeredExtraction {
     pub fn capture_volatile_evidence(tag: &str, pid: Option<u32>) -> Result<String> {
         let timestamp = Local::now().format("%Y%m%d_%H%M%S").to_string();
-        let vault_dir = format!("forensic_results/vault_{}_{}", tag, timestamp);
+        let vault_dir = format!("artifacts/vault_{}_{}", tag, timestamp);
         let vault_path = PathBuf::from(&vault_dir);
 
         if !vault_path.exists() {

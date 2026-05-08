@@ -47,7 +47,7 @@ fn test_forensic_human_readability_regression() {
         }
         
         // Load the generated Commander's Brief from the temp directory
-        let brief_path = temp_path.join("forensic_results").join("COMMANDERS_BRIEF.md");
+        let brief_path = temp_path.join("artifacts").join("COMMANDERS_BRIEF.md");
         let brief_content = fs::read_to_string(&brief_path)
             .expect("Aegis did not generate COMMANDERS_BRIEF.md");
             

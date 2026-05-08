@@ -47,6 +47,11 @@ clap = { version = "4.4", features = ["derive"] }
 linemux = "0.3"
 futures = "0.3.32"
 reqwest = { version = "0.12", features = ["json", "blocking"] }
+axum = { version = "0.7", features = ["multipart"] }
+tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
+rust-embed = { version = "8.0", features = ["interpolate-folder-path"] }
+mime_guess = "2.0"
+webbrowser = "1.0.1"
 windows = { version = "0.52", features = [
     "Win32_System_EventLog",
     "Win32_Foundation",

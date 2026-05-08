@@ -1,0 +1,27 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "fd87f8d8-94ff-4f53-b19b-cc14c853fddc",
+    "metadata": {
+      "title": "Aegis Sentinel: Managed OSCAL PoAM",
+      "last-modified": "2026-05-08T14:07:29.241571900-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "poam-items": [
+      {
+        "uuid": "4161b09b-84b1-4c21-b58a-b65db60c79fe",
+        "incident-id": null,
+        "title": "PoAM Item: AU-9 [Tampering] - aegis.edge-node.01",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: e2d41ae2268b9947bfde28533827c169a9d6ef14266a46d50137682b00dd68ab.",
+        "status": "Draft",
+        "occurrence-count": 1,
+        "entry-timestamp": "2026-05-08T10:33:51.974062400-07:00",
+        "last-seen": "2026-05-08T10:33:51.974062400-07:00",
+        "impacted-system": "aegis.edge-node.01",
+        "evidence-hash": "e2d41ae2268b9947bfde28533827c169a9d6ef14266a46d50137682b00dd68ab",
+        "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
+        "correlated-events": []
+      }
+    ]
+  }
+}

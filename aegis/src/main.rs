@@ -82,8 +82,16 @@ struct Cli {
     check_only: bool,
 
     /// Output directory for artifacts
-    #[arg(short, long, default_value = "artifacts")]
+    #[arg(short, long, default_value = "forensic_results")]
     output_dir: String,
+
+    /// Operational Mode (standalone, push)
+    #[arg(short, long, default_value = "standalone")]
+    mode: String,
+
+    /// Automatically open the browser to the HUD
+    #[arg(short, long, default_value_t = false)]
+    auto_open: bool,
 }
 
 fn calculate_file_hash(path: &PathBuf) -> Result<String> {
@@ -135,6 +143,27 @@ async fn main() -> Result<()> {
         }
     }
 
+    // --- STANDALONE HUB ACTIVATION (LONE SENTINEL) ---
+    if cli.mode == "standalone" {
+        let results_dir = PathBuf::from(&cli.output_dir);
+        let server_dir = results_dir.clone();
+        let auto_open = cli.auto_open;
+        
+        tokio::spawn(async move {
+            if let Err(e) = aegis::server::start_server(server_dir, 8080).await {
+                eprintln!("❌ Aegis Server Error: {}", e);
+            }
+        });
+
+        if auto_open {
+            // Give the server a moment to bind
+            tokio::time::sleep(Duration::from_millis(500)).await;
+            if let Err(e) = webbrowser::open("http://localhost:8080") {
+                eprintln!("⚠️ Warning: Failed to open browser automatically: {}", e);
+            }
+        }
+    }
+
     if cfg!(windows) && !cli.offline {
         println!("🛡️ Aegis: Initializing forensic pre-flight checks...");
         match run_preflight_checks().await {
@@ -170,9 +199,18 @@ async fn main() -> Result<()> {
             let candidates = vec![PathBuf::from("auth.log"), PathBuf::from("cloudlogs.json")];
             let found: Vec<PathBuf> = candidates.into_iter().filter(|p| p.exists()).collect();
             if found.is_empty() {
-                return Err(anyhow::anyhow!("No log files found. Provide one or more via 'aegis.exe <PATH1> <PATH2> ...' or use --watch for live events."));
+                if cli.mode == "standalone" {
+                    println!("📡 Aegis: [PURE-HUB] No local logs provided. Monitoring Tactical Stream only.");
+                    // Return a dummy path to satisfy the rest of the initialization, 
+                    // or we need to refactor more. 
+                    // Let's use a non-existent path but handle it.
+                    vec![PathBuf::from("STANDALONE_HUB")]
+                } else {
+                    return Err(anyhow::anyhow!("No log files found. Provide one or more via 'aegis.exe <PATH1> <PATH2> ...' or use --watch for live events."));
+                }
+            } else {
+                found
             }
-            found
         }
     };
 
@@ -561,6 +599,13 @@ async fn main() -> Result<()> {
         let _ = s.save_current_offset();
     }
     
+    if cli.mode == "standalone" {
+        println!("🚀 Aegis: Hub is active. Press Ctrl+C to terminate mission.");
+        loop {
+            tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
+        }
+    }
+
     println!("🛡️ Project Aegis: Audit Finalized Successfully.");
     Ok(())
 }

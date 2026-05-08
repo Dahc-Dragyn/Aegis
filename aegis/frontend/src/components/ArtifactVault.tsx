@@ -22,7 +22,7 @@ export default function ArtifactVault() {
   useEffect(() => {
     const fetchArtifacts = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/artifacts?t=${Date.now()}`);
+        const response = await fetch(`/artifacts?t=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
           setArtifacts(data);
@@ -54,7 +54,7 @@ export default function ArtifactVault() {
     setIsViewing(true);
     setArtifactContent("### STREAMING REAL-TIME INTELLIGENCE...");
     try {
-      const response = await fetch(`http://127.0.0.1:8000${artifact.path}?t=${Date.now()}`);
+      const response = await fetch(`${artifact.path}?t=${Date.now()}`);
       const data = await response.json();
       setArtifactContent(data.content || "ERROR: NO CONTENT RETURNED.");
     } catch (error) {
@@ -160,7 +160,7 @@ export default function ArtifactVault() {
               <div className="flex items-center gap-4">
                 {selectedArtifact && (
                   <a 
-                    href={`http://localhost:8000/artifacts/view/${selectedArtifact.name}`}
+                    href={`/artifacts/view/${selectedArtifact.name}`}
                     target="_blank"
                     className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-black uppercase tracking-[0.2em] rounded border border-slate-700 transition-all flex items-center gap-2 group"
                   >

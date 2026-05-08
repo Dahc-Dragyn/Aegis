@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 # 2. Workspace Setup
 WORKDIR /app
-RUN mkdir -p /app/forensic_results /app/triage /app/aegis_mcp
+RUN mkdir -p /app/artifacts /app/triage /app/aegis_mcp
 
 # 3. Python Environment
 COPY aegis_mcp/requirements.txt .

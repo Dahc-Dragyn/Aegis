@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = aegis::config::AppConfig::default_config();
     let engine = Arc::new(aegis::NistEngine::new(config.clone())?);
     let monitor = Arc::new(aegis::monitor::PostureMonitor::new());
-    let audit_path = PathBuf::from("artifacts/snr_stress_test.jsonl");
+    let audit_path = PathBuf::from("forensic_results/snr_stress_test.jsonl");
     if audit_path.exists() {
         let _ = std::fs::remove_file(&audit_path);
     }

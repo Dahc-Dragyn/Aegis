@@ -13,7 +13,7 @@ Aegis has successfully completed the "Final Certification Gauntlet," demonstrati
 - **Objective**: Ensure that forensic evidence is captured, hashed, and retained in a tamper-evident manner.
 - **Success Criteria**: Automated creation of a forensic vault with cryptographic manifest.
 - **Verification**: 
-    - [x] Generated `forensic_results/vault_RegistryExfiltration_...` containing `SAM.hiv`.
+    - [x] Generated `artifacts/vault_RegistryExfiltration_...` containing `SAM.hiv`.
     - [x] Verified `forensic_evidence_manifest.md` with SHA-256 binary fingerprints for all captured artifacts.
     - [x] Sealed results in a signed `.jsonl.gz` forensic ledger.
 

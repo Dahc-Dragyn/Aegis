@@ -32,7 +32,7 @@ export default function IngestionManifold({ onComplete }: { onComplete?: () => v
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for large logs
 
-      const response = await fetch(`http://127.0.0.1:8000/exfil/upload?t=${Date.now()}`, {
+      const response = await fetch(`/exfil/upload?t=${Date.now()}`, {
         method: 'POST',
         body: formData,
         signal: controller.signal

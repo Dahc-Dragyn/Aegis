@@ -23,7 +23,7 @@ tests/Violation_logs/
 audit_temp.txt
 batch_audit_results.json
 gauntlet_results/
-forensic_results/
+artifacts/
 receipts/
 scratch/
 draft_tickets/

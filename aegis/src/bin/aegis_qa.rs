@@ -53,7 +53,7 @@ fn main() -> anyhow::Result<()> {
 
         match run_status {
             Ok(output) if output.status.success() => {
-                let brief_path = base_dir.join("forensic_results").join("COMMANDERS_BRIEF.md");
+                let brief_path = base_dir.join("artifacts").join("COMMANDERS_BRIEF.md");
                 let brief_content = fs::read_to_string(&brief_path).unwrap_or_default();
                 
                 // Extract Title

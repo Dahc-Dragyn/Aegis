@@ -12,19 +12,21 @@ import remarkGfm from 'remark-gfm';
 import { List } from 'react-window';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 import dynamic from 'next/dynamic';
-const RGL: any = require('react-grid-layout');
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-const GridWrapper = (props: any) => {
-  const { children, ...rest } = props;
-  return <div {...rest}>{children}</div>;
-};
-
 const ResponsiveGridLayout = dynamic(
   async () => {
-    const { Responsive, WidthProvider } = (await import('react-grid-layout')) as any;
+    // In RGL 2.x, the v1-style HOCs and components are moved to /legacy
+    const mod = await import('react-grid-layout/legacy');
+    const Responsive = mod.Responsive;
+    const WidthProvider = mod.WidthProvider;
+    
+    if (!WidthProvider || !Responsive) {
+      throw new Error("FAILED_TO_LOAD_RGL_LEGACY_COMPONENTS");
+    }
+    
     const Component = WidthProvider(Responsive);
     return (props: any) => <Component {...props} />;
   },
@@ -147,10 +149,10 @@ function TacticalHUD() {
     try {
       const t = Date.now();
       const [histRes, sitRes, isoRes, healthRes] = await Promise.all([
-        fetch(`http://127.0.0.1:8000/telemetry/history?t=${t}`),
-        fetch(`http://127.0.0.1:8000/sitrep?t=${t}`),
-        fetch(`http://127.0.0.1:8000/isolation/status?t=${t}`),
-        fetch(`http://127.0.0.1:8000/system/health?t=${t}`)
+        fetch(`/telemetry/history?t=${t}`),
+        fetch(`/sitrep?t=${t}`),
+        fetch(`/isolation/status?t=${t}`),
+        fetch(`/system/health?t=${t}`)
       ]);
       if (histRes.ok) {
         const histData = await histRes.json();
@@ -194,7 +196,7 @@ function TacticalHUD() {
     setIsHunting(true);
     setShowHuntAlert(true);
     try {
-      await fetch('http://127.0.0.1:8000/snapshot', { method: 'POST' });
+      await fetch('/snapshot', { method: 'POST' });
       setTimeout(refreshData, 500);
     } catch (e) {
       console.error("[HUD] SNAPSHOT_ERROR:", e);

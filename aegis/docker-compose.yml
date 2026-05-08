@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./forensic_results:/app/forensic_results
+      - ./artifacts:/app/artifacts
       - ./aegis_mcp:/app/aegis_mcp
       - ./triage:/app/triage
     restart: always
