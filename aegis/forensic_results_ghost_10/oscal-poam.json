@@ -1,0 +1,27 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "8a50845c-6a48-4f2f-8c84-ffd52f77fb43",
+    "metadata": {
+      "title": "Aegis Sentinel: Managed OSCAL PoAM",
+      "last-modified": "2026-05-10T07:31:17.997794600-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "poam-items": [
+      {
+        "uuid": "6504ed8d-bda7-4126-ae3d-782f2deb9abc",
+        "incident-id": null,
+        "title": "PoAM Item: SI-4 [WMI Persistence] - DC1.insecurebank.local",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: 396042935258e35fb05a7b92d3b134ee6a3e67ca3a57c711f0f456dc756c3261.",
+        "status": "Draft",
+        "occurrence-count": 1,
+        "entry-timestamp": "2019-05-16T09:08:40.360593-07:00",
+        "last-seen": "2019-05-16T09:08:40.360593-07:00",
+        "impacted-system": "DC1.insecurebank.local",
+        "evidence-hash": "396042935258e35fb05a7b92d3b134ee6a3e67ca3a57c711f0f456dc756c3261",
+        "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
+        "correlated-events": []
+      }
+    ]
+  }
+}

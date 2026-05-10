@@ -22,13 +22,15 @@ struct Asset;
 pub struct ServerState {
     pub results_dir: PathBuf,
     pub ledger_path: PathBuf,
+    pub offline_mode: bool,
 }
 
-pub async fn start_server(results_dir: PathBuf, port: u16) -> Result<()> {
+pub async fn start_server(results_dir: PathBuf, port: u16, offline_mode: bool) -> Result<()> {
     let ledger_path = results_dir.join("telemetry_ledger.json");
     let state = Arc::new(ServerState { 
         results_dir: results_dir.clone(),
         ledger_path,
+        offline_mode,
     });
 
     // Cold Start Purge (Mission-Zero)
@@ -45,6 +47,7 @@ pub async fn start_server(results_dir: PathBuf, port: u16) -> Result<()> {
         .route("/exfil/upload", post(exfil_upload))
         .route("/telemetry/history", get(get_history))
         .route("/system/health", get(get_health))
+        .route("/system/status", get(get_system_status))
         .route("/isolation/status", get(get_isolation_status))
         .route("/isolation/toggle", post(toggle_isolation))
         .fallback(static_handler)
@@ -189,6 +192,14 @@ async fn get_history(State(state): State<Arc<ServerState>>) -> Json<Value> {
 async fn get_health() -> Json<Value> {
     // In standalone, we might want to calculate this from redb or memory
     Json(json!({ "ingested": 0, "suppressed": 0, "clarity": 100.0 }))
+}
+
+async fn get_system_status(State(state): State<Arc<ServerState>>) -> Json<Value> {
+    Json(json!({
+        "offline_mode": state.offline_mode,
+        "results_dir": state.results_dir.to_string_lossy(),
+        "timestamp": Local::now().to_rfc3339()
+    }))
 }
 
 async fn get_isolation_status(State(state): State<Arc<ServerState>>) -> Json<Value> {

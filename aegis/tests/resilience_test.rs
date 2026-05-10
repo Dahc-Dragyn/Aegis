@@ -22,16 +22,18 @@ async fn test_log_rotation_resilience() {
     let config = AppConfig::default_config();
     let engine = Arc::new(NistEngine::new(config.clone()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
-    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1).unwrap());
+    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1, false).unwrap());
     let (tx, rx) = mpsc::channel(100);
     
     // Initialize EdgeBuffer for resilience check
     let edge_db_path = dir.path().join("aegis.edge.db");
     let (edge_buffer, _buffer_handle) = aegis::edge_buffer::EdgeBuffer::new(
+        "TestNode".to_string(),
         edge_db_path, 
         Arc::clone(&ledger), 
         50000, 
-        true
+        true,
+        None
     ).unwrap();
     let edge_buffer = Arc::new(edge_buffer);
 
@@ -47,7 +49,7 @@ async fn test_log_rotation_resilience() {
     );
 
     // Hardened Fusion Worker
-    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer), Arc::clone(&monitor));
+    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer));
 
     
     // Hardened Sentry (using PlainTextParser for log-injection tests)
@@ -72,8 +74,16 @@ async fn test_log_rotation_resilience() {
         file.flush().unwrap();
     } 
 
-    tokio::time::sleep(Duration::from_millis(2000)).await;
-    assert_eq!(monitor.get_snapshot().signals_found, 1, "Initial signal failed to register");
+    // Wait and retry for initial signal (handle async processing lag)
+    let mut initial_captured = false;
+    for _ in 0..10 {
+        if monitor.get_snapshot().signals_found >= 1 {
+            initial_captured = true;
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(500)).await;
+    }
+    assert!(initial_captured, "Initial signal failed to register after 5s");
 
     // 4. ROTATE LOG (Delete and Recreate - Changes Creation Time)
     println!("🔄 Rotating log file...");

@@ -1,0 +1,76 @@
+{
+  "assessment-results": {
+    "uuid": "2a31b3bd-2934-46fa-94b2-6faff5ae74c7",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-10T07:33:06.575703600-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "8b636e03-c230-4f17-bc46-6acbf0d2dcda",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 3 signals (Aggregated).",
+        "start": "2026-05-10T07:33:06.575699900-07:00",
+        "observations": [
+          {
+            "uuid": "fe738150-ad6b-4a36-aba1-8bf68389c286",
+            "description": "NIST Control Capture: SI-4 [LOLBAS]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 2,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Sysmon\",\n          \"Guid\": \"5770385F-C22A-43E0-BF4C-06F5698FFBD9\"\n        }\n      },\n      \"EventID\": 1,\n      \"Version\": 5,\n      \"Level\": 4,\n      \"Task\": 1,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8000000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2020-10-13T20:11:42.278672Z\"\n        }\n      },\n      \"EventRecordID\": 2196442,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 5340,\n          \"ThreadID\": 7092\n        }\n      },\n      \"Channel\": \"Microsoft-Windows-Sysmon/Operational\",\n      \"Computer\": \"LAPTOP-JU4M3I0E\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-18\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"RuleName\": \"\",\n      \"UtcTime\": \"2020-10-13 20:11:42.277\",\n      \"ProcessGuid\": \"00247C92-09FE-5F86-0000-0010AC861401\",\n      \"ProcessId\": 6372,\n      \"Image\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\",\n      \"FileVersion\": \"10.0.18362.449 (WinBuild.160101.0800)\",\n      \"Description\": \"Windows Command Processor\",\n      \"Product\": \"Microsoft® Windows® Operating System\",\n      \"Company\": \"Microsoft Corporation\",\n      \"OriginalFileName\": \"Cmd.Exe\",\n      \"CommandLine\": \"c:\\\\windows\\\\system32\\\\cmd.exe\",\n      \"CurrentDirectory\": \"c:\\\\Windows\\\\System32\\\\\",\n      \"User\": \"LAPTOP-JU4M3I0E\\\\bouss\",\n      \"LogonGuid\": \"00247C92-DE70-5F85-0000-002059F80600\",\n      \"LogonId\": \"0x6f859\",\n      \"TerminalSessionId\": 1,\n      \"IntegrityLevel\": \"Medium\",\n      \"Hashes\": \"SHA1=8DCA9749CD48D286950E7A9FA1088C937CBCCAD4,MD5=D7AB69FAD18D4A643D84A271DFC0DBDF,SHA256=FF79D3C4A0B7EB191783C323AB8363EBD1FD10BE58D8BCC96B07067743CA81D5,IMPHASH=272245E2988E1E430500B852C4FB5E18\",\n      \"ParentProcessGuid\": \"00247C92-09FE-5F86-0000-001051841401\",\n      \"ParentProcessId\": 1716,\n      \"ParentImage\": \"C:\\\\Windows\\\\System32\\\\wuauclt.exe\",\n      \"ParentCommandLine\": \"wuauclt.exe   /UpdateDeploymentProvider C:\\\\ProgramData\\\\Intel\\\\helpa.dll /RunHandlerComServer\"\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Sysmon\",\n          \"Guid\": \"5770385F-C22A-43E0-BF4C-06F5698FFBD9\"\n        }\n      },\n      \"EventID\": 1,\n      \"Version\": 5,\n      \"Level\": 4,\n      \"Task\": 1,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8000000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2020-10-13T20:11:42.279861Z\"\n        }\n      },\n      \"EventRecordID\": 2196443,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 5340,\n          \"ThreadID\": 7092\n        }\n      },\n      \"Channel\": \"Microsoft-Windows-Sysmon/Operational\",\n      \"Computer\": \"LAPTOP-JU4M3I0E\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-18\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"RuleName\": \"\",\n      \"UtcTime\": \"2020-10-13 20:11:42.277\",\n      \"ProcessGuid\": \"00247C92-09FE-5F86-0000-0010AD861401\",\n      \"ProcessId\": 7648,\n      \"Image\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\",\n      \"FileVersion\": \"10.0.18362.449 (WinBuild.160101.0800)\",\n      \"Description\": \"Windows Command Processor\",\n      \"Product\": \"Microsoft® Windows® Operating System\",\n      \"Company\": \"Microsoft Corporation\",\n      \"OriginalFileName\": \"Cmd.Exe\",\n      \"CommandLine\": \"c:\\\\windows\\\\system32\\\\cmd.exe\",\n      \"CurrentDirectory\": \"c:\\\\Windows\\\\System32\\\\\",\n      \"User\": \"LAPTOP-JU4M3I0E\\\\bouss\",\n      \"LogonGuid\": \"00247C92-DE70-5F85-0000-002059F80600\",\n      \"LogonId\": \"0x6f859\",\n      \"TerminalSessionId\": 1,\n      \"IntegrityLevel\": \"Medium\",\n      \"Hashes\": \"SHA1=8DCA9749CD48D286950E7A9FA1088C937CBCCAD4,MD5=D7AB69FAD18D4A643D84A271DFC0DBDF,SHA256=FF79D3C4A0B7EB191783C323AB8363EBD1FD10BE58D8BCC96B07067743CA81D5,IMPHASH=272245E2988E1E430500B852C4FB5E18\",\n      \"ParentProcessGuid\": \"00247C92-09FE-5F86-0000-001051841401\",\n      \"ParentProcessId\": 1716,\n      \"ParentImage\": \"C:\\\\Windows\\\\System32\\\\wuauclt.exe\",\n      \"ParentCommandLine\": \"wuauclt.exe   /UpdateDeploymentProvider C:\\\\ProgramData\\\\Intel\\\\helpa.dll /RunHandlerComServer\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          },
+          {
+            "uuid": "d89e865c-3115-4165-9a3c-a904bab20a3f",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 1,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Sysmon\",\n          \"Guid\": \"5770385F-C22A-43E0-BF4C-06F5698FFBD9\"\n        }\n      },\n      \"EventID\": 7,\n      \"Version\": 3,\n      \"Level\": 4,\n      \"Task\": 7,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8000000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2020-10-13T20:11:42.269224Z\"\n        }\n      },\n      \"EventRecordID\": 2196441,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 5340,\n          \"ThreadID\": 7092\n        }\n      },\n      \"Channel\": \"Microsoft-Windows-Sysmon/Operational\",\n      \"Computer\": \"LAPTOP-JU4M3I0E\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-18\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"RuleName\": \"\",\n      \"UtcTime\": \"2020-10-13 20:11:42.268\",\n      \"ProcessGuid\": \"00247C92-09FE-5F86-0000-001051841401\",\n      \"ProcessId\": 1716,\n      \"Image\": \"C:\\\\Windows\\\\System32\\\\wuauclt.exe\",\n      \"ImageLoaded\": \"C:\\\\ProgramData\\\\Intel\\\\helpa.dll\",\n      \"FileVersion\": \"?\",\n      \"Description\": \"?\",\n      \"Product\": \"?\",\n      \"Company\": \"?\",\n      \"OriginalFileName\": \"?\",\n      \"Hashes\": \"SHA1=AF7687063F8EE1C8FD57D1A5FE6FA4F28A53C434,MD5=6AB43126243BE72FF7D446D5A496AA76,SHA256=56C5AFF6AC04BDF86EDBC4F0D0F9581F250A4C97DD60FD1179F153AC20230920,IMPHASH=8DEF796746DD54062D5B3186EEF39356\",\n      \"Signed\": \"false\",\n      \"Signature\": \"\",\n      \"SignatureStatus\": \"Unavailable\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "ddb6419d-b23e-420a-860d-7f6215cc3d26",
+            "title": "Compliance Deviation: SI-4 [LOLBAS]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [LOLBAS]. Total incidents: 2.",
+            "occurrence-count": 2,
+            "incident-id": "8137a690-1041-44aa-975a-06f572e3173a",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "742b879b-dc36-455d-9263-3194408d1fa4",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 1.",
+            "occurrence-count": 1,
+            "incident-id": "8137a690-1041-44aa-975a-06f572e3173a",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

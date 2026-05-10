@@ -17,10 +17,17 @@ async fn test_edge_resilience_spillover() {
     let engine = Arc::new(NistEngine::new(AppConfig::default_config()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
     let config = AppConfig::default_config();
-    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1).unwrap());
+    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 1, false).unwrap());
 
     // 1. Initialize EdgeBuffer in OFFLINE mode
-    let (buffer, _handle) = EdgeBuffer::new(edge_db_path.clone(), Arc::clone(&ledger), 100, false).unwrap();
+    let (buffer, _handle) = EdgeBuffer::new(
+        "TestNode".to_string(),
+        edge_db_path.clone(), 
+        Arc::clone(&ledger), 
+        100, 
+        false,
+        None
+    ).unwrap();
     let buffer = Arc::new(buffer);
 
     // 2. Push records (should spill to disk)

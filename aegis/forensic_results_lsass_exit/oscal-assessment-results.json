@@ -1,0 +1,50 @@
+{
+  "assessment-results": {
+    "uuid": "cb384b9e-3532-443f-a35c-391abd4a9faa",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-09T09:40:00.179467-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "1224c64a-d3f8-47ba-9d15-d32399dd8119",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 2 signals (Aggregated).",
+        "start": "2026-05-09T09:40:00.179461300-07:00",
+        "observations": [
+          {
+            "uuid": "8173f9a8-fa12-4400-b2f9-08919939c8a3",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 2,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-ProcessExitMonitor\",\n          \"Guid\": \"{FD771D53-8492-4057-8E35-8C02813AF49B}\",\n          \"EventSourceName\": \"Process Exit Monitor\"\n        }\n      },\n      \"EventID\": {\n        \"#attributes\": {\n          \"Qualifiers\": 16384\n        },\n        \"#text\": 3001\n      },\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 0,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x80000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2021-06-09T04:58:49.287418Z\"\n        }\n      },\n      \"EventRecordID\": 32887,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 0,\n          \"ThreadID\": 0\n        }\n      },\n      \"Channel\": \"Application\",\n      \"Computer\": \"MSEDGEWIN10\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-21-3461203602-4096304019-2269080069-1000\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"#attributes\": {\n        \"Name\": \"EVENT_PROCESSTERMINATION_CROSSPROCESS\"\n      },\n      \"param1\": \"C:\\\\Windows\\\\System32\\\\lsass.exe\",\n      \"param2\": \"C:\\\\Users\\\\IEUser\\\\Desktop\\\\LsassSilentProcessExit.exe\",\n      \"param3\": \"0\",\n      \"param4\": \"01d75d3714c3280e\"\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-ProcessExitMonitor\",\n          \"Guid\": \"{FD771D53-8492-4057-8E35-8C02813AF49B}\",\n          \"EventSourceName\": \"Process Exit Monitor\"\n        }\n      },\n      \"EventID\": {\n        \"#attributes\": {\n          \"Qualifiers\": 16384\n        },\n        \"#text\": 3001\n      },\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 0,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x80000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2021-06-09T05:18:11.103154Z\"\n        }\n      },\n      \"EventRecordID\": 32934,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 0,\n          \"ThreadID\": 0\n        }\n      },\n      \"Channel\": \"Application\",\n      \"Computer\": \"MSEDGEWIN10\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-21-3461203602-4096304019-2269080069-1000\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"#attributes\": {\n        \"Name\": \"EVENT_PROCESSTERMINATION_CROSSPROCESS\"\n      },\n      \"param1\": \"C:\\\\Windows\\\\System32\\\\lsass.exe\",\n      \"param2\": \"C:\\\\Users\\\\IEUser\\\\Desktop\\\\LsassSilentProcessExit.exe\",\n      \"param3\": \"0\",\n      \"param4\": \"01d75d3714c3280e\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "b034ed34-94b8-4d45-a731-8c9c2bd5d50f",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 2.",
+            "occurrence-count": 2,
+            "incident-id": "c4acfd64-19b5-4171-9283-a432038c8a8f",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

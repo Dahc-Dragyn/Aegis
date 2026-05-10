@@ -23,7 +23,7 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 ### **3. The Tactical HUD**
 *   **Interface**: Next.js C4ISR interface featuring **DOM Virtualization**, **60FPS Physics Governor**, and **Theater Mode** (React Portals).
 *   **Signal Silence**: 1:Suppressing noise (SNR) to maintain UI stability during high-velocity telemetry floods (50k+ EPS).
-*   **AI Advisor**: Model-locked to `gemini-1.5-flash` for regulatory-grounded triage and automated SITREP generation.
+*   **AI Advisor**: High-fidelity bridge locked to `gemini-2.5-flash-lite` for regulatory-grounded triage, automated **AI AUGMENTED SITREP** generation, and 5-D intelligence synthesis.
 
 ---
 
@@ -52,6 +52,14 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 
 ---
 
+## 🧠 AI Intelligence Synthesis
+The system now leverages advanced LLM bridging to transform raw telemetry into actionable intelligence:
+*   **AI Augmented SITREP**: Automated high-fidelity summaries integrated directly into the `COMMANDERS_BRIEF.md`.
+*   **Resilient Heartbeat**: Hardened connectivity guard that maintains signal integrity even under restricted API gateway responses.
+*   **Offline-First Fallback**: Seamless transition to deterministic "Standard Briefs" during absolute network silence.
+
+---
+
 ## 🛡️ Security & Integrity
 *   **Zero-File Footprint**: The HUD and Server are internal to the binary. No Docker or Python runtime required on the host.
 *   **Structural Integrity**: Hardened SPA routing prevents session loss during browser refreshes.
@@ -59,4 +67,4 @@ By decoupling a zero-cost abstraction Rust core from a dynamic threat intelligen
 *   **Lineage Integrity**: DAG-based process tracking prevents PID-reuse contamination.
 
 ---
-**Status: 🟢 MISSION READY | STANDALONE GOLD MASTER | LONE SENTINEL ACTIVE | Q2 2026**
+**Status: 🟢 MISSION READY | STANDALONE GOLD MASTER | LONE SENTINEL ACTIVE | MAY 2026**

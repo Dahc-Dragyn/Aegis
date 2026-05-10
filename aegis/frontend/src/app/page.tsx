@@ -98,6 +98,7 @@ function TacticalHUD() {
   const [sitrep, setSitrep] = useState("ANALYZING MANIFOLD... WAITING FOR INGESTION.");
   const [displayedSitrep, setDisplayedSitrep] = useState("");
   const [hubStatus, setHubStatus] = useState("OFFLINE");
+  const [isOffline, setIsOffline] = useState(false);
   const [isIsolated, setIsIsolated] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [isHunting, setIsHunting] = useState(false);
@@ -148,11 +149,12 @@ function TacticalHUD() {
   const refreshData = async () => {
     try {
       const t = Date.now();
-      const [histRes, sitRes, isoRes, healthRes] = await Promise.all([
+      const [histRes, sitRes, isoRes, healthRes, statusRes] = await Promise.all([
         fetch(`/telemetry/history?t=${t}`),
         fetch(`/sitrep?t=${t}`),
         fetch(`/isolation/status?t=${t}`),
-        fetch(`/system/health?t=${t}`)
+        fetch(`/system/health?t=${t}`),
+        fetch(`/system/status?t=${t}`)
       ]);
       if (histRes.ok) {
         const histData = await histRes.json();
@@ -177,6 +179,10 @@ function TacticalHUD() {
       if (healthRes.ok) {
         const healthData = await healthRes.json();
         setClarity(healthData);
+      }
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setIsOffline(statusData.offline_mode);
       }
     } catch (e: any) {
       setHubStatus("OFFLINE");
@@ -379,6 +385,14 @@ function TacticalHUD() {
                 </div>
               </div>
             )}
+            {isOffline && (
+              <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
+                <div className="bg-amber-600/20 border border-amber-600/50 px-3 py-0.5 rounded flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                  <span className="text-amber-500 font-black text-[9px] tracking-widest uppercase">LOCAL ANALYSIS ONLY</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -548,8 +562,8 @@ function TacticalHUD() {
                 </div>
                 <div className="p-3 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center text-[8px] uppercase tracking-widest">
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" />
-                    <span className="text-slate-500">Source: Librarian_AI_Advisor</span>
+                    <span className={`w-1.5 h-1.5 ${isOffline ? "bg-amber-500" : "bg-cyan-500"} rounded-full animate-pulse`} />
+                    <span className="text-slate-500">Source: {isOffline ? "Standard_Triage_Engine" : "Librarian_AI_Advisor"}</span>
                   </div>
                   <span className="text-amber-500/80 font-black italic">TACTICAL_READOUT_ACTIVE</span>
                 </div>

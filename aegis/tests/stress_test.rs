@@ -25,15 +25,17 @@ async fn test_100k_compliance_burst() {
     
     let engine = Arc::new(NistEngine::new(config.clone()).unwrap());
     let monitor = Arc::new(PostureMonitor::new());
-    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512).unwrap());
+    let ledger = Arc::new(AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512, false).unwrap());
     
     // Initialize high-capacity EdgeBuffer for stress check
     let edge_db_path = dir.path().join("aegis.edge.db");
     let (edge_buffer, _buffer_handle) = aegis::edge_buffer::EdgeBuffer::new(
+        "StressNode".to_string(),
         edge_db_path, 
         Arc::clone(&ledger), 
         200000, 
-        true
+        true,
+        None
     ).unwrap();
     let edge_buffer = Arc::new(edge_buffer);
 
@@ -49,7 +51,7 @@ async fn test_100k_compliance_burst() {
     );
 
     // Hardened Fusion Worker
-    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer), Arc::clone(&monitor));
+    let mut fusion_worker = aegis::correlation::FusionWorker::new(fusion_rx, Arc::clone(&edge_buffer));
 
     // Hardened Sentry (using PlainTextParser for log-injection tests)
     let parser = Arc::new(aegis::parsers::plain::PlainTextParser);

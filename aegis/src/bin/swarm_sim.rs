@@ -34,6 +34,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&monitor),
         &config,
         512,
+        false, // offline_mode
     )?);
     let (alpha_buffer, _alpha_handle) = EdgeBuffer::new(
         "Alpha".to_string(),
@@ -52,6 +53,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&monitor),
         &config,
         512,
+        false, // offline_mode
     )?);
     let (beta_buffer, _beta_handle) = EdgeBuffer::new(
         "Beta".to_string(),

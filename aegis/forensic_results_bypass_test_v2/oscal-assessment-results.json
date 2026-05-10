@@ -1,0 +1,49 @@
+{
+  "assessment-results": {
+    "uuid": "da623be3-e3ad-43f0-9f8a-f26fc86974a3",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-09T09:32:47.617181300-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "b01fe99b-63ef-49a5-b12f-4a178baf812d",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 1 signals (Aggregated).",
+        "start": "2026-05-09T09:32:47.617175900-07:00",
+        "observations": [
+          {
+            "uuid": "9a84ef6b-3b4f-41ca-93b6-c870b52543ab",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 1,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Sysmon\",\n          \"Guid\": \"5770385F-C22A-43E0-BF4C-06F5698FFBD9\"\n        }\n      },\n      \"EventID\": 13,\n      \"Version\": 2,\n      \"Level\": 4,\n      \"Task\": 13,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8000000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2020-09-20T21:22:24.799192Z\"\n        }\n      },\n      \"EventRecordID\": 401997,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 3248,\n          \"ThreadID\": 4728\n        }\n      },\n      \"Channel\": \"Microsoft-Windows-Sysmon/Operational\",\n      \"Computer\": \"MSEDGEWIN10\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-18\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"RuleName\": \"Local Admin Password Setting Changed\",\n      \"EventType\": \"SetValue\",\n      \"UtcTime\": \"2020-09-20 21:22:24.798\",\n      \"ProcessGuid\": \"747F3D96-C6C1-5F67-0000-0010A65D0000\",\n      \"ProcessId\": 648,\n      \"Image\": \"C:\\\\Windows\\\\system32\\\\lsass.exe\",\n      \"TargetObject\": \"HKLM\\\\SAM\\\\SAM\\\\Domains\\\\Account\\\\Users\\\\000001F4\\\\ForcePasswordReset\",\n      \"Details\": \"Binary Data\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "27c9cb12-3559-4574-ad8a-c756013162c4",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 1.",
+            "occurrence-count": 1,
+            "incident-id": "dbaa1169-3663-41ee-ac8f-392b52608ce2",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

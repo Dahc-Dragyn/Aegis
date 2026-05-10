@@ -560,6 +560,8 @@ mod nist_engine {
                 let cmd_lower = tagged_record.message.to_lowercase();
                 let raw_lower = tagged_record.raw.to_lowercase();
                 
+                let current_image_lower = current_image.as_ref().map(|s| s.to_lowercase()).unwrap_or_default();
+                
                 if cmd_lower.contains("aegis") && (raw_lower.contains("kill") || raw_lower.contains("stop") || raw_lower.contains("delete")) {
                     final_severity = crate::models::SeverityLevel::Critical;
                     tagged_record.message = format!("☢️ CRITICAL: DIRECT ATTACK ON FORENSIC SENTINEL! Attempt to terminate/tamper with Aegis detected.");
@@ -570,13 +572,186 @@ mod nist_engine {
                 let is_verified_origin = chain.to_lowercase().contains("services.exe") 
                     || chain.to_lowercase().contains("update") 
                     || chain.to_lowercase().contains("orchestrator")
-                    || chain.to_lowercase().contains("tiworker.exe");
+                    || chain.to_lowercase().contains("tiworker.exe")
+                    || chain.to_lowercase().contains("explorer.exe")
+                    || chain.to_lowercase().contains("winlogon.exe")
+                    || chain.to_lowercase().contains("smss.exe");
+
+                let mut is_trusted_lineage = is_verified_origin;
+                // If we have a parent name but no chain, check if parent name is known-good
+                if !is_trusted_lineage {
+                    if let Some(parent_name) = record.metadata.get("ParentProcessName")
+                        .or_else(|| record.metadata.get("parent_process_name")) {
+                        let pn_lower = parent_name.to_lowercase();
+                        if pn_lower.contains("services.exe") || pn_lower.contains("explorer.exe") || pn_lower.contains("wininit.exe") {
+                            is_trusted_lineage = true;
+                        }
+                    }
+                }
 
                 let mut heuristic_hit = false;
 
-                // Note: Verified origin suppression moved to end of pipeline to avoid blocking heuristics
+                // --- 🛡️ DCSYNC HEURISTIC: Atomic TTP Detection [Event 4662] ---
+                let event_id = record.metadata.get("EventID").or_else(|| record.metadata.get("event_id")).cloned().unwrap_or_default();
+                if event_id == "4662" {
+                    let properties = record.metadata.get("Properties").cloned().unwrap_or_default();
+                    let access_mask = record.metadata.get("AccessMask").cloned().unwrap_or_default();
+                    
+                    // GUIDs: DS-Replication-Get-Changes and DS-Replication-Get-Changes-All
+                    let is_dcsync_guid = properties.contains("1131f6aa-9c07-11d1-f79f-00c04fc2dcd2") || 
+                                         properties.contains("1131f6ad-9c07-11d1-f79f-00c04fc2dcd2");
+                    
+                    // Access Mask 0x100 = Control Access
+                    if is_dcsync_guid && (access_mask == "0x100" || access_mask == "256") {
+                        let subject_name = record.metadata.get("SubjectUserName").cloned().unwrap_or_else(|| "Unknown".to_string());
+                        
+                        // Non-DC Attribution Filter: DCs usually end in $
+                        if !subject_name.ends_with('$') {
+                            final_severity = crate::models::SeverityLevel::Critical;
+                            let dcsync_msg = format!("☢️ RED ALERT: DCSYNC ATTACK DETECTED! Non-DC account '{}' is requesting sensitive directory replication (DS-Replication-Get-Changes). Possible Domain Dominance event.", subject_name);
+                            tagged_record.message = dcsync_msg.clone();
+                            tagged_record.metadata.insert("forensic_tag".to_string(), "DCSyncAttack".to_string());
+                            tagged_record.metadata.insert("captured_message".to_string(), dcsync_msg);
+                            tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [DCSync Detector]".to_string());
+                            heuristic_hit = true;
+                        } else {
+                            // Even if it's a machine account, if it's suspicious, we flag it as High
+                            final_severity = crate::models::SeverityLevel::High;
+                            tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Replication Audit]".to_string());
+                        }
+                    }
+                }
 
-                if is_orphan && (final_severity >= crate::models::SeverityLevel::High || nist_match.is_none()) {
+                // --- 🛡️ PASS-THE-HASH HEURISTIC: T1550.002 [Event 4624 / Logon Type 9] ---
+                if event_id == "4624" {
+                    let logon_type = record.metadata.get("LogonType").cloned().unwrap_or_default();
+                    let auth_package = record.metadata.get("AuthenticationPackageName").cloned().unwrap_or_default().to_lowercase();
+                    let logon_process = record.metadata.get("LogonProcessName").cloned().unwrap_or_default().to_lowercase();
+                    
+                    if logon_type == "9" && (auth_package.contains("negotiate") || logon_process.contains("seclogo")) {
+                        final_severity = crate::models::SeverityLevel::Critical;
+                        let pth_msg = format!("☢️ CRITICAL: PASS-THE-HASH ATTACK DETECTED! Anomalous Logon Type 9 (NewCredentials) via '{}' process. Possible Mimikatz PtH token injection.", logon_process);
+                        tagged_record.message = pth_msg.clone();
+                        tagged_record.metadata.insert("forensic_tag".to_string(), "PassTheHash".to_string());
+                        tagged_record.metadata.insert("captured_message".to_string(), pth_msg);
+                        tagged_record.metadata.insert("nist_control_id".to_string(), "AC-3 [Identity Thief]".to_string());
+                        heuristic_hit = true;
+                    }
+                }
+
+                // --- 🛡️ KERNEL INVADER HEURISTIC: BYOVD Prevention [SI-4] ---
+                // Monitoring Service Creation (7045/4697) and Driver Load (Sysmon 6)
+                if event_id == "7045" || event_id == "4697" || event_id == "6" {
+                    let image_path = if event_id == "6" {
+                        record.metadata.get("ImageLoaded").cloned().unwrap_or_default().to_lowercase()
+                    } else {
+                        record.metadata.get("ImagePath").cloned().unwrap_or_default().to_lowercase()
+                    };
+
+                    if !image_path.is_empty() {
+                        let is_malicious_path = image_path.contains("\\temp\\") || 
+                                               image_path.contains("\\users\\") || 
+                                               image_path.contains("\\programdata\\") || 
+                                               image_path.contains("\\perflogs\\") ||
+                                               image_path.contains("\\appdata\\");
+
+                        if is_malicious_path && image_path.ends_with(".sys") {
+                            final_severity = crate::models::SeverityLevel::Critical;
+                            let kernel_msg = format!("☢️ CRITICAL: KERNEL INTEGRITY VIOLATION! Malicious driver load detected from non-standard directory: '{}'. Possible BYOVD attack.", image_path);
+                            tagged_record.message = kernel_msg.clone();
+                            tagged_record.metadata.insert("forensic_tag".to_string(), "KernelInvader".to_string());
+                            tagged_record.metadata.insert("captured_message".to_string(), kernel_msg);
+                            tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Kernel Integrity Violation]".to_string());
+                            heuristic_hit = true;
+                        }
+                    }
+                }
+
+                // --- 🛡️ ZERO-TRUST PROXY ENFORCEMENT: LOLBAS / Signed Binary Abuse [T1218] ---
+
+                let is_shell_or_proxy = current_image_lower.contains("cmd.exe") ||
+                                       current_image_lower.contains("powershell.exe") ||
+                                       current_image_lower.contains("pwsh.exe") ||
+                                       current_image_lower.contains("rundll32.exe") || 
+                                       current_image_lower.contains("regsvr32.exe") || 
+                                       current_image_lower.contains("msiexec.exe") ||
+                                       current_image_lower.contains("certutil.exe") ||
+                                       raw_lower.contains("rundll32.exe") ||
+                                       raw_lower.contains("regsvr32.exe") ||
+                                       raw_lower.contains("msiexec.exe") ||
+                                       raw_lower.contains("certutil.exe");
+                
+                if is_shell_or_proxy {
+                    // Lineage Invariant: Shells/Proxies spawned from unknown/orphaned/untrusted lineage are CRITICAL
+                    if is_orphan && !is_trusted_lineage {
+                        final_severity = crate::models::SeverityLevel::Critical;
+                        let lineage_msg = format!("☢️ CRITICAL: LINEAGE INVARIANT VIOLATION! {} spawned from an untrusted or unknown parent (Orphan). Possible T1218 or T1059.", current_image_lower);
+                        tagged_record.message = lineage_msg.clone();
+                        tagged_record.metadata.insert("forensic_tag".to_string(), "LineageViolation".to_string());
+                        tagged_record.metadata.insert("captured_message".to_string(), lineage_msg);
+                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Ghost Hunter]".to_string());
+                        heuristic_hit = true;
+                    }
+                }
+
+                let is_proxy_bin = is_shell_or_proxy && (current_image_lower.contains("rundll32") || current_image_lower.contains("regsvr32") || current_image_lower.contains("msiexec") || current_image_lower.contains("certutil"));
+                
+                if is_proxy_bin {
+                    let mut proxy_hit = false;
+                    let mut proxy_msg = String::new();
+                    
+                    let forbidden_exports = ["minidump", "control_rundll", "fileprotocolhandler", "#24", "openurl", "shell_run", "runas"];
+                    let whitelist = ["printui.dll", "sysdm.cpl", "advpack.dll", "setupapi.dll", "appresolver.dll"];
+
+                    let is_forbidden = forbidden_exports.iter().any(|e| raw_lower.contains(e));
+                    let is_whitelisted = whitelist.iter().any(|w| raw_lower.contains(w));
+                    
+                    // Geography Filter: Check for non-standard path loading (outside System32/Program Files/SysWOW64)
+                    let has_outside_path = (raw_lower.contains(":\\") || raw_lower.contains("\\\\")) && 
+                                           !(raw_lower.contains("system32") || raw_lower.contains("program files") || raw_lower.contains("syswow64"));
+
+                    if is_forbidden {
+                        proxy_hit = true;
+                        final_severity = crate::models::SeverityLevel::Critical;
+                        proxy_msg = format!("☢️ CRITICAL: WEAPONIZED PROXY EXECUTION! Forbidden export detected in {} context. Automatic Red Alert.", current_image_lower);
+                    } else if has_outside_path {
+                        proxy_hit = true;
+                        final_severity = crate::models::SeverityLevel::High;
+                        proxy_msg = format!("☢️ HIGH: ZERO-TRUST VIOLATION! {} is loading a binary from a non-standard/unprotected directory. Escalating for forensic review.", current_image_lower);
+                    } else if !is_whitelisted {
+                        proxy_hit = true;
+                        final_severity = crate::models::SeverityLevel::Medium;
+                        proxy_msg = format!("🟡 WARNING: UNKNOWN PROXY EXECUTION! {} is running with a non-whitelisted module. Zero-Trust policy enforcement applied.", current_image_lower);
+                    }
+
+                    if proxy_hit {
+                        tagged_record.message = proxy_msg.clone();
+                        tagged_record.metadata.insert("forensic_tag".to_string(), "ProxyExecution".to_string());
+                        tagged_record.metadata.insert("captured_message".to_string(), proxy_msg);
+                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Zero-Trust Proxy]".to_string());
+                        heuristic_hit = true;
+                    }
+                }
+
+                // --- 🧬 COM HIJACKING HEURISTIC: T1546.015 [Registry Persistence] ---
+                if (raw_lower.contains("inprocserver32") || raw_lower.contains("localserver32")) && 
+                   (raw_lower.contains("software\\classes\\clsid") || raw_lower.contains("hkcu")) {
+                    
+                    let has_outside_path = (raw_lower.contains(":\\") || raw_lower.contains("\\\\")) && 
+                                           !(raw_lower.contains("system32") || raw_lower.contains("program files") || raw_lower.contains("syswow64"));
+                    
+                    if has_outside_path {
+                        final_severity = crate::models::SeverityLevel::Critical;
+                        let com_msg = format!("☢️ CRITICAL: COM HIJACKING DETECTED! Registry persistence established via InprocServer32/LocalServer32 pointing to a non-system path. Possible T1546.015.");
+                        tagged_record.message = com_msg.clone();
+                        tagged_record.metadata.insert("forensic_tag".to_string(), "COMHijacking".to_string());
+                        tagged_record.metadata.insert("captured_message".to_string(), com_msg);
+                        tagged_record.metadata.insert("nist_control_id".to_string(), "SI-4 [Persistence Trap]".to_string());
+                        heuristic_hit = true;
+                    }
+                }
+
+                if is_orphan && (final_severity >= crate::models::SeverityLevel::High || nist_match.is_none()) && !heuristic_hit {
                     if tagged_record.destination_ip.is_some() {
                         final_severity = crate::models::SeverityLevel::Critical;
                         let pivot_msg = format!("☢️ CRITICAL: PIVOT ATTEMPT DETECTED! Orphan process {} is initiating network traffic to {}:{}.", 
@@ -785,6 +960,30 @@ mod nist_engine {
             // Should be escalated to Critical because it's an orphan malicious-looking process
             assert_eq!(result_orphan.severity.as_ref().unwrap(), "Critical");
             assert!(result_orphan.message.contains("ORPHAN PROCESS"));
+        }
+
+        #[test]
+        fn test_pass_the_hash_detection() {
+            let config = AppConfig::default_config();
+            let engine = NistEngine::new(config.clone()).unwrap();
+            
+            // Simulate Event 4624, Logon Type 9, seclogo process
+            let mut pth_record = LogRecord {
+                message: "An account was successfully logged on.".to_string(),
+                ..Default::default()
+            };
+            pth_record.metadata.insert("EventID".to_string(), "4624".to_string());
+            pth_record.metadata.insert("LogonType".to_string(), "9".to_string());
+            pth_record.metadata.insert("LogonProcessName".to_string(), "seclogo".to_string());
+            pth_record.metadata.insert("AuthenticationPackageName".to_string(), "Negotiate".to_string());
+            
+            let batch = vec![Arc::new(pth_record)];
+            let results = engine.analyze_batch(&batch, &config);
+            
+            let result_pth = results.get(0).unwrap();
+            assert_eq!(result_pth.severity.as_ref().unwrap(), "Critical");
+            assert!(result_pth.message.contains("PASS-THE-HASH"));
+            assert!(result_pth.metadata.get("forensic_tag").unwrap() == "PassTheHash");
         }
     }
 }

@@ -1,0 +1,21 @@
+{
+  "assessment-results": {
+    "uuid": "d4306306-7fcd-4d72-8da6-5f4fb8c4e906",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-09T08:25:35.553350-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "2ad21e53-fc27-4b0f-84f3-ddd90134eae0",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 0 signals (Aggregated).",
+        "start": "2026-05-09T08:25:35.553337800-07:00",
+        "observations": [],
+        "findings": []
+      }
+    ]
+  }
+}

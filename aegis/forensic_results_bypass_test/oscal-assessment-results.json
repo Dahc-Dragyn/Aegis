@@ -1,0 +1,78 @@
+{
+  "assessment-results": {
+    "uuid": "2a399308-04d1-4ad4-ac0b-53ffa26091fc",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-09T09:32:18.463947700-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "353d9dba-0d31-46ea-8df6-d5ece353f162",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 5 signals (Aggregated).",
+        "start": "2026-05-09T09:32:18.463943900-07:00",
+        "observations": [
+          {
+            "uuid": "579fe40e-675d-4eba-bc1f-2480202e7f47",
+            "description": "NIST Control Capture: AU-9 [Tampering]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 1,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Eventlog\",\n          \"Guid\": \"{fc65ddd8-d6ef-4962-83d5-6e5cfe9ce148}\"\n        }\n      },\n      \"EventID\": 1102,\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 104,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x4020000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2019-04-27T19:27:55.274060Z\"\n        }\n      },\n      \"EventRecordID\": 4987,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 824,\n          \"ThreadID\": 6060\n        }\n      },\n      \"Channel\": \"Security\",\n      \"Computer\": \"IEWIN7\",\n      \"Security\": null\n    },\n    \"UserData\": {\n      \"LogFileCleared\": {\n        \"#attributes\": {\n          \"xmlns:auto-ns3\": \"http://schemas.microsoft.com/win/2004/08/events\",\n          \"xmlns\": \"http://manifests.microsoft.com/win/2004/08/windows/eventlog\"\n        },\n        \"SubjectUserSid\": \"S-1-5-21-3583694148-1414552638-2922671848-1000\",\n        \"SubjectUserName\": \"IEUser\",\n        \"SubjectDomainName\": \"IEWIN7\",\n        \"SubjectLogonId\": \"0xffa8\"\n      }\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          },
+          {
+            "uuid": "322ea48b-3a11-4923-8dc6-3a7638ff1221",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 4,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Security-Auditing\",\n          \"Guid\": \"54849625-5478-4994-A5BA-3E3B0328C30D\"\n        }\n      },\n      \"EventID\": 4663,\n      \"Version\": 0,\n      \"Level\": 0,\n      \"Task\": 12800,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8020000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2019-04-27T19:31:15.355063Z\"\n        }\n      },\n      \"EventRecordID\": 4988,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 4,\n          \"ThreadID\": 68\n        }\n      },\n      \"Channel\": \"Security\",\n      \"Computer\": \"IEWIN7\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"SubjectUserSid\": \"S-1-5-21-3583694148-1414552638-2922671848-1000\",\n      \"SubjectUserName\": \"IEUser\",\n      \"SubjectDomainName\": \"IEWIN7\",\n      \"SubjectLogonId\": \"0xffa8\",\n      \"ObjectServer\": \"Security\",\n      \"ObjectType\": \"File\",\n      \"ObjectName\": \"C:\\\\Users\\\\IEUser\\\\AppData\\\\Roaming\\\\Opera Software\\\\Opera Stable\\\\Login Data\",\n      \"HandleId\": \"0x50\",\n      \"AccessList\": \"%%4416\",\n      \"AccessMask\": \"0x1\",\n      \"ProcessId\": \"0x134c\",\n      \"ProcessName\": \"C:\\\\Users\\\\Defau1t\\\\wsus.exe\"\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Security-Auditing\",\n          \"Guid\": \"54849625-5478-4994-A5BA-3E3B0328C30D\"\n        }\n      },\n      \"EventID\": 4663,\n      \"Version\": 0,\n      \"Level\": 0,\n      \"Task\": 12800,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8020000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2019-04-27T19:33:05.308188Z\"\n        }\n      },\n      \"EventRecordID\": 4989,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 4,\n          \"ThreadID\": 56\n        }\n      },\n      \"Channel\": \"Security\",\n      \"Computer\": \"IEWIN7\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"SubjectUserSid\": \"S-1-5-21-3583694148-1414552638-2922671848-1000\",\n      \"SubjectUserName\": \"IEUser\",\n      \"SubjectDomainName\": \"IEWIN7\",\n      \"SubjectLogonId\": \"0xffa8\",\n      \"ObjectServer\": \"Security\",\n      \"ObjectType\": \"File\",\n      \"ObjectName\": \"C:\\\\Users\\\\IEUser\\\\AppData\\\\Roaming\\\\Mozilla\\\\Firefox\\\\Profiles\\\\kushu3sd.default\\\\key4.db\",\n      \"HandleId\": \"0x50\",\n      \"AccessList\": \"%%4416\",\n      \"AccessMask\": \"0x1\",\n      \"ProcessId\": \"0x134c\",\n      \"ProcessName\": \"C:\\\\Users\\\\Defau1t\\\\wsus.exe\"\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Security-Auditing\",\n          \"Guid\": \"54849625-5478-4994-A5BA-3E3B0328C30D\"\n        }\n      },\n      \"EventID\": 4663,\n      \"Version\": 0,\n      \"Level\": 0,\n      \"Task\": 12800,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8020000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2019-04-27T19:33:18.699755Z\"\n        }\n      },\n      \"EventRecordID\": 4990,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 4,\n          \"ThreadID\": 56\n        }\n      },\n      \"Channel\": \"Security\",\n      \"Computer\": \"IEWIN7\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"SubjectUserSid\": \"S-1-5-21-3583694148-1414552638-2922671848-1000\",\n      \"SubjectUserName\": \"IEUser\",\n      \"SubjectDomainName\": \"IEWIN7\",\n      \"SubjectLogonId\": \"0xffa8\",\n      \"ObjectServer\": \"Security\",\n      \"ObjectType\": \"File\",\n      \"ObjectName\": \"C:\\\\Users\\\\IEUser\\\\AppData\\\\Roaming\\\\Mozilla\\\\Firefox\\\\Profiles\\\\kushu3sd.default\\\\logins.json\",\n      \"HandleId\": \"0x50\",\n      \"AccessList\": \"%%4416\",\n      \"AccessMask\": \"0x1\",\n      \"ProcessId\": \"0x134c\",\n      \"ProcessName\": \"C:\\\\Users\\\\Defau1t\\\\wsus.exe\"\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Security-Auditing\",\n          \"Guid\": \"54849625-5478-4994-A5BA-3E3B0328C30D\"\n        }\n      },\n      \"EventID\": 4663,\n      \"Version\": 0,\n      \"Level\": 0,\n      \"Task\": 12800,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8020000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2019-04-27T19:33:50.134293Z\"\n        }\n      },\n      \"EventRecordID\": 4991,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 4,\n          \"ThreadID\": 44\n        }\n      },\n      \"Channel\": \"Security\",\n      \"Computer\": \"IEWIN7\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"SubjectUserSid\": \"S-1-5-21-3583694148-1414552638-2922671848-1000\",\n      \"SubjectUserName\": \"IEUser\",\n      \"SubjectDomainName\": \"IEWIN7\",\n      \"SubjectLogonId\": \"0xffa8\",\n      \"ObjectServer\": \"Security\",\n      \"ObjectType\": \"File\",\n      \"ObjectName\": \"C:\\\\Users\\\\IEUser\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\User Data\\\\Default\\\\Login Data\",\n      \"HandleId\": \"0x50\",\n      \"AccessList\": \"%%4416\",\n      \"AccessMask\": \"0x1\",\n      \"ProcessId\": \"0x134c\",\n      \"ProcessName\": \"C:\\\\Users\\\\Defau1t\\\\wsus.exe\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "a08f7f9e-9d54-4944-88b9-291190cd954a",
+            "title": "Compliance Deviation: AU-9 [Tampering]",
+            "description": "An aggregated security deficiency was detected for control AU-9 [Tampering]. Total incidents: 1.",
+            "occurrence-count": 1,
+            "incident-id": "d6f355d9-9c58-4787-8cfb-4fe52148988e",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          },
+          {
+            "uuid": "02ac7b34-8dae-49cf-896d-d31b4d3499b8",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 4.",
+            "occurrence-count": 4,
+            "incident-id": "d6f355d9-9c58-4787-8cfb-4fe52148988e",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

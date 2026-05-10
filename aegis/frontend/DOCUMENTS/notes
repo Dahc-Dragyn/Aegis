@@ -1,0 +1,70 @@
+Project Aegis: Tactical HUD (Next.js Frontend) Reconstruction Manifest
+This manifest serves as the core design and functional bible for rebuilding the Aegis glass. The objective is to transition from a generic developer dashboard to a Combat-Certified C4ISR Tactical Interface that adheres to MIL-SPEC standards while maintaining the high-velocity throughput of the Rust/Python backend.
+
+1. Design Language: The MIL-SPEC Standard
+The UI must feel like a mission-critical tool found in a Tactical Operations Center (TOC). It must prioritize data density and legibility over aesthetic "fluff."
+
+Primary Design Bible: MIL-STD-2525D (Joint Military Symbology) and MIL-STD-1472H (Human Engineering).
+
+Tactical Color Palette:
+
+Background: Deep Slate/Off-Black (#121212) to reduce eye strain in low-light SOC environments.
+
+Friendly/Nominal: Cyan/Tactical Blue (#00FFFF) or Neutral Green (#00FF00).
+
+Hostile/Critical: True Red (#FF0000) for all detected Sigma/IOB threats.
+
+Unknown/Pending: Tactical Yellow (#FFFF00).
+
+Typography:
+
+Forensic Data: Monospaced (e.g., Fira Code or JetBrains Mono) for perfect vertical alignment of PIDs, timestamps, and hashes.
+
+Interface: Clean, high-legibility sans-serif (e.g., Inter or Roboto).
+
+Symbology: Implement diamond frames for hostile process detections and circle frames for verified system processes.
+
+2. Core Functional Modules
+A. The Commander’s Overview (W5 Brief Pane)
+Function: Real-time display of the Gemini-3.1-Flash-Lite synthesized intelligence.
+
+Requirement: Must be the focal point of the HUD. When a Critical sequence completes, this pane auto-populates with the Who, What, When, Where, and Why narrative.
+
+Visual: Styled as a formal "Spot Report" or "SITREP."
+
+B. The High-Velocity Telemetry Feed (79k EPS Buffer)
+Function: A rolling view of the raw forensic logs.
+
+Requirement: Use a virtualized list (e.g., react-window or TanStack Virtual) to prevent DOM collapse.
+
+Throttle: Implement a 100ms UI batching window. The backend may be hitting 79,000 EPS, but the UI should only update at a rate readable by the human eye (~10-20 alerts per second max).
+
+C. Provenance Graph (Operation Ghost Hunter)
+Function: A visual representation of the Process Lineage reconstructed by the Rust DashMap.
+
+Requirement: D3.js or React Flow implementation to show the "Parent -> Child" execution chain.
+
+Interactivity: Clicking a node must pull the SHA-256 hash and DLL list from the Operation Black Box forensic vault.
+
+D. The Kill Chain Interface (SOAR Control)
+Function: Actionable remediation buttons tied to the Python/PowerShell backend.
+
+Requirement: Buttons for "ISOLATE HOST," "TERMINATE PID," and "SEAL REGISTRY HIVE."
+
+Safety: Must include a two-stage "Safety Off" confirmation to prevent accidental disruption of critical system processes.
+
+3. Technical Implementation & Bridge
+Framework: Next.js 14/15 (App Router) for optimized server-side rendering and routing.
+
+Real-Time Data: WebSockets (Socket.io) or FastMCP connection to the Python triage layer. Avoid REST polling to ensure sub-100ms "Left of Bang" latency.
+
+State Management: Lightweight stores (Zustand) for tactical alert counts and the active forensic manifest.
+
+Styling: Tailwind CSS for rapid layout of the 12-column tactical grid.
+
+4. Mandatory Compliance Features (Federal/DoD)
+Access Banner: The login screen must feature the standard DoD System Use Notification Banner for NIST 800-53 compliance.
+
+Audit Trail Visualization: A dedicated tab for AU-6/AU-11 reports, showing the cryptographic chain of custody (SHA-256) for every forensic artifact stored in the vault.
+
+Session Security: Automatic logout and "Clear Screen" functionality per DISA STIG requirements for classified/sensitive environments.

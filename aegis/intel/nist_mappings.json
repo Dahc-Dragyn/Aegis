@@ -142,5 +142,21 @@
     "default_status": "Fail",
     "severity": "Critical",
     "pattern_str": "(?i)CBS_E_MANIFEST_INVALID_ITEM|0x800f080d|EventID 2004|Resource-Exhaustion-Detector|0x80042100|netstat\\s+-ano|ipconfig\\s+/all|\\bnmap\\b|\\bnc\\s+-|\\bncat\\b|\\bexploit\\b|ZAM64|BYOV|CVE-2021-21551|doppel|proc_doppel|doppelgang|ntds\\.dit|ntdsutil|herpaderp|scriptblocklogging|transcription|powershell.*policies|System\\.Management\\.Automation|psinject|\\[Net\\.ServicePointManager\\]|\\$env:temp|DownloadFile|Invoke-WebRequest|IWR|javascript:|mshtml,RunHTMLApplication|mshta.*\\.hta|mshta.*(http|https)|user shell folders.*startup|mscfile\\\\shell\\\\open\\\\command|ms-settings\\\\shell\\\\open\\/command|eventvwr\\.exe|bitsadmin|start-bitstransfer|openvpn|timestomp|Set-ItemProperty.*CreationTime|(\\\\[a-z0-9_]{15,}\\.exe)|(\\\\AppData\\\\Local\\\\Temp\\\\[a-z0-9_]+\\.exe)|promptforcredential|getnetworkcredential|validatecredentials|Suspicious_C2_Tunnel|DNS_TXT_C2_Tunneling|DNS-TXT|SMBGhost|CVE-2020-0796|ZeroLogon|CVE-2020-1472|NetrServerAuthenticate: Bad password 0|NetrServerAuthenticate returns Success|PetitPotam|MS-EFSR|EFS_RPC|CVE-2021-36942|byt3bl33d3r|Event Log Crash|Defense Evasion|/etc/shadow|authorized_keys|crontab\\s+-e|systemctl\\s+stop|(\\.env|config\\.php|wp-admin|phpinfo)|TCC\\.db|PipeName"
+  },
+  {
+    "control_id": "SI-4 [DCSync Detector]",
+    "category": "System & Info Integrity",
+    "description": "NIST SI-4: DCSync Replication Attack Detection",
+    "human_title": "☢️ DCSync Directory Replication Attack",
+    "human_action": "A non-Domain Controller account is attempting to replicate the Active Directory database. This is a high-confidence indicator of the DCSync technique used by Mimikatz to steal domain hashes.",
+    "long_description": "The DCSync technique abuses the Microsoft Directory Replication Service (DRS) Remote Protocol to impersonate a domain controller and request account data. It requires specific replication permissions (DS-Replication-Get-Changes).",
+    "remediation": "IMMEDIATE DOMAIN COMPROMISE PROTOCOL. Isolate the source account and node. Reset all administrative passwords. Review replication permissions on the Domain object.",
+    "adversary_profile": "Mimikatz / DCSync Attack",
+    "tactical_intent": "Steal Active Directory credentials (hashes) without accessing the NTDS.dit file or memory of the LSASS process on a Domain Controller.",
+    "attack_mechanism": "Directory Replication Service (DRS) GetChanges/GetChangesAll requests from non-DC accounts.",
+    "target_field": "message",
+    "default_status": "Fail",
+    "severity": "Critical",
+    "pattern_str": "DCSYNC ATTACK DETECTED"
   }
 ]

@@ -1,0 +1,49 @@
+{
+  "assessment-results": {
+    "uuid": "0850091e-c382-471f-9dd2-522d60f60b05",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-10T07:33:20.474890400-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "90c28d21-4aa1-4cde-af73-1b84ea1592cb",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 1 signals (Aggregated).",
+        "start": "2026-05-10T07:33:20.474883400-07:00",
+        "observations": [
+          {
+            "uuid": "73b35b6b-a853-4278-bc5c-cdcea4fa9791",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 1,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Sysmon\",\n          \"Guid\": \"5770385F-C22A-43E0-BF4C-06F5698FFBD9\"\n        }\n      },\n      \"EventID\": 13,\n      \"Version\": 2,\n      \"Level\": 4,\n      \"Task\": 13,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x8000000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2020-07-04T14:18:58.268712Z\"\n        }\n      },\n      \"EventRecordID\": 306346,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 3400,\n          \"ThreadID\": 4136\n        }\n      },\n      \"Channel\": \"Microsoft-Windows-Sysmon/Operational\",\n      \"Computer\": \"MSEDGEWIN10\",\n      \"Security\": {\n        \"#attributes\": {\n          \"UserID\": \"S-1-5-18\"\n        }\n      }\n    },\n    \"EventData\": {\n      \"RuleName\": \"Persistence - Hidden Run value detected\",\n      \"EventType\": \"SetValue\",\n      \"UtcTime\": \"2020-07-04 14:18:58.231\",\n      \"ProcessGuid\": \"747F3D96-8FD2-5F00-0000-0010C15D2200\",\n      \"ProcessId\": 3728,\n      \"Image\": \"C:\\\\Users\\\\Public\\\\tools\\\\evasion\\\\a.exe\",\n      \"TargetObject\": \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\\",\n      \"Details\": \"\\\"c:\\\\windows\\\\tasks\\\\taskhost.exe\\\"\"\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "1258f316-cc75-4c77-8048-1b3cc226e120",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 1.",
+            "occurrence-count": 1,
+            "incident-id": "2ac4f629-3a6e-4643-9a66-257766510ea3",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

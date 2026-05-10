@@ -1,0 +1,12 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "298d83d7-2af0-4fc1-bb33-fb89540e15c6",
+    "metadata": {
+      "title": "Aegis Sentinel: Managed OSCAL PoAM",
+      "last-modified": "2026-05-10T07:31:35.785810900-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "poam-items": []
+  }
+}

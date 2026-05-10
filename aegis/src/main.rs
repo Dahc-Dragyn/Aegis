@@ -94,6 +94,23 @@ struct Cli {
     auto_open: bool,
 }
 
+async fn check_llm_connectivity() -> bool {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap_or_default();
+
+    // Use the Gemini endpoint for the heartbeat
+    let url = "https://generativelanguage.googleapis.com";
+    match client.get(url).send().await {
+        Ok(resp) => {
+            let status = resp.status();
+            status.is_success() || status == reqwest::StatusCode::FORBIDDEN || status == reqwest::StatusCode::NOT_FOUND
+        },
+        Err(_) => false,
+    }
+}
+
 fn calculate_file_hash(path: &PathBuf) -> Result<String> {
     let mut file = File::open(path)?;
     let mut hasher = Sha256::new();
@@ -149,8 +166,27 @@ async fn main() -> Result<()> {
         let server_dir = results_dir.clone();
         let auto_open = cli.auto_open;
         
+        // --- CONNECTIVITY GUARD (HEARTBEAT) ---
+        // --- CONNECTIVITY GUARD (HEARTBEAT) ---
+        let is_offline_detected = if cli.offline {
+            println!("[!] OFFLINE OVERRIDE: Entering Tactical Edge mode.");
+            true
+        } else {
+            print!("🌐 Aegis: Probing LLM Bridge... ");
+            let _ = std::io::stdout().flush();
+            let reachable = check_llm_connectivity().await;
+            if reachable {
+                println!("ONLINE");
+                false
+            } else {
+                println!("\n[!] SIGNAL LOSS: LLM Bridge unreachable. Commander's Brief will be generated as 'Raw Summary' only.");
+                true
+            }
+        };
+        let is_offline = is_offline_detected;
+        
         tokio::spawn(async move {
-            if let Err(e) = aegis::server::start_server(server_dir, 8080).await {
+            if let Err(e) = aegis::server::start_server(server_dir, 8080, is_offline).await {
                 eprintln!("❌ Aegis Server Error: {}", e);
             }
         });
@@ -257,7 +293,16 @@ async fn main() -> Result<()> {
     // 5. Initialize Shared Engine, Ledger, and Monitor
     let engine = Arc::new(NistEngine::new(config.clone())?);
     let monitor = Arc::new(PostureMonitor::new());
-    let mut ledger_obj = AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512)?;
+    
+    // Determine offline status for ledger (might be standalone or forced)
+    let is_offline_final = if cli.mode == "standalone" {
+        // Reuse the result from the earlier heartbeat
+        check_llm_connectivity().await == false || cli.offline
+    } else {
+        cli.offline
+    };
+
+    let mut ledger_obj = AuditLedger::new(audit_path.clone(), Arc::clone(&engine), Arc::clone(&monitor), &config, 512, is_offline_final)?;
     ledger_obj.set_source_artifact(&primary_log.to_string_lossy());
     let ledger = Arc::new(ledger_obj);
     
@@ -525,7 +570,6 @@ async fn main() -> Result<()> {
         let _ = fusion_handle.await;
         let _ = buffer_handle.await;
         
-        let _ = AuditLedger::prep_vault(output_dir);
         let manifest_path = PathBuf::from(output_dir).join("NIST_MANIFEST.md");
         ledger.generate_manifest(&manifest_path)?;
         let brief_path = PathBuf::from(output_dir).join("COMMANDERS_BRIEF.md");
@@ -658,6 +702,22 @@ async fn run_preflight_checks() -> Result<()> {
             println!("⚠️ WARNING: 'Include Command Line in Process Creation Events' is DISABLED. Forensic depth will be reduced.");
         } else {
             println!("✅ Forensic Baseline: Process Command Line telemetry is ACTIVE.");
+        }
+    }
+
+    // Check 4: Registry Auditing Fidelity (Event ID 4663)
+    let output_obj = Command::new("powershell")
+        .args(&["-NoProfile", "-Command", "auditpol /get /subcategory:'Handle Manipulation' /r"])
+        .output()
+        .await;
+    
+    if let Ok(output) = output_obj {
+        let stdout_obj = String::from_utf8_lossy(&output.stdout);
+        if !stdout_obj.contains("Success") {
+            println!("⚠️ WARNING: CRITICAL NIST SC-7 ALIGNMENT FAILURE: 'Handle Manipulation' auditing is DISABLED.");
+            println!("   Registry Guard and Persistence traps require 'Success' auditing for Handle Manipulation to capture Access Masks.");
+        } else {
+            println!("✅ Forensic Baseline: Handle Manipulation auditing is ACTIVE.");
         }
     }
 

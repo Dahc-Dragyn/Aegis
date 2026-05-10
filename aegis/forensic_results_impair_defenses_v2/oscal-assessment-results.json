@@ -1,0 +1,51 @@
+{
+  "assessment-results": {
+    "uuid": "2ca788fc-054b-4f8e-86c5-cdd895e3503c",
+    "metadata": {
+      "title": "Aegis-Sentinel OSCAL Assessment Results",
+      "last-modified": "2026-05-09T10:10:11.892188100-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "results": [
+      {
+        "uuid": "83b527a2-ab51-45b2-ac55-a7636c3066d0",
+        "title": "Forensic Assessment for Aegis-Sentinel",
+        "description": "Aegis-automated audit record (LFA v3) containing 3 signals (Aggregated).",
+        "start": "2026-05-09T10:10:11.892184400-07:00",
+        "observations": [
+          {
+            "uuid": "12fd838c-44d6-4662-92c4-a07ea4f23fe7",
+            "description": "NIST Control Capture: SI-4 [Windows Integrity]",
+            "methods": [
+              "EXAMINE",
+              "TEST"
+            ],
+            "occurrence-count": 3,
+            "sample-evidence": [
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"edgeupdate\"\n        }\n      },\n      \"EventID\": {\n        \"#attributes\": {\n          \"Qualifiers\": 0\n        },\n        \"#text\": 0\n      },\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 0,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x80000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2024-10-27T12:45:03.689949Z\"\n        }\n      },\n      \"EventRecordID\": 2383,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 0,\n          \"ThreadID\": 0\n        }\n      },\n      \"Channel\": \"Application\",\n      \"Computer\": \"Server002\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"Data\": {\n        \"#text\": [\n          \"Service stopped\"\n        ]\n      },\n      \"Binary\": null\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"edgeupdate\"\n        }\n      },\n      \"EventID\": {\n        \"#attributes\": {\n          \"Qualifiers\": 0\n        },\n        \"#text\": 0\n      },\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 0,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x80000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2024-10-27T12:45:06.052965Z\"\n        }\n      },\n      \"EventRecordID\": 2384,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 0,\n          \"ThreadID\": 0\n        }\n      },\n      \"Channel\": \"Application\",\n      \"Computer\": \"Server002\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"Data\": {\n        \"#text\": [\n          \"Service stopped\"\n        ]\n      },\n      \"Binary\": null\n    }\n  }\n}",
+              "{\n  \"Event\": {\n    \"#attributes\": {\n      \"xmlns\": \"http://schemas.microsoft.com/win/2004/08/events/event\"\n    },\n    \"System\": {\n      \"Provider\": {\n        \"#attributes\": {\n          \"Name\": \"Microsoft-Windows-Security-SPP\",\n          \"Guid\": \"{E23B33B0-C8C9-472C-A5F9-F2BDFEA0F156}\",\n          \"EventSourceName\": \"Software Protection Platform Service\"\n        }\n      },\n      \"EventID\": {\n        \"#attributes\": {\n          \"Qualifiers\": 16384\n        },\n        \"#text\": 16384\n      },\n      \"Version\": 0,\n      \"Level\": 4,\n      \"Task\": 0,\n      \"Opcode\": 0,\n      \"Keywords\": \"0x80000000000000\",\n      \"TimeCreated\": {\n        \"#attributes\": {\n          \"SystemTime\": \"2024-10-27T12:45:13.899006Z\"\n        }\n      },\n      \"EventRecordID\": 2385,\n      \"Correlation\": null,\n      \"Execution\": {\n        \"#attributes\": {\n          \"ProcessID\": 0,\n          \"ThreadID\": 0\n        }\n      },\n      \"Channel\": \"Application\",\n      \"Computer\": \"Server002\",\n      \"Security\": null\n    },\n    \"EventData\": {\n      \"Data\": {\n        \"#text\": [\n          \"2024-10-28T12:42:13Z\",\n          \"RulesEngine\"\n        ]\n      },\n      \"Binary\": null\n    }\n  }\n}"
+            ],
+            "relevant-evidence": []
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "5c2af09f-9e00-47bc-ad47-bf6a288345a8",
+            "title": "Compliance Deviation: SI-4 [Windows Integrity]",
+            "description": "An aggregated security deficiency was detected for control SI-4 [Windows Integrity]. Total incidents: 3.",
+            "occurrence-count": 3,
+            "incident-id": "bbfa80e3-fdfd-4132-9ac9-a475a8c377c1",
+            "target": {
+              "target-id": "aegis.sentinel.0",
+              "status": {
+                "state": "not-satisfied"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

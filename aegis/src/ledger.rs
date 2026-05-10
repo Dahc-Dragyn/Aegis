@@ -25,13 +25,14 @@ pub struct AuditLedger {
     config: AppConfig,
     active_file: Mutex<File>,
     current_size: Mutex<u64>,
-    max_size: u64,
     source_artifact: String,
     lineage_graph: Arc<Mutex<LineageGraph>>,
+    last_event_time: Mutex<Option<chrono::DateTime<chrono::Local>>>,
+    pub offline_mode: bool,
 }
 
 impl AuditLedger {
-    pub fn new(path: PathBuf, engine: Arc<NistEngine>, monitor: Arc<PostureMonitor>, config: &AppConfig, max_mb: u64) -> Result<Self> {
+    pub fn new(path: PathBuf, engine: Arc<NistEngine>, monitor: Arc<PostureMonitor>, config: &AppConfig, _max_mb: u64, offline_mode: bool) -> Result<Self> {
         let file = OpenOptions::new()
             .create(true)
             .append(true)
@@ -46,9 +47,10 @@ impl AuditLedger {
             config: config.clone(),
             active_file: Mutex::new(file),
             current_size: Mutex::new(metadata.len()),
-            max_size: max_mb * 1024 * 1024,
             source_artifact: String::from("UNKNOWN"),
             lineage_graph: Arc::new(Mutex::new(LineageGraph::new())),
+            last_event_time: Mutex::new(None),
+            offline_mode,
         })
     }
 
@@ -83,12 +85,39 @@ impl AuditLedger {
     }
 
     fn internal_record(&self, record: &LogRecord) -> Result<()> {
-        let serialized = serde_json::to_string(record)?;
-        let mut file = self.active_file.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-        writeln!(file, "{}", serialized)?;
+        // --- Audit Gap Sentinel: Detect Discontinuities ---
+        {
+            let mut file = self.active_file.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
+            let mut size = self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
+            let mut last_time = self.last_event_time.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
+            
+            if let Some(prev) = *last_time {
+                let gap = record.timestamp.signed_duration_since(prev).num_seconds();
+                if gap > 300 {
+                    let mut metadata = BTreeMap::new();
+                    metadata.insert("computer".to_string(), "AEGIS_SENTINEL".to_string());
+                    metadata.insert("event_id".to_string(), "3001".to_string());
+                    metadata.insert("gap_seconds".to_string(), gap.to_string());
+                    
+                    let gap_warning = LogRecord {
+                        timestamp: record.timestamp,
+                        message: format!("⚠️ NIST AU-6: LOG DISCONTINUITY DETECTED! Gap of {} seconds in forensic stream.", gap),
+                        severity: Some("Medium".to_string()),
+                        metadata,
+                        raw: format!("AUDIT_GAP_SENTINEL: {}s gap detected.", gap),
+                        ..Default::default()
+                    };
+                    let serialized_gap = serde_json::to_string(&gap_warning)?;
+                    writeln!(file, "{}", serialized_gap)?;
+                    *size += serialized_gap.len() as u64 + 1;
+                }
+            }
+            *last_time = Some(record.timestamp);
 
-        let mut size = self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-        *size += serialized.len() as u64 + 1;
+            let serialized = serde_json::to_string(record)?;
+            writeln!(file, "{}", serialized)?;
+            *size += serialized.len() as u64 + 1;
+        }
         
         if let Ok(mut graph) = self.lineage_graph.lock() {
             graph.add_record(record);
@@ -104,6 +133,33 @@ impl AuditLedger {
         let mut graph = self.lineage_graph.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
 
         for record in records {
+            // --- Audit Gap Sentinel: Detect Discontinuities ---
+            {
+                let mut last_time = self.last_event_time.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
+                if let Some(prev) = *last_time {
+                    let gap = record.timestamp.signed_duration_since(prev).num_seconds();
+                    if gap > 300 {
+                        let mut metadata = BTreeMap::new();
+                        metadata.insert("computer".to_string(), "AEGIS_SENTINEL".to_string());
+                        metadata.insert("event_id".to_string(), "3001".to_string()); // AU-6 Audit Warning
+                        metadata.insert("gap_seconds".to_string(), gap.to_string());
+                        
+                        let gap_warning = LogRecord {
+                            timestamp: record.timestamp, // Mark at the point of recovery
+                            message: format!("⚠️ NIST AU-6: LOG DISCONTINUITY DETECTED! Gap of {} seconds in forensic stream.", gap),
+                            severity: Some("Medium".to_string()),
+                            metadata,
+                            raw: format!("AUDIT_GAP_SENTINEL: {}s gap detected.", gap),
+                            ..Default::default()
+                        };
+                        let serialized_gap = serde_json::to_string(&gap_warning)?;
+                        writeln!(file, "{}", serialized_gap)?;
+                        *size += serialized_gap.len() as u64 + 1;
+                    }
+                }
+                *last_time = Some(record.timestamp);
+            }
+
             let serialized = serde_json::to_string(&record)?;
             writeln!(file, "{}", serialized)?;
             *size += serialized.len() as u64 + 1;
@@ -126,55 +182,7 @@ impl AuditLedger {
         }
         records
     }
-    fn rotate_if_needed(&self) -> Result<()> {
-        let size = *self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-        if size >= self.max_size {
-            let file = self.active_file.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-            
-            let timestamp = Local::now().format("%Y%m%d_%H%M%S");
-            let new_path = self.path.with_extension(format!("{}.cold", timestamp));
-            
-            println!("🔄 NIST AU-9: Rotating audit ledger to {:?} (Size: {} bytes)", new_path, size);
-            
-            // Critical: Close active file handle before renaming on Windows
-            drop(file); 
-            std::fs::rename(&self.path, &new_path)?;
-            
-            // Re-open fresh ledger
-            let new_file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&self.path)?;
-            
-            let mut active_file_lock = self.active_file.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-            *active_file_lock = new_file;
-            
-            let mut current_size_lock = self.current_size.lock().map_err(|_| anyhow::anyhow!("Mutex poison"))?;
-            *current_size_lock = 0;
-            
-            // Inject a bridge record for AU-9 chain continuity
-            let mut metadata = BTreeMap::new();
-            metadata.insert("computer".to_string(), "AEGIS_INTERNAL".to_string());
-            metadata.insert("event_id".to_string(), "900".to_string());
-            metadata.insert("provider".to_string(), "Aegis-AuditSystem".to_string());
 
-            let bridge = LogRecord {
-                timestamp: Local::now(),
-                message: format!("Aegis Ledger Rotated. Ancestor: {:?}", new_path),
-                severity: Some("INFO".to_string()),
-                metadata,
-                raw: String::new(),
-                bridge_hash: Some(self.calculate_file_hash(&new_path)?),
-                ..Default::default()
-            };
-            
-            let serialized = serde_json::to_string(&bridge)?;
-            writeln!(active_file_lock, "{}", serialized)?;
-            active_file_lock.flush()?;
-            *current_size_lock += serialized.len() as u64 + 1;
-        }
-        Ok(())
-    }
 
     fn calculate_file_hash(&self, path: &PathBuf) -> Result<String> {
         let mut file = File::open(path)?;
@@ -218,7 +226,19 @@ impl AuditLedger {
         let now = Local::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
         
         let has_threat = events.iter().any(|e| e.severity == crate::models::SeverityLevel::High || e.severity == crate::models::SeverityLevel::Critical);
-        let status = if has_threat { "NON-COMPLIANT (THREAT DETECTED)" } else { "COMPLIANT (ROUTINE AUDIT)" };
+        
+        // --- Global Severity Carry-Over: Triage-to-Compliance Handshake ---
+        let has_critical_keyword = events.iter().any(|e| {
+            let desc = e.description.to_lowercase();
+            let action = e.human_action.to_lowercase();
+            let remediation = e.remediation.to_lowercase();
+            desc.contains("isolate") || desc.contains("freeze") || desc.contains("contain") || desc.contains("compromised") || desc.contains("zero-trust") || desc.contains("proxy") ||
+            action.contains("isolate") || action.contains("freeze") || action.contains("contain") || action.contains("compromised") || action.contains("zero-trust") || action.contains("proxy") ||
+            remediation.contains("isolate") || remediation.contains("freeze") || remediation.contains("contain") || remediation.contains("compromised") || remediation.contains("zero-trust") || remediation.contains("proxy")
+        });
+        
+        let has_threat = has_threat || has_critical_keyword;
+        let status = if has_threat { "🔴 NON-COMPLIANT" } else { "🟢 COMPLIANT" };
 
         let mut report = format!(
             "# 🛡️ NIST 800-53r5 FORENSIC COMPLIANCE MANIFEST\n\
@@ -252,12 +272,16 @@ impl AuditLedger {
         // --- [SI-4] SYSTEM MONITORING ---
         report.push_str("## [SI-4] SYSTEM MONITORING\n\n");
         if events.is_empty() {
-            report.push_str("* **Detection Logic**: Active Baseline Monitoring (Passive)\n\
+            report.push_str("* **Status**: ✅ COMPLIANT\n\
+                * **Detection Logic**: Active Baseline Monitoring (Passive)\n\
                 * **Severity Level**: INFO\n\
                 * **Regulatory Note**: System monitoring must detect unauthorized use. Current state is nominal.\n\n");
         } else {
             let last_event = events.iter().max_by_key(|e| e.severity).unwrap();
             let control_id = last_event.metadata.get("nist_control_id").cloned().unwrap_or_else(|| last_event.control_id.clone());
+            let si4_status = if has_threat { "🔴 NON-COMPLIANT" } else { "🟡 OBSERVATION" };
+            
+            report.push_str(&format!("* **Status**: {}\n", si4_status));
             report.push_str(&format!("* **Detection Logic**: Heuristic Signature Match [{}]\n", last_event.control_id));
             report.push_str(&format!("* **Severity Level**: {:?}\n", last_event.severity));
             report.push_str(&format!("* **Regulatory Note**: System monitoring must detect unauthorized use. Current event mapping: {}\n\n", control_id));
@@ -299,7 +323,7 @@ impl AuditLedger {
             .build()
             .ok()?;
 
-        let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-09-2025:generateContent?key={}", key);
+        let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={}", key);
         
         let prompt = format!(
             "You are a Senior Forensic Analyst. Summarize the following telemetry in exactly 2 professional sentences. Focus on the tactical impact and recommended next steps. Telemetry: {}",
@@ -318,6 +342,10 @@ impl AuditLedger {
 
         match client.post(&url).json(&body).send() {
             Ok(resp) => {
+                if !resp.status().is_success() {
+                    eprintln!("⚠️ Aegis AI Error: HTTP {}", resp.status());
+                    return None;
+                }
                 let v: serde_json::Value = resp.json().ok()?;
                 let summary = v.get("candidates")
                     .and_then(|c| c.get(0))
@@ -346,21 +374,75 @@ impl AuditLedger {
         };
 
         let has_threat = events.iter().any(|e| e.severity == crate::models::SeverityLevel::High || e.severity == crate::models::SeverityLevel::Critical) || !anomalies.is_empty();
-        let status_label = if has_threat { "🔴 COMPROMISED" } else { "🟢 SAFE" };
+        let has_warning = events.iter().any(|e| e.severity == crate::models::SeverityLevel::Medium);
 
-        let mut brief = format!(
-            "--- 🛡️ AEGIS COMMANDER'S TACTICAL BRIEF ---\n\
-            STATUS: {}\n\
-            TIMESTAMP: {}\n\
-            SCANNED ARTIFACT: {}\n\
-            FIDELITY: 100% (CERTIFIED)\n\
-            CORRELATED CROSS-VECTOR EVENTS: {}\n\
-            ----------------------------------------------------------------\n\n",
-            status_label,
-            now, 
-            Path::new(&self.source_artifact).file_name().and_then(|f| f.to_str()).unwrap_or(&self.source_artifact),
-            correlation_count
-        );
+        // --- Unified Status Logic: Sync Brief with Manifest ---
+        let has_critical_keyword = events.iter().any(|e| {
+            let desc = e.description.to_lowercase();
+            let action = e.human_action.to_lowercase();
+            let remediation = e.remediation.to_lowercase();
+            desc.contains("isolate") || desc.contains("freeze") || desc.contains("contain") || desc.contains("compromised") || desc.contains("zero-trust") || desc.contains("proxy") ||
+            action.contains("isolate") || action.contains("freeze") || action.contains("contain") || action.contains("compromised") || action.contains("zero-trust") || action.contains("proxy") ||
+            remediation.contains("isolate") || remediation.contains("freeze") || remediation.contains("contain") || remediation.contains("compromised") || remediation.contains("zero-trust") || remediation.contains("proxy")
+        });
+
+        let is_compromised = has_threat || has_critical_keyword;
+        
+        let status_label = if is_compromised { 
+            "🔴 COMPROMISED" 
+        } else if has_warning {
+            "🟡 WARNING (ZERO-TRUST)"
+        } else { 
+            "🟢 SAFE" 
+        };
+
+        let mut brief = if self.offline_mode {
+            format!(
+                "--- 🛡️ AEGIS COMMANDER'S TACTICAL BRIEF [OFFLINE MODE] ---\n\
+                STATUS: {}\n\
+                TIMESTAMP: {}\n\
+                SCANNED ARTIFACT: {}\n\
+                MODE: LOCAL ANALYSIS ONLY (NIST AU-2 Alignment)\n\
+                CORRELATED CROSS-VECTOR EVENTS: {}\n\
+                ----------------------------------------------------------------\n\n\
+                > [!WARNING]\n\
+                > **SIGNAL LOSS**: AI-driven tactical synthesis is currently unavailable. \n\
+                > The following SITREP contains raw forensic statistics and deterministic rule matches only.\n\n",
+                status_label,
+                now, 
+                Path::new(&self.source_artifact).file_name().and_then(|f| f.to_str()).unwrap_or(&self.source_artifact),
+                correlation_count
+            )
+        } else {
+            format!(
+                "--- 🛡️ AEGIS COMMANDER'S TACTICAL BRIEF ---\n\
+                STATUS: {}\n\
+                TIMESTAMP: {}\n\
+                SCANNED ARTIFACT: {}\n\
+                FIDELITY: 100% (CERTIFIED)\n\
+                CORRELATED CROSS-VECTOR EVENTS: {}\n\
+                ----------------------------------------------------------------\n\n",
+                status_label,
+                now, 
+                Path::new(&self.source_artifact).file_name().and_then(|f| f.to_str()).unwrap_or(&self.source_artifact),
+                correlation_count
+            )
+        };
+
+        if !self.offline_mode {
+            let mut telemetry_summary = String::new();
+            if let Some(event) = events.iter().max_by_key(|e| e.severity) {
+                telemetry_summary.push_str(&format!("Event: {}. Severity: {:?}. Impact: {}. ", event.human_title, event.severity, event.tactical_intent));
+            }
+            if !anomalies.is_empty() {
+                telemetry_summary.push_str(&format!("Detected {} lineage anomalies.", anomalies.len()));
+            }
+
+            if let Some(ai_brief) = self.get_ai_synthesis(&telemetry_summary) {
+                brief.push_str("## 🧠 AI AUGMENTED SITREP\n");
+                brief.push_str(&format!("> [!NOTE]\n> **AI SYNOPSIS ACTIVE**: {}\n\n", ai_brief));
+            }
+        }
 
         if events.is_empty() && anomalies.is_empty() {
             brief.push_str("## STATUS: OPERATIONAL\n\nNo active threats detected in the current forensic window. System posture remains compliant.\n");
@@ -371,7 +453,7 @@ impl AuditLedger {
 
                 brief.push_str("## 1. [WHO] ADVERSARY PROFILE\n");
                 brief.push_str(&format!("* **Tool/Actor**: {}\n", last_event.adversary_profile));
-                brief.push_str(&format!("* **Classification**: {}\n\n", if has_threat { "Hostile Threat Actor" } else { "Neutral/Internal Event" }));
+                brief.push_str(&format!("* **Classification**: {}\n\n", if is_compromised { "Hostile Threat Actor" } else { "Neutral/Internal Event" }));
 
                 // 2. [WHEN] FORENSIC WINDOW
                 brief.push_str("## 2. [WHEN] FORENSIC WINDOW\n");
@@ -386,7 +468,7 @@ impl AuditLedger {
                 // 4. [WHY] TACTICAL INTENT & IMPACT
                 brief.push_str("## 4. [WHY] TACTICAL INTENT & IMPACT\n");
                 brief.push_str(&format!("* **Objective**: {}\n", last_event.tactical_intent));
-                brief.push_str(&format!("* **NIST Risk**: {} (SI-4 / SC-7)\n\n", if has_threat { "CRITICAL" } else { "LOW" }));
+                brief.push_str(&format!("* **NIST Risk**: {} (SI-4 / SC-7)\n\n", if is_compromised { "CRITICAL" } else { "LOW" }));
 
                 // 5. [WHAT TO DO] HARDENED REMEDIATION (NIST 800-53r5)
                 brief.push_str("## 5. [WHAT TO DO] HARDENED REMEDIATION (NIST 800-53r5)\n");
@@ -423,8 +505,8 @@ impl AuditLedger {
                 brief.push_str(&format!("* **Mechanism**: {}\n\n", last_event.attack_mechanism));
 
                 brief.push_str("### ⚖️ REGULATORY COMPLIANCE GATE\n");
-                brief.push_str(&format!("* **CONTROL [SI-4]**: {} - System monitoring must detect unauthorized use.\n", if has_threat { "NON-COMPLIANT" } else { "COMPLIANT" }));
-                brief.push_str(&format!("* **CONTROL [SC-7]**: {} - Boundary Protection triggered.\n\n", if has_threat { "NON-COMPLIANT" } else { "COMPLIANT" }));
+                brief.push_str(&format!("* **CONTROL [SI-4]**: {} - System monitoring must detect unauthorized use.\n", if is_compromised { "NON-COMPLIANT" } else { "COMPLIANT" }));
+                brief.push_str(&format!("* **CONTROL [SC-7]**: {} - Boundary Protection triggered.\n\n", if is_compromised { "NON-COMPLIANT" } else { "COMPLIANT" }));
             } else if !anomalies.is_empty() {
                 // If only anomalies exist, we still have a compliance gate
                 brief.push_str("### ⚖️ REGULATORY COMPLIANCE GATE\n");
@@ -434,7 +516,7 @@ impl AuditLedger {
         }
 
         brief.push_str("----------------------------------------------------------------\n");
-        brief.push_str("**AUTHENTICATION**: AEGIS_CORE_02 // ISSO_ADVISOR_V9\n");
+        brief.push_str(&format!("**AUTHENTICATION**: AEGIS_CORE_02 // ISSO_{}\n", if self.offline_mode { "LOCAL_V9" } else { "ADVISOR_V9" }));
         brief.push_str("--- END OF BRIEF ---");
 
         std::fs::write(output_path, brief)?;
@@ -908,5 +990,62 @@ impl AuditLedger {
         }
 
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Arc;
+    use chrono::{TimeZone, Local};
+    use crate::monitor::PostureMonitor;
+
+    #[test]
+    fn test_audit_gap_sentinel_detection() {
+        let temp_dir = std::env::temp_dir();
+        let ledger_path = temp_dir.join("test_gap.jsonl");
+        
+        let config = AppConfig::default_config();
+        let engine = Arc::new(NistEngine::new(config.clone()).unwrap());
+        let monitor = Arc::new(PostureMonitor::new());
+        
+        let ledger = AuditLedger::new(
+            ledger_path.clone(),
+            Arc::clone(&engine),
+            Arc::clone(&monitor),
+            &config,
+            10,
+            false
+        ).expect("Failed to create ledger");
+
+        // Record 1: T=0
+        let t1 = Local.with_ymd_and_hms(2024, 10, 27, 10, 0, 0).unwrap();
+        let r1 = LogRecord {
+            timestamp: t1,
+            message: "Event 1".to_string(),
+            ..Default::default()
+        };
+        ledger.record(&r1).unwrap();
+
+        // Record 2: T=400s (Gap > 300s)
+        let t2 = t1 + chrono::Duration::seconds(400);
+        let r2 = LogRecord {
+            timestamp: t2,
+            message: "Event 2".to_string(),
+            ..Default::default()
+        };
+        ledger.record(&r2).unwrap();
+
+        // Verification: Read the file and check for the warning
+        let file = File::open(&ledger_path).unwrap();
+        let reader = BufReader::new(file);
+        let lines: Vec<String> = reader.lines().map(|l| l.unwrap()).collect();
+        
+        // Should have: Event 1, Gap Warning, Event 2
+        assert_eq!(lines.len(), 3);
+        assert!(lines[1].contains("NIST AU-6: LOG DISCONTINUITY DETECTED"));
+        assert!(lines[1].contains("400"));
+
+        let _ = std::fs::remove_file(ledger_path);
     }
 }

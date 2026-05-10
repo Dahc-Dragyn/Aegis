@@ -4,7 +4,7 @@ use aegis::models::LogRecord;
 use std::sync::Arc;
 use std::path::PathBuf;
 use tokio::sync::broadcast;
-use chrono::Local;
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,7 +28,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Arc::clone(&engine),
         Arc::clone(&monitor),
         &config,
-        512
+        512,
+        false, // offline_mode
     )?);
     
     let (whisper_tx, _) = broadcast::channel::<AuditReceipt>(1000);

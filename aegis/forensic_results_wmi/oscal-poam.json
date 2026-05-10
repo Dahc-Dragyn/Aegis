@@ -1,0 +1,41 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "90e1c4fd-2585-4df9-8e0f-c12ee6c108bb",
+    "metadata": {
+      "title": "Aegis Sentinel: Managed OSCAL PoAM",
+      "last-modified": "2026-05-09T09:42:44.663552-07:00",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "poam-items": [
+      {
+        "uuid": "4534ddd6-3a98-486d-8c14-2a12310f827a",
+        "incident-id": null,
+        "title": "PoAM Item: AC-3 [Credential Access] - WIN-77LTAPHIQ1R.example.corp",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: 3119147f2dbe6fe5e7491ce7bd374a37d259b766c0c2502b49086b266a7ace3f.",
+        "status": "Draft",
+        "occurrence-count": 1,
+        "entry-timestamp": "2019-03-18T15:15:49.645889-07:00",
+        "last-seen": "2019-03-18T15:15:49.645889-07:00",
+        "impacted-system": "WIN-77LTAPHIQ1R.example.corp",
+        "evidence-hash": "3119147f2dbe6fe5e7491ce7bd374a37d259b766c0c2502b49086b266a7ace3f",
+        "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
+        "correlated-events": []
+      },
+      {
+        "uuid": "d6efb1ab-47e4-426d-99ff-dddefa0715f6",
+        "incident-id": null,
+        "title": "PoAM Item: SI-4 [Windows Integrity] - aegis.edge-node.01",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: 41a1c1164846a077a4c31cffa3daf1d0a472eb2e146756171133071a56384d1c.",
+        "status": "Draft",
+        "occurrence-count": 2,
+        "entry-timestamp": "2026-05-09T08:27:04.367307700-07:00",
+        "last-seen": "2026-05-09T08:54:12.531875-07:00",
+        "impacted-system": "aegis.edge-node.01",
+        "evidence-hash": "41a1c1164846a077a4c31cffa3daf1d0a472eb2e146756171133071a56384d1c",
+        "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
+        "correlated-events": []
+      }
+    ]
+  }
+}
