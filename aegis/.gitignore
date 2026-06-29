@@ -33,6 +33,27 @@ temp_repos/
 temp_rules/
 temp_sigma/
 
+# Forensic Results and Test Run Output (ignore all test results directories)
+forensic_results_*/
+forensic_results_*
+test_output/
+anomaly_output/
+diagnostic_vault/
+forensic_qa/
+
+# Debug and Stress Test Files
+signals_debug.json
+snr_stress_50k.jsonl
+stress_test_*.jsonl
+test_log*.txt
+anomaly_test.json
+api_output.json
+correlation_test.jsonl
+recycling_test.jsonl
+ledger_*.jsonl
+lineage_*.jsonl
+*.log
+
 # Intelligence & Compliance (EXCLUDING lean maps)
 intel/compliance/NIST_SP-800-53_rev5_catalog.json
 intel/compliance/*-profile_catalog.json

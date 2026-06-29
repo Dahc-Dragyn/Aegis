@@ -789,7 +789,7 @@ mod nist_engine {
                 }
 
                 // 7. Verified Origin Suppression (NIST AU-12 Low-Noise)
-                if is_verified_origin && !heuristic_hit {
+                if is_verified_origin && !heuristic_hit && nist_match.is_none() {
                     if final_severity >= crate::models::SeverityLevel::High {
                         final_severity = crate::models::SeverityLevel::Info;
                         tagged_record.outcome = Some("VerifiedOrigin".to_string());

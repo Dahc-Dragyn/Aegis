@@ -1,24 +1,38 @@
 {
   "plan-of-action-and-milestones": {
-    "uuid": "53b3ba96-1962-4359-8d52-33c738c87062",
+    "uuid": "a7d10878-6132-441b-8c1f-3b7d6dab9f16",
     "metadata": {
       "title": "Aegis Sentinel: Managed OSCAL PoAM",
-      "last-modified": "2026-05-09T10:05:46.556234400-07:00",
+      "last-modified": "2026-05-13T08:01:38.011509900-07:00",
       "version": "1.0",
       "oscal-version": "1.1.2"
     },
     "poam-items": [
       {
-        "uuid": "d6efb1ab-47e4-426d-99ff-dddefa0715f6",
+        "uuid": "0c086d1a-ca68-427a-ac8b-4919283ae0ba",
         "incident-id": null,
-        "title": "PoAM Item: SI-4 [Windows Integrity] - aegis.edge-node.01",
-        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: 41a1c1164846a077a4c31cffa3daf1d0a472eb2e146756171133071a56384d1c.",
+        "title": "PoAM Item: AU-9 [Tampering] - PC01.example.corp",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: 321e53fd07be8eba64be43a40bd372b7f29d2d102c3871919d5dec474f942424.",
         "status": "Draft",
-        "occurrence-count": 3,
-        "entry-timestamp": "2026-05-09T08:27:04.367307700-07:00",
-        "last-seen": "2026-05-09T10:02:51.644418900-07:00",
+        "occurrence-count": 1,
+        "entry-timestamp": "2019-03-19T16:35:07.524202-07:00",
+        "last-seen": "2019-03-19T16:35:07.524202-07:00",
+        "impacted-system": "PC01.example.corp",
+        "evidence-hash": "321e53fd07be8eba64be43a40bd372b7f29d2d102c3871919d5dec474f942424",
+        "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
+        "correlated-events": []
+      },
+      {
+        "uuid": "4945a4a5-46a0-48b6-851c-2c37bf7799cf",
+        "incident-id": null,
+        "title": "PoAM Item: AU-9 [Tampering] - aegis.edge-node.01",
+        "description": "Recurrent security integrity failure detected. Initial detection fingerprint: e2d41ae2268b9947bfde28533827c169a9d6ef14266a46d50137682b00dd68ab.",
+        "status": "Draft",
+        "occurrence-count": 1,
+        "entry-timestamp": "2026-05-13T08:01:11.725511-07:00",
+        "last-seen": "2026-05-13T08:01:11.725511-07:00",
         "impacted-system": "aegis.edge-node.01",
-        "evidence-hash": "41a1c1164846a077a4c31cffa3daf1d0a472eb2e146756171133071a56384d1c",
+        "evidence-hash": "e2d41ae2268b9947bfde28533827c169a9d6ef14266a46d50137682b00dd68ab",
         "remediation-remarks": "[Action Required] Technician must verify system integrity and log resolution steps here.",
         "correlated-events": []
       }

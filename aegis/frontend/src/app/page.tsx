@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import IngestionManifold from '@/components/IngestionManifold';
 import ArtifactVault from '@/components/ArtifactVault';
 import ProvenanceGraph from '@/components/ProvenanceGraph';
 import { 
-  Shield, Zap, Activity, Target, AlertCircle, Terminal, Database, Unlock, Lock, ChevronRight, Network, HelpCircle, X, Info, RefreshCw, Download, Eye, Maximize2, RotateCcw
+  Shield, Zap, Activity, Target, AlertCircle, Terminal, Database, Unlock, Lock, ChevronRight, Network, HelpCircle, X, Info, RefreshCw, Download, Eye, Maximize2, RotateCcw, Filter, Search
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { List } from 'react-window';
-import { AutoSizer } from 'react-virtualized-auto-sizer';
+import { AutoSizer as _AutoSizer } from 'react-virtualized-auto-sizer';
+const AutoSizer = _AutoSizer as any;
 import dynamic from 'next/dynamic';
 
 import 'react-grid-layout/css/styles.css';
@@ -18,7 +19,6 @@ import 'react-resizable/css/styles.css';
 
 const ResponsiveGridLayout = dynamic(
   async () => {
-    // In RGL 2.x, the v1-style HOCs and components are moved to /legacy
     const mod = await import('react-grid-layout/legacy');
     const Responsive = mod.Responsive;
     const WidthProvider = mod.WidthProvider;
@@ -53,14 +53,8 @@ interface TelemetryEntry {
   details?: string;
   node_id?: string;
   ingestion_timestamp?: string;
+  pid?: string;
 }
-
-const isTimeTravel = (log: TelemetryEntry) => {
-  if (!log.ingestion_timestamp || !log.timestamp) return false;
-  const ingestTime = new Date(log.ingestion_timestamp).getTime();
-  const eventTime = new Date(log.timestamp).getTime();
-  return (ingestTime - eventTime) > 5000;
-};
 
 const TacticalPane = React.forwardRef(({ style, className, onMouseDown, onMouseUp, onTouchEnd, children, title, icon: Icon, ...props }: any, ref: any) => {
   return (
@@ -86,7 +80,6 @@ const TacticalPane = React.forwardRef(({ style, className, onMouseDown, onMouseU
       <div className="flex-1 min-h-0 relative overflow-hidden">
         {children}
       </div>
-      {/* Visual resize indicator for operator awareness */}
       <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-cyan-500/30 pointer-events-none" />
     </div>
   );
@@ -106,6 +99,7 @@ function TacticalHUD() {
   const [activeView, setActiveView] = useState<'stream' | 'graph'>('stream');
   const [feedMode, setFeedMode] = useState<'tactical' | 'forensic'>('tactical');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [pidFilter, setPidFilter] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [layouts, setLayouts] = useState<any>(DEFAULT_LAYOUTS);
   const [clarity, setClarity] = useState({ ingested: 0, suppressed: 0, clarity: 100 });
@@ -134,16 +128,26 @@ function TacticalHUD() {
   useEffect(() => {
     setDisplayedSitrep("");
     typingIdx.current = 0;
+    
+    // Add Node Context if filtered
+    let finalSitrep = sitrep;
+    if (pidFilter) {
+      finalSitrep = `## 🛰️ NODE CONTEXT: PID ${pidFilter}\n\n` + 
+                    `**ANALYSIS:** Focused telemetry shows active process lineage for PID ${pidFilter}. ` +
+                    `All associated network activity and child processes are being prioritized in the Intelligence Stream.\n\n` +
+                    `---\n\n` + sitrep;
+    }
+
     const interval = setInterval(() => {
-      if (typingIdx.current < sitrep.length) {
-        setDisplayedSitrep(prev => prev + sitrep[typingIdx.current]);
+      if (typingIdx.current < finalSitrep.length) {
+        setDisplayedSitrep(prev => prev + finalSitrep[typingIdx.current]);
         typingIdx.current++;
       } else {
         clearInterval(interval);
       }
-    }, 15);
+    }, 10);
     return () => clearInterval(interval);
-  }, [sitrep]);
+  }, [sitrep, pidFilter]);
 
   // 2. DATA FETCHING
   const refreshData = async () => {
@@ -158,7 +162,13 @@ function TacticalHUD() {
       ]);
       if (histRes.ok) {
         const histData = await histRes.json();
-        setTelemetry(histData);
+        // Extract PID for filtering if possible
+        const mappedData = histData.map((l: any) => {
+           const pid = l.details?.match(/PID: (\d+)/)?.[1] || l.pid || l.metadata?.ProcessId;
+           const details = l.details || l.message || (l.metadata ? JSON.stringify(l.metadata) : "");
+           return { ...l, pid, details };
+        });
+        setTelemetry(mappedData);
         setHubStatus("ONLINE");
       } else {
         throw new Error("EXFIL_BRIDGE_FAILED");
@@ -167,7 +177,6 @@ function TacticalHUD() {
         const sitData = await sitRes.json();
         setSitrep(sitData.sitrep);
         
-        // [SIGNAL SILENCE] Breach-in-the-Storm Auto-Expand
         if (sitData.sitrep.includes("AUTO-EXPAND") && !isTheaterExpanded) {
             setIsTheaterExpanded(true);
         }
@@ -215,10 +224,13 @@ function TacticalHUD() {
     }
   };
 
-  const handleToggleIsolation = async () => {
-    await fetch('http://127.0.0.1:8000/isolation/toggle', { method: 'POST' });
+  const handleToggleIsolation = async (controlId?: string) => {
+    await fetch('/isolation/toggle', { method: 'POST' });
     setShowGate(false);
     refreshData();
+    if (controlId) {
+      console.log(`[KILLCHAIN] NIST CONTROL ${controlId} SATISFIED`);
+    }
   };
 
   const onLayoutChange = (currentLayout: any[], allLayouts: any) => {
@@ -227,19 +239,21 @@ function TacticalHUD() {
   };
 
   // 4. DATA PROCESSING (TACTICAL FILTER)
-  const isSignalSilenceActive = React.useMemo(() => {
-    return clarity.clarity < 50;
-  }, [clarity.clarity]);
+  const processedTelemetry = useMemo(() => {
+    let base = telemetry;
+    if (pidFilter) {
+      base = base.filter(l => l.pid === pidFilter);
+    }
 
-  const processedTelemetry = React.useMemo(() => {
-    if (feedMode === 'forensic') return telemetry;
+    if (feedMode === 'forensic') return base;
     
     const results: any[] = [];
     let currentSummary: any = null;
 
-    telemetry.forEach((log) => {
+    base.forEach((log) => {
       const isNoiseSummary = log.message?.includes("NOISE DETECTED");
-      const isCritical = log.severity === 'hostile' || log.severity === 'critical' || log.severity === 'warning' || isNoiseSummary;
+      const sev = log.severity?.toLowerCase();
+      const isCritical = sev === 'hostile' || sev === 'critical' || sev === 'warning' || isNoiseSummary;
       
       if (isCritical) {
         if (currentSummary) {
@@ -247,7 +261,6 @@ function TacticalHUD() {
           currentSummary = null;
         }
         
-        // If it's a noise summary, tag it for special rendering
         if (isNoiseSummary) {
           results.push({ ...log, type: 'noise_alert' });
         } else {
@@ -270,15 +283,13 @@ function TacticalHUD() {
 
     if (currentSummary) results.push(currentSummary);
     return results;
-  }, [telemetry, feedMode]);
+  }, [telemetry, feedMode, pidFilter]);
 
-  // 5. SWARM HEALTH TRACKER
-  const activeNodes = React.useMemo(() => {
+  const activeNodes = useMemo(() => {
     const nodes = new Map<string, boolean>();
     const now = Date.now();
     telemetry.forEach(log => {
       if (!log.node_id) return;
-      // If ingested within last 60 seconds, node is ONLINE
       const logTime = new Date(log.ingestion_timestamp || log.timestamp).getTime();
       if (now - logTime < 60000) {
         nodes.set(log.node_id, true);
@@ -288,6 +299,17 @@ function TacticalHUD() {
     });
     return nodes;
   }, [telemetry]);
+
+  // 5. CROSS-POLLINATION HANDLERS
+  const handleNodeSelect = (pid: string | null) => {
+    setSelectedNodeId(pid);
+    setPidFilter(pid);
+    if (pid) {
+      // Trigger a visual "ping" in the UI
+      console.log(`[HUD] FOCUS_PIVOT: PID ${pid} ENGAGED`);
+      setActiveView('stream');
+    }
+  };
 
   return (
     <main className="h-screen w-screen bg-black text-slate-300 flex flex-col p-3 overflow-hidden font-mono selection:bg-cyan-500/30">
@@ -318,7 +340,7 @@ function TacticalHUD() {
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowGate(false)} className="flex-1 bg-slate-800 text-slate-300 text-[10px] font-bold py-2 rounded uppercase tracking-widest hover:bg-slate-700 transition-colors">Cancel</button>
-              <button onClick={handleToggleIsolation} className="flex-1 bg-rose-600 text-white text-[10px] font-bold py-2 rounded uppercase tracking-widest hover:bg-rose-500 transition-colors">Execute Lock</button>
+              <button onClick={() => handleToggleIsolation("SC-7")} className="flex-1 bg-rose-600 text-white text-[10px] font-bold py-2 rounded uppercase tracking-widest hover:bg-rose-500 transition-colors">Execute Lock</button>
             </div>
           </div>
         </div>
@@ -341,15 +363,33 @@ function TacticalHUD() {
             <div className="p-8 space-y-12">
                <div className="grid grid-cols-2 gap-12 text-xs">
                  <div className="space-y-4">
-                   <h4 className="text-cyan-100 font-bold uppercase tracking-widest border-l-2 border-cyan-500 pl-3">Tiled Layout Engine</h4>
+                   <h4 className="text-cyan-100 font-bold uppercase tracking-widest border-l-2 border-cyan-500 pl-3">Phase 1: Ingestion</h4>
                    <p className="text-slate-400 leading-relaxed">
-                     The HUD now utilizes a high-density mosaic layout. Click and drag the <span className="text-cyan-500">header handles</span> to rearrange panes. Use the bottom-right corner of any pane to resize. Layouts persist across sessions.
+                     <span className="text-cyan-500 font-bold">Artifact Upload:</span> Drag and drop EVTX or JSONL artifacts into the Manifold. Aegis will automatically decompress and vault the signals.
+                     <br /><br />
+                     <span className="text-cyan-500 font-bold">Real-time Stream:</span> Intelligence is hydrated instantly into the stream.
                    </p>
                  </div>
                  <div className="space-y-4">
-                   <h4 className="text-rose-400 font-bold uppercase tracking-widest border-l-2 border-rose-500 pl-3">Tactical vs Forensic</h4>
+                   <h4 className="text-rose-400 font-bold uppercase tracking-widest border-l-2 border-rose-500 pl-3">Phase 2: Analysis</h4>
                    <p className="text-slate-400 leading-relaxed">
-                     <span className="text-cyan-500">Tactical Mode</span> suppresses nominal telemetry to focus on hostile activity. <span className="text-rose-500">Forensic Mode</span> provides the full, unfiltered virtualized stream for deep-dive investigation.
+                     <span className="text-rose-500 font-bold">Cross-Pollination:</span> Select a node in the Provenance Graph to filter the Intelligence Stream for that specific process lineage.
+                     <br /><br />
+                     <span className="text-rose-500 font-bold">Sitrep Guidance:</span> The Commander's Sitrep identifies attack chains and provides interactive response buttons.
+                   </p>
+                 </div>
+                 <div className="space-y-4">
+                   <h4 className="text-emerald-400 font-bold uppercase tracking-widest border-l-2 border-emerald-500 pl-3">Phase 3: Response</h4>
+                   <p className="text-slate-400 leading-relaxed">
+                     <span className="text-emerald-500 font-bold">Kill Chain:</span> Use the 'Isolate Host' command to restrict network traffic or 'Deploy Hunt' to trigger deep memory forensics.
+                     <br /><br />
+                     <span className="text-emerald-500 font-bold">Compliance:</span> All actions satisfy NIST-800-53 controls (SC-7, SI-4).
+                   </p>
+                 </div>
+                 <div className="space-y-4">
+                   <h4 className="text-amber-400 font-bold uppercase tracking-widest border-l-2 border-amber-500 pl-3">System Vitals</h4>
+                   <p className="text-slate-400 leading-relaxed">
+                     Monitor engine latency and signal clarity. A drop in clarity indicates high noise-to-signal ratio, requiring manual SNR adjustment or filter application.
                    </p>
                  </div>
                </div>
@@ -377,19 +417,12 @@ function TacticalHUD() {
               <span className="text-slate-500">Network:</span>
               <span className={isIsolated ? "text-rose-500" : "text-cyan-500"}>{isIsolated ? "Restricted" : "Open"}</span>
             </div>
-            {isSignalSilenceActive && (
+            {pidFilter && (
               <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
-                <div className="bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded flex items-center gap-1.5 animate-pulse">
-                  <Zap className="w-2.5 h-2.5 text-amber-500" />
-                  <span className="text-amber-500 font-black text-[9px] tracking-widest">SIGNAL SILENCE ACTIVE</span>
-                </div>
-              </div>
-            )}
-            {isOffline && (
-              <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
-                <div className="bg-amber-600/20 border border-amber-600/50 px-3 py-0.5 rounded flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                  <span className="text-amber-500 font-black text-[9px] tracking-widest uppercase">LOCAL ANALYSIS ONLY</span>
+                <div className="bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded flex items-center gap-1.5">
+                  <Filter className="w-2.5 h-2.5 text-cyan-500" />
+                  <span className="text-cyan-500 font-black text-[9px] tracking-widest">PID FILTER: {pidFilter}</span>
+                  <button onClick={() => handleNodeSelect(null)} className="ml-1 hover:text-white transition-colors"><X className="w-2.5 h-2.5" /></button>
                 </div>
               </div>
             )}
@@ -414,45 +447,19 @@ function TacticalHUD() {
       {/* 2. TILED HUD MOSAIC */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <style jsx global>{`
-          .react-resizable-handle {
-            background: none !important;
-            z-index: 50 !important;
-          }
-          .react-resizable-handle-se::after,
-          .react-resizable-handle-s::after,
-          .react-resizable-handle-e::after {
-            content: "";
-            position: absolute;
-            background: #06b6d4;
-            opacity: 0.2;
-            transition: opacity 0.2s;
-          }
-          .react-resizable-handle-se::after {
-            right: 2px;
-            bottom: 2px;
-            width: 10px;
-            height: 10px;
-            border-right: 2px solid #06b6d4;
-            border-bottom: 2px solid #06b6d4;
-            background: none;
-          }
-          .react-resizable-handle-s::after {
-            bottom: 0;
-            left: 25%;
-            width: 50%;
-            height: 2px;
-          }
-          .react-resizable-handle-e::after {
-            right: 0;
-            top: 25%;
-            width: 2px;
-            height: 50%;
-          }
-          .react-resizable-handle:hover::after {
-            opacity: 1;
-          }
-          .layout {
-            transition: height 200ms ease;
+          .react-resizable-handle { background: none !important; z-index: 50 !important; }
+          .react-resizable-handle-se::after { right: 2px; bottom: 2px; width: 10px; height: 10px; border-right: 2px solid #06b6d4; border-bottom: 2px solid #06b6d4; background: none; content: ""; position: absolute; opacity: 0.2; transition: opacity 0.2s; }
+          .react-resizable-handle:hover::after { opacity: 1; }
+          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #334155; }
+          .scrollbar-none::-webkit-scrollbar { display: none; }
+          .pane { position: relative; overflow: hidden; }
+          .pane::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.2), transparent); animation: scan-line 4s linear infinite; pointer-events: none; z-index: 10; }
+          @keyframes scan-line {
+            0% { top: 0; }
+            100% { top: 100%; }
           }
         `}</style>
         <ResponsiveGridLayout
@@ -473,50 +480,36 @@ function TacticalHUD() {
           {/* SYSTEM VITALS */}
           <div key="vitals">
             <TacticalPane title="System Vitals" icon={Activity}>
-              <div className="p-4 space-y-6 overflow-y-auto h-full">
+              <div className="p-4 space-y-6 overflow-y-auto h-full scrollbar-none">
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold">
                     <span className="text-slate-400">Engine Latency</span>
-                    <span className="text-cyan-400">0.42ms</span>
+                    <span className="text-cyan-400">{(clarity as any).latency || '0.42ms'}</span>
                   </div>
                   <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-500/50 w-[15%]" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold">
-                    <span className="text-slate-400">Memory Pressure</span>
-                    <span className="text-cyan-400">2.1GB</span>
-                  </div>
-                  <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-500/50 w-[45%]" />
+                    <div className="h-full bg-cyan-500/50" style={{ width: `${Math.min(100, (clarity as any).ingested / 100)}%` }} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold">
-                    <span className="text-slate-400">Forensic Clarity</span>
-                    <span className={clarity.clarity < 10 ? "text-amber-500" : "text-cyan-400"}>
-                      {clarity.clarity.toFixed(1)}%
-                    </span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-slate-500 uppercase tracking-widest font-bold">Signals Ingested</span>
+                    <span className="text-sm text-white font-black">{(clarity as any).ingested.toLocaleString()}</span>
                   </div>
-                  <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
-                    <div className={`h-full transition-all duration-500 ${clarity.clarity < 10 ? "bg-amber-500" : "bg-cyan-500/50"}`} style={{ width: `${clarity.clarity}%` }} />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-slate-500 uppercase tracking-widest font-bold">Noise Suppressed</span>
+                    <span className="text-sm text-slate-400 font-black">{(clarity as any).suppressed.toLocaleString()}</span>
                   </div>
                 </div>
-                
-                {/* SWARM HEALTH GUTTER */}
-                <div className="space-y-2 mt-6 border-t border-slate-800 pt-4">
-                  <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2">Swarm Status</div>
-                  {activeNodes.size === 0 && (
-                    <div className="text-[10px] text-slate-600 font-mono italic">NO NODES DETECTED</div>
-                  )}
-                  {Array.from(activeNodes.entries()).map(([node, isOnline]) => (
-                    <div key={node} className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold">
-                      <span className="text-slate-400">[{node}]</span>
-                      <span className={isOnline ? "text-emerald-500" : "text-rose-500"}>{isOnline ? "ONLINE" : "OFFLINE"}</span>
-                    </div>
-                  ))}
+
+                <div className="space-y-2 text-center py-4 border border-dashed border-slate-800 rounded">
+                   <p className="text-[8px] text-slate-500 uppercase tracking-widest">Signal Clarity Index</p>
+                   <div className="text-xl font-black text-cyan-500 italic">{(clarity as any).clarity}%</div>
+                   <div className="flex justify-center gap-1 mt-2">
+                      {[1,2,3,4,5,6,7,8].map(i => (
+                        <div key={i} className={`w-3 h-1 rounded-sm ${i > 6 ? 'bg-rose-500/40 animate-pulse' : 'bg-cyan-500/20'}`} />
+                      ))}
+                   </div>
                 </div>
               </div>
             </TacticalPane>
@@ -528,6 +521,7 @@ function TacticalHUD() {
               <ArtifactVault />
             </TacticalPane>
           </div>
+          
           {/* SITREP */}
           <div key="sitrep">
             <TacticalPane title="Commander's Sitrep" icon={ChevronRight}>
@@ -539,39 +533,53 @@ function TacticalHUD() {
                       components={{
                         h1: ({node, ...props}) => <h1 className="text-xl font-black uppercase tracking-tighter border-b border-cyan-500/30 pb-2 mb-4 text-white" {...props} />,
                         h2: ({node, ...props}) => <h2 className="text-md font-bold uppercase tracking-widest text-cyan-400 mt-6 mb-2 border-l-2 border-cyan-500 pl-3" {...props} />,
-                        p: ({node, ...props}) => <p className="text-xs leading-relaxed text-slate-300 font-sans mb-3" {...props} />,
+                        blockquote: ({node, ...props}: any) => {
+                           const content = props.children?.[1]?.props?.children?.[0] || "";
+                           if (content.includes("IMMEDIATE ACTION")) {
+                             return (
+                               <div className="bg-rose-950/20 border border-rose-500/30 p-4 rounded-lg my-6 animate-in slide-in-from-left duration-500">
+                                 <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-widest mb-2">
+                                   <Zap className="w-4 h-4 animate-pulse" /> Recommended Action
+                                 </div>
+                                 <p className="text-xs text-rose-200 mb-4">{content.replace("IMMEDIATE ACTION: ", "")}</p>
+                                 <div className="flex gap-2">
+                                    <button 
+                                      onClick={() => handleToggleIsolation("SC-7")}
+                                      className={`text-[9px] font-black uppercase px-4 py-2 rounded transition-all shadow-lg ${
+                                        isIsolated ? 'bg-emerald-600 text-white' : 'bg-rose-600 hover:bg-rose-500 text-white'
+                                      }`}
+                                    >
+                                      {isIsolated ? "Isolation Active [SC-7]" : "Execute Isolation [SC-7]"}
+                                    </button>
+                                    <button 
+                                      onClick={handleSnapshot}
+                                      className="bg-slate-800 hover:bg-slate-700 text-cyan-400 text-[9px] font-black uppercase px-4 py-2 rounded transition-all"
+                                    >
+                                      Deploy Hunt [SI-4]
+                                    </button>
+                                 </div>
+                               </div>
+                             );
+                           }
+                           return <blockquote className="border-l-4 border-cyan-500/30 pl-4 italic text-slate-400" {...props} />;
+                        },
                         li: ({node, ...props}) => (
                           <li className="flex items-start gap-2 text-[11px] text-slate-400 font-mono mb-1">
                             <span className="text-cyan-500 shrink-0 mt-1">▸</span>
                             <span>{props.children}</span>
                           </li>
                         ),
-                        code: ({node, inline, ...props}: any) => (
-                          inline 
-                            ? <code className="bg-slate-800 px-1 py-0.5 rounded text-[10px] font-mono text-cyan-300" {...props} />
-                            : <pre className="bg-black/60 border border-slate-800 p-3 rounded my-4"><code className="text-[10px] font-mono text-amber-200" {...props} /></pre>
-                        )
                       }}
                     >
-                      {sitrep}
+                      {displayedSitrep}
                     </ReactMarkdown>
-                    {typingIdx.current < sitrep.length && (
-                      <span className="w-2 h-4 bg-cyan-500 inline-block ml-1 animate-pulse" />
-                    )}
                   </div>
-                </div>
-                <div className="p-3 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center text-[8px] uppercase tracking-widest">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-1.5 h-1.5 ${isOffline ? "bg-amber-500" : "bg-cyan-500"} rounded-full animate-pulse`} />
-                    <span className="text-slate-500">Source: {isOffline ? "Standard_Triage_Engine" : "Librarian_AI_Advisor"}</span>
-                  </div>
-                  <span className="text-amber-500/80 font-black italic">TACTICAL_READOUT_ACTIVE</span>
                 </div>
               </div>
             </TacticalPane>
           </div>
 
-          {/* INTELLIGENCE STREAM / GRAPH */}
+          {/* INTELLIGENCE STREAM */}
           <div key="intelligence">
             <TacticalPane title={activeView === 'stream' ? "Intelligence Stream" : "Provenance Graph"} icon={activeView === 'stream' ? Activity : Network}>
               <div className="flex flex-col h-full overflow-hidden">
@@ -590,136 +598,140 @@ function TacticalHUD() {
                       GRAPH
                     </button>
                   </div>
+
                   <div className="flex gap-1 bg-black p-1 border border-slate-800 rounded">
                     <button 
                       onClick={() => setFeedMode('tactical')}
-                      className={`px-2 py-1 text-[8px] font-bold tracking-tighter ${feedMode === 'tactical' ? 'text-cyan-400' : 'text-slate-600 hover:text-slate-400'}`}
+                      className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest transition-all ${feedMode === 'tactical' ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                      title="Show Critical Alerts & Summaries"
                     >
                       TACTICAL
                     </button>
                     <button 
                       onClick={() => setFeedMode('forensic')}
-                      className={`px-2 py-1 text-[8px] font-bold tracking-tighter ${feedMode === 'forensic' ? 'text-rose-500' : 'text-slate-600 hover:text-slate-400'}`}
+                      className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest transition-all ${feedMode === 'forensic' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                      title="Show Raw Forensic Stream"
                     >
                       FORENSIC
                     </button>
                   </div>
+                  {pidFilter && (
+                    <div className="flex items-center gap-2 text-[8px] text-cyan-500 font-bold uppercase animate-pulse">
+                      <Filter className="w-2.5 h-2.5" /> Filtering by PID {pidFilter}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 relative">
                   {activeView === 'stream' ? (
-                    <AutoSizer
-                      renderProp={({ height, width }) => (
-                        <List
-                          rowCount={processedTelemetry.length}
-                          rowHeight={45}
-                          rowProps={{}}
-                          className="custom-scrollbar"
-                          style={{ height: height || '100%', width: width || '100%' }}
-                          rowComponent={({ index, style }) => {
-                            const log = processedTelemetry[index];
-                            if (log.type === 'summary') {
-                              return (
-                                <div style={style} className="flex items-center gap-3 px-4 border-b border-slate-800 bg-slate-950/20">
-                                  <span className="text-slate-600 text-[9px]">[{log.timestamp}]</span>
-                                  <div className="h-px flex-1 bg-slate-800" />
-                                  <span className="text-[9px] font-bold text-slate-500 tracking-tighter italic uppercase">
-                                    {log.count} Signals Suppressed (UI Level)
-                                  </span>
-                                  <div className="h-px flex-1 bg-slate-800" />
-                                </div>
-                              );
-                            }
-                            
-                            if (log.type === 'noise_alert') {
-                              return (
-                                <div style={style} className="flex items-center gap-3 px-4 border-b border-amber-500/30 bg-amber-900/20">
-                                  <span className="text-amber-700 text-[9px] font-mono">[{log.timestamp}]</span>
-                                  <Zap className="w-3 h-3 text-amber-500 shrink-0" />
-                                  <span className="text-[10px] font-black text-amber-500 tracking-widest uppercase">
-                                    {log.message}
-                                  </span>
-                                  <div className="h-px flex-1 bg-amber-900/20" />
-                                  <span className="text-[8px] font-mono text-amber-700/60 italic uppercase">Signal Silence Active</span>
-                                </div>
-                              );
-                            }
-                            const tt = isTimeTravel(log);
-                            const eventName = log.event || log.message || "UNKNOWN_EVENT";
-                            const badgeColor = log.node_id === 'Alpha' ? 'text-slate-400' : (log.node_id === 'Beta' ? 'text-slate-500' : 'text-slate-400');
-                            
+                    <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-1">
+                      {processedTelemetry.length === 0 ? (
+                        <div className="flex items-center justify-center h-full text-slate-700 text-[10px] uppercase tracking-widest italic animate-pulse">
+                          No signals detected in current manifold
+                        </div>
+                      ) : (
+                        processedTelemetry.map((log: any, index: number) => {
+                          if (log.type === 'summary') {
                             return (
-                              <div 
-                                style={style} 
-                                onClick={() => {
-                                  setSelectedNodeId(log.details?.match(/PID: (\d+)/)?.[1] || null);
-                                  setActiveView('graph');
-                                }}
-                                className={`flex items-start gap-3 p-3 border-b text-[10px] cursor-pointer hover:bg-white/5 transition-colors 
-                                  ${log.severity === 'hostile' || log.severity === 'critical' ? 'bg-rose-500/10' : ''} 
-                                  ${tt ? 'border-dashed border-cyan-500/40 bg-cyan-950/10' : 'border-slate-800'}`}
-                              >
-                                <span className="text-slate-600 shrink-0 w-16 font-mono">[{log.timestamp}]</span>
-                                <span className={`shrink-0 w-16 text-center font-bold tracking-widest uppercase ${badgeColor}`}>
-                                  [{log.node_id || 'LOCAL'}]
+                              <div key={`sum-${index}`} className="flex items-center gap-3 px-4 py-3 border-b border-slate-800 bg-slate-950/20">
+                                <span className="text-slate-600 text-[9px]">[{log.timestamp}]</span>
+                                <div className="h-px flex-1 bg-slate-800" />
+                                <span className="text-[9px] font-bold text-slate-500 tracking-tighter italic uppercase">
+                                  {log.count} Signals Suppressed (UI Level)
                                 </span>
-                                <div className="flex flex-col shrink-0 w-32 gap-1">
-                                  <span className={`font-bold tracking-tighter uppercase ${
-                                    log.severity === 'hostile' || log.severity === 'critical' ? 'text-rose-500' :
-                                    log.severity === 'warning' ? 'text-amber-500' :
-                                    log.severity === 'friendly' ? 'text-emerald-500' :
-                                    'text-blue-400'
-                                  }`}>
-                                    {eventName}
-                                  </span>
-                                  {tt && (
-                                    <span className="text-[8px] italic font-bold tracking-widest text-slate-500">
-                                      [RECONCILED]
-                                    </span>
-                                  )}
-                                </div>
-                                <span className="text-slate-300 truncate flex-1 leading-relaxed">{log.details}</span>
+                                <div className="h-px flex-1 bg-slate-800" />
                               </div>
                             );
-                          }}
-                        />
+                          }
+                          
+                          const eventName = log.event || log.message || "UNKNOWN_EVENT";
+                          const sev = log.severity?.toLowerCase();
+                          const isCritical = sev === 'hostile' || sev === 'critical';
+                          
+                          return (
+                            <div 
+                              key={index}
+                              onClick={() => handleNodeSelect(log.pid || null)}
+                              className={`flex items-start gap-3 p-3 border-b text-[10px] cursor-pointer hover:bg-white/5 transition-colors border-slate-800 
+                                ${isCritical ? 'bg-rose-500/10 border-l-2 border-l-rose-500' : ''} 
+                                ${pidFilter && log.pid === pidFilter ? 'bg-cyan-500/10 border-l-2 border-l-cyan-500' : ''}`}
+                            >
+                              <span className="text-slate-600 shrink-0 w-16 font-mono">[{log.timestamp}]</span>
+                              <div className="flex flex-col shrink-0 w-32 gap-1">
+                                <span className={`font-bold tracking-tighter uppercase ${
+                                  isCritical ? 'text-rose-500' : 'text-blue-400'
+                                }`}>
+                                  {eventName}
+                                </span>
+                                <span className="text-[8px] text-slate-500">PID: {log.pid || 'N/A'}</span>
+                              </div>
+                              <span className="text-slate-300 truncate flex-1 leading-relaxed">{log.details}</span>
+                            </div>
+                          );
+                        })
                       )}
-                    />
+                    </div>
                   ) : (
-                    <AutoSizer
-                      renderProp={({ height, width }) => (
-                        <ProvenanceGraph 
-                          highlightNodeId={selectedNodeId} 
-                          width={width} 
-                          height={height} 
-                        />
-                      )}
-                    />
+                    <div className="absolute inset-0">
+                      <AutoSizer>
+                        {({ height, width }: any) => (
+                          <ProvenanceGraph 
+                            highlightNodeId={selectedNodeId} 
+                            width={width} 
+                            height={height} 
+                            onNodeClick={(pid: string) => handleNodeSelect(pid)}
+                          />
+                        )}
+                      </AutoSizer>
+                    </div>
                   )}
                 </div>
               </div>
             </TacticalPane>
           </div>
 
-          {/* INGESTION MANIFOLD */}
           <div key="manifold">
             <TacticalPane title="Ingestion Manifold" icon={Terminal}>
               <IngestionManifold onComplete={refreshData} />
             </TacticalPane>
           </div>
 
-          {/* OVERWATCH */}
           <div key="overwatch">
-            <TacticalPane title="Overwatch" icon={Shield}>
-              <div className="p-4 space-y-3 text-[10px] leading-relaxed">
-                <p className="text-cyan-500 font-bold">[ACTIVE] Continuous forensic monitoring enabled.</p>
-                <p className="text-slate-400">Real-time assets served from Active Intelligence feed.</p>
-                <p className="text-slate-400">Kill chain authority authorized.</p>
+            <TacticalPane title="Overwatch Status" icon={Shield}>
+              <div className="p-4 space-y-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Signal density</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl text-white font-black">{Math.floor(telemetry.length / 10)}</span>
+                    <span className="text-[8px] text-slate-600 font-bold uppercase tracking-widest">Events / Sec</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 border-t border-slate-800 pt-3">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Response Posture</span>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${isIsolated ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : 'bg-emerald-500 animate-pulse'}`} />
+                    <span className={isIsolated ? "text-rose-500 text-xs font-black uppercase" : "text-emerald-500 text-xs font-black uppercase"}>
+                      {isIsolated ? "ACTIVE_ISOLATION" : "PASSIVE_MONITORING"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 border-t border-slate-800 pt-3">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Threat Context</span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {telemetry.some(l => {
+                      const s = l.severity?.toLowerCase();
+                      return s === 'hostile' || s === 'critical';
+                    }) 
+                      ? "⚠️ HOSTILE_SIGNALS_PRESENT" 
+                      : "✓ NO_IMMEDIATE_THREATS"}
+                  </span>
+                </div>
               </div>
             </TacticalPane>
           </div>
 
-          {/* KILL CHAIN */}
           <div key="killchain">
             <TacticalPane title="Kill Chain Response" icon={Zap}>
               <div className="p-4 space-y-3">
@@ -733,7 +745,7 @@ function TacticalHUD() {
                   }`}
                 >
                   <Target className={`w-4 h-4 ${isHunting ? 'animate-spin' : ''}`} />
-                  {isHunting ? 'Hunting...' : 'Deploy Host Hunt'}
+                  Deploy Host Hunt [SI-4]
                 </button>
                 
                 <button 
@@ -745,7 +757,7 @@ function TacticalHUD() {
                   }`}
                 >
                   {isIsolated ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                  {isIsolated ? 'Restore Network' : 'Isolate Host'}
+                  {isIsolated ? 'Restore Network' : 'Isolate Host [SC-7]'}
                 </button>
               </div>
             </TacticalPane>
@@ -753,7 +765,6 @@ function TacticalHUD() {
         </ResponsiveGridLayout>
       </div>
 
-      {/* 3. STATUS BAR */}
       <footer className="mt-3 flex justify-between items-center text-[9px] uppercase tracking-[0.2em] text-slate-600 font-bold h-8 shrink-0 border-t border-slate-900 pt-2">
         <div className="flex gap-4">
           <span>Latency: 0.42ms // Tunnel: AES-256 GCM</span>
@@ -762,10 +773,11 @@ function TacticalHUD() {
             Hub Status: {hubStatus}
           </span>
         </div>
-        <div>Aegis Tactical Manifold V3.5 // MOS PROTOCOL</div>
+        <div>Aegis Tactical Manifold V4.0 // PHASE 1 PIVOT</div>
       </footer>
     </main>
   );
 }
 
 export default TacticalHUD;
+

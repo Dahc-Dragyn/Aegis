@@ -1,3 +1,0 @@
-{"timestamp": "2026-05-01T12:00:00Z", "EventID": "1", "ProcessId": "100", "Image": "C:\\Windows\\explorer.exe", "ParentProcessId": "50"}
-{"timestamp": "2026-05-01T12:00:05Z", "EventID": "1", "ProcessId": "200", "Image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "ParentProcessId": "100"}
-{"timestamp": "2026-05-01T12:00:10Z", "EventID": "1", "ProcessId": "300", "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "ParentProcessId": "200", "CommandLine": "powershell.exe -ExecutionPolicy Bypass -File C:\\Temp\\evil.ps1"}

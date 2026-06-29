@@ -819,14 +819,18 @@ impl AuditLedger {
                         let mut final_rec_mut = final_rec;
                         final_rec_mut.metadata.insert("forensic_payload".to_string(), match_str);
                         
-                        // NIST Hardening: Prioritize dynamic severity from record (Escalations) over static mapping
-                        let posture_severity = match final_rec_mut.severity.as_deref() {
-                            Some("Critical") => crate::models::SeverityLevel::Critical,
-                            Some("High") => crate::models::SeverityLevel::High,
-                            Some("Medium") => crate::models::SeverityLevel::Medium,
-                            Some("Low") => crate::models::SeverityLevel::Low,
-                            Some("Info") => crate::models::SeverityLevel::Info,
-                            _ => mapping.severity,
+                        // NIST Hardening: Prioritize mapping severity for security controls (High/Critical)
+                        // to ensure they aren't suppressed by raw log levels like Sysmon 'Info'.
+                        let posture_severity = match mapping.severity {
+                            crate::models::SeverityLevel::Critical | crate::models::SeverityLevel::High | crate::models::SeverityLevel::Medium => mapping.severity,
+                            _ => match final_rec_mut.severity.as_deref() {
+                                Some("Critical") => crate::models::SeverityLevel::Critical,
+                                Some("High") => crate::models::SeverityLevel::High,
+                                Some("Medium") => crate::models::SeverityLevel::Medium,
+                                Some("Low") => crate::models::SeverityLevel::Low,
+                                Some("Info") => crate::models::SeverityLevel::Info,
+                                _ => mapping.severity,
+                            }
                         };
 
                         events.push(crate::PostureEvent {
@@ -852,14 +856,17 @@ impl AuditLedger {
                             let mut final_rec_mut = final_rec;
                             final_rec_mut.metadata.insert("forensic_payload".to_string(), match_str);
                             
-                            // NIST Hardening: Prioritize dynamic severity from record (Escalations) over static mapping
-                            let posture_severity = match final_rec_mut.severity.as_deref() {
-                                Some("Critical") => crate::models::SeverityLevel::Critical,
-                                Some("High") => crate::models::SeverityLevel::High,
-                                Some("Medium") => crate::models::SeverityLevel::Medium,
-                                Some("Low") => crate::models::SeverityLevel::Low,
-                                Some("Info") => crate::models::SeverityLevel::Info,
-                                _ => mapping.severity,
+                            // NIST Hardening: Prioritize mapping severity for security controls (High/Critical)
+                            let posture_severity = match mapping.severity {
+                                crate::models::SeverityLevel::Critical | crate::models::SeverityLevel::High | crate::models::SeverityLevel::Medium => mapping.severity,
+                                _ => match final_rec_mut.severity.as_deref() {
+                                    Some("Critical") => crate::models::SeverityLevel::Critical,
+                                    Some("High") => crate::models::SeverityLevel::High,
+                                    Some("Medium") => crate::models::SeverityLevel::Medium,
+                                    Some("Low") => crate::models::SeverityLevel::Low,
+                                    Some("Info") => crate::models::SeverityLevel::Info,
+                                    _ => mapping.severity,
+                                }
                             };
 
                             events.push(crate::PostureEvent {

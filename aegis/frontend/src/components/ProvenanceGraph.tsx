@@ -21,9 +21,10 @@ interface ProvenanceGraphProps {
   highlightNodeId?: string | null;
   width?: number;
   height?: number;
+  onNodeClick?: (pid: string) => void;
 }
 
-export default function ProvenanceGraph({ highlightNodeId, width: propWidth, height: propHeight }: ProvenanceGraphProps) {
+export default function ProvenanceGraph({ highlightNodeId, width: propWidth, height: propHeight, onNodeClick }: ProvenanceGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const zoomRef = useRef<any>(null);
   const simulationRef = useRef<any>(null);
@@ -64,13 +65,7 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
         }
 
         if (ppid && ppid !== "0" && ppid !== "1000") {
-          // Only add links if both nodes exist (governor might have dropped parent)
           links.push({ source: ppid, target: id });
-          if (!nodeSet.has(ppid) && (!isHighVolume || type !== 'unknown')) {
-             // We don't add "Unknown Parent" in high volume mode if it's likely to be noise
-             // but if the child is hostile, we might want the link?
-             // Actually, for simplicity, we just link what we have.
-          }
         }
       };
 
@@ -84,13 +79,11 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
           if (system && data) {
             const eventId = system.EventID;
             if (eventId === 4688) {
-              // Windows Security: Process Creation
               const pid = parseInt(data.NewProcessId, 16).toString();
               const ppid = parseInt(data.ProcessId, 16).toString();
               const name = data.NewProcessName?.split('\\').pop() || "Unknown";
               addNode(pid, name, log.severity, log.timestamp, ppid, log.node_id);
             } else if (eventId === 1) {
-              // Sysmon: Process Creation
               const pid = data.ProcessId?.toString();
               const ppid = data.ParentProcessId?.toString();
               const name = data.Image?.split('\\').pop() || "Unknown";
@@ -98,7 +91,6 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
             }
           }
         } else if (typeof eventObj === 'string') {
-          // Legacy String Parser
           const match = eventObj.match(/Process Created: (.*?) \(PID: (\d+), Parent: (\d+)\)/);
           if (match) {
             const [_, name, pid, ppid] = match;
@@ -107,7 +99,6 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
         }
       });
 
-      // --- FRONTEND GOVERNOR: Filter dead links and limit ---
       const activeIds = new Set(nodes.map(n => n.id));
       const validLinks = links.filter(l => activeIds.has(l.source as string) && activeIds.has(l.target as string));
 
@@ -136,7 +127,6 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
       simulationRef.current.stop();
     }
 
-    // --- TUNED D3 PHYSICS: Faster convergence for dense data ---
     const isGovernorEngaged = graphData.nodes.length > 200;
     
     const simulation = d3.forceSimulation(graphData.nodes as any)
@@ -150,7 +140,6 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
     const g = svg.append("g");
     gRef.current = g.node();
 
-    // MIL-SPEC Marker (Arrowhead)
     svg.append("defs").append("marker")
       .attr("id", "arrowhead")
       .attr("viewBox", "-0 -5 10 10")
@@ -178,30 +167,30 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
       .data(graphData.nodes)
       .join("g")
       .attr("id", (d: any) => `node-${d.id}`)
+      .attr("class", "cursor-pointer")
+      .on("click", (event, d: any) => {
+        if (onNodeClick) onNodeClick(d.id);
+      })
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended) as any);
 
-    // MATTE SYMBOLOGY (MIL-STD-2525D)
     node.each(function(d: any) {
       const el = d3.select(this);
       if (d.type === 'hostile') {
-        // Red Diamond
         el.append("path")
           .attr("d", "M 0 -10 L 10 0 L 0 10 L -10 0 Z")
           .attr("fill", "#FF0000")
           .attr("stroke", "#7f0000")
           .attr("stroke-width", 2);
       } else if (d.type === 'friendly') {
-        // Green Circle
         el.append("circle")
           .attr("r", 9)
           .attr("fill", "#00FF00")
           .attr("stroke", "#007f00")
           .attr("stroke-width", 2);
       } else {
-        // Yellow Square
         el.append("rect")
           .attr("x", -8)
           .attr("y", -8)
@@ -213,12 +202,12 @@ export default function ProvenanceGraph({ highlightNodeId, width: propWidth, hei
       }
     });
 
-    // Highlight Ring (Matte)
     node.append("circle")
       .attr("r", 15)
       .attr("fill", "none")
       .attr("stroke", "#22d3ee")
       .attr("stroke-width", 2)
+      .attr("class", "node-highlight")
       .style("opacity", (d: any) => d.id === highlightNodeId ? 1 : 0);
 
     node.append("text")

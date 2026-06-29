@@ -45,7 +45,7 @@
     "target_field": "raw",
     "default_status": "Fail",
     "severity": "Critical",
-    "pattern_str": "(?i)\\b(mimikatz|mimidrv|procdump|pypykatz|ppldump|LsarSetSecret|AS-REQ|Kerbrute)\\b|comsvcs\\.dll.*?MiniDump|rdp-tcp|psexesvc|wmiprvse|lsarpc|samr|DCSync|krbtgt|DRSUAPI|MachineAccount Password|Policy\\\\Secrets|TGS-REQ|sname=krbtgt|RC4-HMAC|EType 23"
+    "pattern_str": "(?i)\\b(mimikatz|mimilsa|mimidrv|procdump|pypykatz|ppldump|LsarSetSecret|AS-REQ|Kerbrute)\\b|comsvcs\\.dll.*?MiniDump|rdp-tcp|psexesvc|wmiprvse|lsarpc|samr|DCSync|krbtgt|DRSUAPI|MachineAccount Password|Policy\\\\Secrets|TGS-REQ|sname=krbtgt|RC4-HMAC|EType 23"
   },
   {
     "control_id": "IA-2 [Shadow Vault]",
