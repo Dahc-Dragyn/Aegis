@@ -1,0 +1,28 @@
+# Dependency directories
+**/node_modules/
+**/.next/
+**/.vercel/
+**/target/
+target/
+
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# Secrets & Credentials
+service-account.json
+**/service-account.json
+
+# Misc
+*.log
+*.exe
+*.pdb
+aegis.pos
+aegis.audit.jsonl
+NIST_MANIFEST.md
+error.txt
+debug/
+release/

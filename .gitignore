@@ -12,3 +12,14 @@ NIST_MANIFEST.md
 error.txt
 debug/
 release/
+
+# Node/Next.js dependencies and builds
+**/node_modules/
+**/.next/
+**/.vercel/
+
+# Credentials and secrets
+**/service-account.json
+service-account.json
+**/.env.local
+.env.local
